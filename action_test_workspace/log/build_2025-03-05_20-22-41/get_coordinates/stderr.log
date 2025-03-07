@@ -1,0 +1,7 @@
+[01m[K/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp:[m[K In member function ‘[01m[Kjson CoordinateFinder::findPathToCoordinates(const string&, const json&, const string&)[m[K’:
+[01m[K/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp:152:32:[m[K [01;31m[Kerror: [m[K‘[01m[KGetCoordPathfindReturn[m[K’ has not been declared
+  152 |             json path_result = [01;31m[KGetCoordPathfindReturn[m[K::process(
+      |                                [01;31m[K^~~~~~~~~~~~~~~~~~~~~~[m[K
+gmake[2]: *** [CMakeFiles/get_coordinates.dir/build.make:76: CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/get_coordinates.dir/all] Error 2
+gmake: *** [Makefile:136: all] Error 2

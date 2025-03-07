@@ -1,0 +1,29 @@
+[0.034s] Invoking command in '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates': /usr/bin/cmake /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates -DCMAKE_INSTALL_PREFIX=/home/fyier/thesis_temoto/actions/action_test_workspace/install/get_coordinates
+[0.214s] -- The C compiler identification is GNU 11.4.0
+[0.347s] -- The CXX compiler identification is GNU 11.4.0
+[0.371s] -- Detecting C compiler ABI info
+[0.485s] -- Detecting C compiler ABI info - done
+[0.502s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.502s] -- Detecting C compile features
+[0.506s] -- Detecting C compile features - done
+[0.510s] -- Detecting CXX compiler ABI info
+[0.767s] -- Detecting CXX compiler ABI info - done
+[0.784s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.784s] -- Detecting CXX compile features
+[0.785s] -- Detecting CXX compile features - done
+[0.824s] -- Found OpenCV: /usr (found version "4.5.4") 
+[0.836s] -- Found nlohmann_json: /usr/lib/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.10.5") 
+[0.842s] -- Configuring done
+[0.862s] -- Generating done
+[0.869s] -- Build files have been written to: /home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates
+[0.878s] Invoked command in '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates' returned '0': /usr/bin/cmake /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates -DCMAKE_INSTALL_PREFIX=/home/fyier/thesis_temoto/actions/action_test_workspace/install/get_coordinates
+[0.878s] Invoking command in '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates': /usr/bin/cmake --build /home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates -- -j8 -l8
+[1.051s] [  8%] [32mBuilding CXX object CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o[0m
+[6.534s] [01m[K/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp:[m[K In member function ‘[01m[Kjson CoordinateFinder::findPathToCoordinates(const string&, const json&, const string&)[m[K’:
+[6.535s] [01m[K/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp:152:32:[m[K [01;31m[Kerror: [m[K‘[01m[KGetCoordPathfindReturn[m[K’ has not been declared
+[6.535s]   152 |             json path_result = [01;31m[KGetCoordPathfindReturn[m[K::process(
+[6.535s]       |                                [01;31m[K^~~~~~~~~~~~~~~~~~~~~~[m[K
+[9.480s] gmake[2]: *** [CMakeFiles/get_coordinates.dir/build.make:76: CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o] Error 1
+[9.480s] gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/get_coordinates.dir/all] Error 2
+[9.480s] gmake: *** [Makefile:136: all] Error 2
+[9.492s] Invoked command in '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates' returned '2': /usr/bin/cmake --build /home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates -- -j8 -l8

@@ -1,0 +1,129 @@
+[0.000000] (-) TimerEvent: {}
+[0.003720] (get_coordinates) JobQueued: {'identifier': 'get_coordinates', 'dependencies': OrderedDict()}
+[0.003792] (get_coordinates) JobStarted: {'identifier': 'get_coordinates'}
+[0.033039] (get_coordinates) JobProgress: {'identifier': 'get_coordinates', 'progress': 'cmake'}
+[0.036437] (get_coordinates) Command: {'cmd': ['/usr/bin/cmake', '/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates', '-DCMAKE_INSTALL_PREFIX=/home/fyier/thesis_temoto/actions/action_test_workspace/install/get_coordinates'], 'cwd': '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates', 'env': OrderedDict([('GJS_DEBUG_TOPICS', 'JS ERROR;JS LOG'), ('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'fyier'), ('LC_TIME', 'et_EE.UTF-8'), ('XDG_SESSION_TYPE', 'wayland'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs/lib:/home/fyier/thesis_temoto/ros2_ws/install/interfaces/lib:/home/fyier/thesis_temoto/ros2_ws/install/example_navigate/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/fyier'), ('OLDPWD', '/home/fyier/thesis_temoto/actions/action_test_workspace/build'), ('DESKTOP_SESSION', 'ubuntu'), ('GIO_LAUNCHED_DESKTOP_FILE', '/usr/share/applications/terminator.desktop'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('LC_MONETARY', 'et_EE.UTF-8'), ('MANAGERPID', '1105'), ('SYSTEMD_EXEC_PID', '1260'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('TERMINATOR_DBUS_NAME', 'net.tenshu.Terminator25ef4b219e3b005583550f2b0f9f990c3'), ('GIO_LAUNCHED_DESKTOP_FILE_PID', '13048'), ('NVM_DIR', '/home/fyier/.nvm'), ('IM_CONFIG_PHASE', '1'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/fyier/thesis_temoto/ros2_ws/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'fyier'), ('IGN_GAZEBO_MODEL_PATH', '/opt/ros/humble/share'), ('JOURNAL_STREAM', '8:16436'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('USERNAME', 'fyier'), ('TERM', 'xterm-256color'), ('GAZEBO_MODEL_PATH', '/opt/ros/humble/share'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/home/fyier/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/master:@/tmp/.ICE-unix/1225,unix/master:/tmp/.ICE-unix/1225'), ('INVOCATION_ID', 'bf4d010e3dc1420f8d2203a6f4ff26b0'), ('XDG_MENU_PREFIX', 'gnome-'), ('LC_ADDRESS', 'et_EE.UTF-8'), ('GNOME_SETUP_DISPLAY', ':1'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('DISPLAY', ':0'), ('TERMINATOR_DBUS_PATH', '/net/tenshu/Terminator2'), ('LANG', 'en_US.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('IBUS_DISABLE_SNOOPER', '1'), ('LC_TELEPHONE', 'et_EE.UTF-8'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu'), ('XAUTHORITY', '/run/user/1000/.mutter-Xwaylandauth.VOJ122'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('AMENT_PREFIX_PATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_chat_interface_python:/home/fyier/thesis_temoto/ros2_ws/install/temoto_action_engine_ros2:/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs:/home/fyier/thesis_temoto/ros2_ws/install/interfaces:/home/fyier/thesis_temoto/ros2_ws/install/example_navigate:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('LC_NAME', 'et_EE.UTF-8'), ('TERMINATOR_UUID', 'urn:uuid:278cbbc8-6369-4620-a166-75abcbaee33a'), ('QT_ACCESSIBILITY', '1'), ('GDMSESSION', 'ubuntu'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('IGN_GAZEBO_RESOURCE_PATH', '/opt/ros/humble/share'), ('LC_MEASUREMENT', 'et_EE.UTF-8'), ('GAZEBO_RESOURCE_PATH', '/opt/ros/humble/share'), ('GJS_DEBUG_OUTPUT', 'stderr'), ('LC_IDENTIFICATION', 'et_EE.UTF-8'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates'), ('LC_ALL', 'en_US.UTF-8'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_chat_interface_python/lib/python3.10/site-packages:/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs/local/lib/python3.10/dist-packages:/home/fyier/thesis_temoto/ros2_ws/install/interfaces/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('LC_NUMERIC', 'et_EE.UTF-8'), ('LC_PAPER', 'et_EE.UTF-8'), ('COLCON', '1'), ('VTE_VERSION', '6800'), ('NVM_RC_VERSION', ''), ('CMAKE_PREFIX_PATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_action_engine_ros2:/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs:/home/fyier/thesis_temoto/ros2_ws/install/interfaces:/home/fyier/thesis_temoto/ros2_ws/install/example_navigate')]), 'shell': False}
+[0.099953] (-) TimerEvent: {}
+[0.201420] (-) TimerEvent: {}
+[0.217502] (get_coordinates) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.302046] (-) TimerEvent: {}
+[0.350726] (get_coordinates) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.374755] (get_coordinates) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.402149] (-) TimerEvent: {}
+[0.488468] (get_coordinates) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.502256] (-) TimerEvent: {}
+[0.505773] (get_coordinates) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.506199] (get_coordinates) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.509723] (get_coordinates) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.513350] (get_coordinates) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.602365] (-) TimerEvent: {}
+[0.704774] (-) TimerEvent: {}
+[0.770191] (get_coordinates) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.787343] (get_coordinates) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.787700] (get_coordinates) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.788761] (get_coordinates) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.804879] (-) TimerEvent: {}
+[0.827804] (get_coordinates) StdoutLine: {'line': b'-- Found OpenCV: /usr (found version "4.5.4") \n'}
+[0.839647] (get_coordinates) StdoutLine: {'line': b'-- Found nlohmann_json: /usr/lib/cmake/nlohmann_json/nlohmann_jsonConfig.cmake (found version "3.10.5") \n'}
+[0.845740] (get_coordinates) StdoutLine: {'line': b'-- Configuring done\n'}
+[0.865455] (get_coordinates) StdoutLine: {'line': b'-- Generating done\n'}
+[0.872178] (get_coordinates) StdoutLine: {'line': b'-- Build files have been written to: /home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates\n'}
+[0.877980] (get_coordinates) CommandEnded: {'returncode': 0}
+[0.881786] (get_coordinates) JobProgress: {'identifier': 'get_coordinates', 'progress': 'build'}
+[0.881837] (get_coordinates) Command: {'cmd': ['/usr/bin/cmake', '--build', '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates', '--', '-j8', '-l8'], 'cwd': '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates', 'env': OrderedDict([('GJS_DEBUG_TOPICS', 'JS ERROR;JS LOG'), ('LESSOPEN', '| /usr/bin/lesspipe %s'), ('USER', 'fyier'), ('LC_TIME', 'et_EE.UTF-8'), ('XDG_SESSION_TYPE', 'wayland'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs/lib:/home/fyier/thesis_temoto/ros2_ws/install/interfaces/lib:/home/fyier/thesis_temoto/ros2_ws/install/example_navigate/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/home/fyier'), ('OLDPWD', '/home/fyier/thesis_temoto/actions/action_test_workspace/build'), ('DESKTOP_SESSION', 'ubuntu'), ('GIO_LAUNCHED_DESKTOP_FILE', '/usr/share/applications/terminator.desktop'), ('ROS_PYTHON_VERSION', '3'), ('GNOME_SHELL_SESSION_MODE', 'ubuntu'), ('GTK_MODULES', 'gail:atk-bridge'), ('LC_MONETARY', 'et_EE.UTF-8'), ('MANAGERPID', '1105'), ('SYSTEMD_EXEC_PID', '1260'), ('DBUS_SESSION_BUS_ADDRESS', 'unix:path=/run/user/1000/bus'), ('COLORTERM', 'truecolor'), ('TERMINATOR_DBUS_NAME', 'net.tenshu.Terminator25ef4b219e3b005583550f2b0f9f990c3'), ('GIO_LAUNCHED_DESKTOP_FILE_PID', '13048'), ('NVM_DIR', '/home/fyier/.nvm'), ('IM_CONFIG_PHASE', '1'), ('WAYLAND_DISPLAY', 'wayland-0'), ('COLCON_PREFIX_PATH', '/home/fyier/thesis_temoto/ros2_ws/install'), ('ROS_DISTRO', 'humble'), ('LOGNAME', 'fyier'), ('IGN_GAZEBO_MODEL_PATH', '/opt/ros/humble/share'), ('JOURNAL_STREAM', '8:16436'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('XDG_SESSION_CLASS', 'user'), ('USERNAME', 'fyier'), ('TERM', 'xterm-256color'), ('GAZEBO_MODEL_PATH', '/opt/ros/humble/share'), ('GNOME_DESKTOP_SESSION_ID', 'this-is-deprecated'), ('ROS_LOCALHOST_ONLY', '0'), ('PATH', '/opt/ros/humble/bin:/home/fyier/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin'), ('SESSION_MANAGER', 'local/master:@/tmp/.ICE-unix/1225,unix/master:/tmp/.ICE-unix/1225'), ('INVOCATION_ID', 'bf4d010e3dc1420f8d2203a6f4ff26b0'), ('XDG_MENU_PREFIX', 'gnome-'), ('LC_ADDRESS', 'et_EE.UTF-8'), ('GNOME_SETUP_DISPLAY', ':1'), ('XDG_RUNTIME_DIR', '/run/user/1000'), ('DISPLAY', ':0'), ('TERMINATOR_DBUS_PATH', '/net/tenshu/Terminator2'), ('LANG', 'en_US.UTF-8'), ('XDG_CURRENT_DESKTOP', 'ubuntu:GNOME'), ('IBUS_DISABLE_SNOOPER', '1'), ('LC_TELEPHONE', 'et_EE.UTF-8'), ('XMODIFIERS', '@im=ibus'), ('XDG_SESSION_DESKTOP', 'ubuntu'), ('XAUTHORITY', '/run/user/1000/.mutter-Xwaylandauth.VOJ122'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('SSH_AGENT_LAUNCHER', 'gnome-keyring'), ('SSH_AUTH_SOCK', '/run/user/1000/keyring/ssh'), ('AMENT_PREFIX_PATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_chat_interface_python:/home/fyier/thesis_temoto/ros2_ws/install/temoto_action_engine_ros2:/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs:/home/fyier/thesis_temoto/ros2_ws/install/interfaces:/home/fyier/thesis_temoto/ros2_ws/install/example_navigate:/opt/ros/humble'), ('SHELL', '/bin/bash'), ('LC_NAME', 'et_EE.UTF-8'), ('TERMINATOR_UUID', 'urn:uuid:278cbbc8-6369-4620-a166-75abcbaee33a'), ('QT_ACCESSIBILITY', '1'), ('GDMSESSION', 'ubuntu'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('IGN_GAZEBO_RESOURCE_PATH', '/opt/ros/humble/share'), ('LC_MEASUREMENT', 'et_EE.UTF-8'), ('GAZEBO_RESOURCE_PATH', '/opt/ros/humble/share'), ('GJS_DEBUG_OUTPUT', 'stderr'), ('LC_IDENTIFICATION', 'et_EE.UTF-8'), ('QT_IM_MODULE', 'ibus'), ('PWD', '/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates'), ('LC_ALL', 'en_US.UTF-8'), ('XDG_CONFIG_DIRS', '/etc/xdg/xdg-ubuntu:/etc/xdg'), ('NVM_CD_FLAGS', ''), ('XDG_DATA_DIRS', '/usr/share/ubuntu:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop'), ('PYTHONPATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_chat_interface_python/lib/python3.10/site-packages:/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs/local/lib/python3.10/dist-packages:/home/fyier/thesis_temoto/ros2_ws/install/interfaces/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('LC_NUMERIC', 'et_EE.UTF-8'), ('LC_PAPER', 'et_EE.UTF-8'), ('COLCON', '1'), ('VTE_VERSION', '6800'), ('NVM_RC_VERSION', ''), ('CMAKE_PREFIX_PATH', '/home/fyier/thesis_temoto/ros2_ws/install/temoto_action_engine_ros2:/home/fyier/thesis_temoto/ros2_ws/install/temoto_msgs:/home/fyier/thesis_temoto/ros2_ws/install/interfaces:/home/fyier/thesis_temoto/ros2_ws/install/example_navigate')]), 'shell': False}
+[0.904980] (-) TimerEvent: {}
+[1.005323] (-) TimerEvent: {}
+[1.054918] (get_coordinates) StdoutLine: {'line': b'[  8%] \x1b[32mBuilding CXX object CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o\x1b[0m\n'}
+[1.105427] (-) TimerEvent: {}
+[1.207907] (-) TimerEvent: {}
+[1.308572] (-) TimerEvent: {}
+[1.410982] (-) TimerEvent: {}
+[1.512044] (-) TimerEvent: {}
+[1.614944] (-) TimerEvent: {}
+[1.715393] (-) TimerEvent: {}
+[1.815872] (-) TimerEvent: {}
+[1.916297] (-) TimerEvent: {}
+[2.022046] (-) TimerEvent: {}
+[2.122406] (-) TimerEvent: {}
+[2.222856] (-) TimerEvent: {}
+[2.323302] (-) TimerEvent: {}
+[2.424753] (-) TimerEvent: {}
+[2.525098] (-) TimerEvent: {}
+[2.625503] (-) TimerEvent: {}
+[2.729755] (-) TimerEvent: {}
+[2.830105] (-) TimerEvent: {}
+[2.930464] (-) TimerEvent: {}
+[3.030844] (-) TimerEvent: {}
+[3.131220] (-) TimerEvent: {}
+[3.231595] (-) TimerEvent: {}
+[3.332928] (-) TimerEvent: {}
+[3.433397] (-) TimerEvent: {}
+[3.538176] (-) TimerEvent: {}
+[3.640774] (-) TimerEvent: {}
+[3.741120] (-) TimerEvent: {}
+[3.841476] (-) TimerEvent: {}
+[3.941960] (-) TimerEvent: {}
+[4.042334] (-) TimerEvent: {}
+[4.142838] (-) TimerEvent: {}
+[4.243171] (-) TimerEvent: {}
+[4.343498] (-) TimerEvent: {}
+[4.443939] (-) TimerEvent: {}
+[4.545880] (-) TimerEvent: {}
+[4.646277] (-) TimerEvent: {}
+[4.751025] (-) TimerEvent: {}
+[4.851365] (-) TimerEvent: {}
+[4.951817] (-) TimerEvent: {}
+[5.052245] (-) TimerEvent: {}
+[5.153137] (-) TimerEvent: {}
+[5.253577] (-) TimerEvent: {}
+[5.354039] (-) TimerEvent: {}
+[5.458756] (-) TimerEvent: {}
+[5.559179] (-) TimerEvent: {}
+[5.659595] (-) TimerEvent: {}
+[5.762752] (-) TimerEvent: {}
+[5.866086] (-) TimerEvent: {}
+[5.970748] (-) TimerEvent: {}
+[6.071150] (-) TimerEvent: {}
+[6.171504] (-) TimerEvent: {}
+[6.271865] (-) TimerEvent: {}
+[6.372209] (-) TimerEvent: {}
+[6.472778] (-) TimerEvent: {}
+[6.537990] (get_coordinates) StderrLine: {'line': b'\x1b[01m\x1b[K/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp:\x1b[m\x1b[K In member function \xe2\x80\x98\x1b[01m\x1b[Kjson CoordinateFinder::findPathToCoordinates(const string&, const json&, const string&)\x1b[m\x1b[K\xe2\x80\x99:\n'}
+[6.538252] (get_coordinates) StderrLine: {'line': b'\x1b[01m\x1b[K/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp:152:32:\x1b[m\x1b[K \x1b[01;31m\x1b[Kerror: \x1b[m\x1b[K\xe2\x80\x98\x1b[01m\x1b[KGetCoordPathfindReturn\x1b[m\x1b[K\xe2\x80\x99 has not been declared\n'}
+[6.538368] (get_coordinates) StderrLine: {'line': b'  152 |             json path_result = \x1b[01;31m\x1b[KGetCoordPathfindReturn\x1b[m\x1b[K::process(\n'}
+[6.538471] (get_coordinates) StderrLine: {'line': b'      |                                \x1b[01;31m\x1b[K^~~~~~~~~~~~~~~~~~~~~~\x1b[m\x1b[K\n'}
+[6.572887] (-) TimerEvent: {}
+[6.673264] (-) TimerEvent: {}
+[6.773633] (-) TimerEvent: {}
+[6.879756] (-) TimerEvent: {}
+[6.980097] (-) TimerEvent: {}
+[7.080555] (-) TimerEvent: {}
+[7.181006] (-) TimerEvent: {}
+[7.281480] (-) TimerEvent: {}
+[7.385757] (-) TimerEvent: {}
+[7.486162] (-) TimerEvent: {}
+[7.587341] (-) TimerEvent: {}
+[7.688788] (-) TimerEvent: {}
+[7.789136] (-) TimerEvent: {}
+[7.889548] (-) TimerEvent: {}
+[7.989991] (-) TimerEvent: {}
+[8.090467] (-) TimerEvent: {}
+[8.190954] (-) TimerEvent: {}
+[8.293903] (-) TimerEvent: {}
+[8.394298] (-) TimerEvent: {}
+[8.498770] (-) TimerEvent: {}
+[8.599252] (-) TimerEvent: {}
+[8.699736] (-) TimerEvent: {}
+[8.800092] (-) TimerEvent: {}
+[8.900979] (-) TimerEvent: {}
+[9.002960] (-) TimerEvent: {}
+[9.103488] (-) TimerEvent: {}
+[9.203833] (-) TimerEvent: {}
+[9.305597] (-) TimerEvent: {}
+[9.405968] (-) TimerEvent: {}
+[9.483378] (get_coordinates) StderrLine: {'line': b'gmake[2]: *** [CMakeFiles/get_coordinates.dir/build.make:76: CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o] Error 1\n'}
+[9.483613] (get_coordinates) StderrLine: {'line': b'gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/get_coordinates.dir/all] Error 2\n'}
+[9.483757] (get_coordinates) StderrLine: {'line': b'gmake: *** [Makefile:136: all] Error 2\n'}
+[9.495031] (get_coordinates) CommandEnded: {'returncode': 2}
+[9.495677] (get_coordinates) JobEnded: {'identifier': 'get_coordinates', 'rc': 2}
+[9.509655] (-) EventReactorShutdown: {}

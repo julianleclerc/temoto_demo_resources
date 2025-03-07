@@ -1,0 +1,6 @@
+{
+    "error": "invalidJSON",
+    "message": "AI did not return a valid JSON response",
+    "raw_response": "```json\n{\n    \"success\": \"true\",\n    \"coordinates\": {\"x\": 230, \"y\": 330},\n    \"error\": \"none\",\n    \"message\": \"Coordinates for the plant next to the fridge.\"\n}\n```",
+    "success": "false"
+}

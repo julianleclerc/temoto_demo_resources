@@ -1,0 +1,116 @@
+{
+    "classes": [
+      "plant",
+      "chair",
+      "table",
+      "fridge"
+    ],
+    "items": {
+      "plant": [
+        {
+          "id": "plant_001",
+          "description": "House plant",
+          "coordinates": {
+            "x": -0.5,
+            "y": 2.0
+          },
+          "dimensions": {
+            "height": 0.5,
+            "width": 0.5
+          }
+        },
+        {
+          "id": "plant_002",
+          "description": "House plant",
+          "coordinates": {
+            "x": -0.8,
+            "y": -5.5
+          },
+          "dimensions": {
+            "height": 0.5,
+            "width": 0.5
+          }
+        },
+        {
+          "id": "plant_003",
+          "description": "House plant",
+          "coordinates": {
+            "x": 0.5,
+            "y": -5.2
+          },
+          "dimensions": {
+            "height": 0.5,
+            "width": 0.5
+          }
+        },
+        {
+          "id": "plant_004",
+          "description": "House plant",
+          "coordinates": {
+            "x": 3,
+            "y": -3
+          },
+          "dimensions": {
+            "height": 0.5,
+            "width": 0.5
+          }
+        }
+      ],
+      "chair": [
+        {
+          "id": "chair_001",
+          "description": "Small Sofa chair",
+          "coordinates": {
+            "x": 1.4,
+            "y": 0.0
+          },
+          "dimensions": {
+            "height": 1,
+            "width": 1
+          }
+        },
+        {
+          "id": "chair_002",
+          "description": "Large Sofa chair",
+          "coordinates": {
+            "x": 2.4,
+            "y": -1.6
+          },
+          "dimensions": {
+            "height": 1.2,
+            "width": 1
+          }
+        }
+      ],
+      "table": [
+        {
+          "id": "table_001",
+          "description": "Dining table",
+          "coordinates": {
+            "x": 1.3,
+            "y": -1.6
+          },
+          "dimensions": {
+            "height": 1,
+            "width": 1
+          }
+        }
+      ],
+      "fridge": [
+        {
+          "id": "fridge_001",
+          "description": "Fridge",
+          "coordinates": {
+            "x": 3,
+            "y": -4
+          },
+          "dimensions": {
+            "height": 1,
+            "width": 1
+          }
+        }
+      ]
+  
+    }
+  }
+  
