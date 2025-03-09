@@ -276,7 +276,44 @@ CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o: ../src/ai_core.cpp \
   /usr/include/x86_64-linux-gnu/curl/multi.h \
   /usr/include/x86_64-linux-gnu/curl/curl.h \
   /usr/include/x86_64-linux-gnu/curl/urlapi.h \
-  /usr/include/x86_64-linux-gnu/curl/options.h
+  /usr/include/x86_64-linux-gnu/curl/options.h \
+  /usr/include/c++/11/regex \
+  /usr/include/c++/11/algorithm \
+  /usr/include/c++/11/bits/stl_algo.h \
+  /usr/include/c++/11/bits/algorithmfwd.h \
+  /usr/include/c++/11/bits/stl_heap.h \
+  /usr/include/c++/11/bits/uniform_int_dist.h \
+  /usr/include/c++/11/pstl/glue_algorithm_defs.h \
+  /usr/include/c++/11/functional \
+  /usr/include/c++/11/bits/std_function.h \
+  /usr/include/c++/11/unordered_map \
+  /usr/include/c++/11/bits/hashtable.h \
+  /usr/include/c++/11/bits/hashtable_policy.h \
+  /usr/include/c++/11/bits/enable_special_members.h \
+  /usr/include/c++/11/bits/unordered_map.h \
+  /usr/include/c++/11/bitset \
+  /usr/include/c++/11/iterator \
+  /usr/include/c++/11/bits/stream_iterator.h \
+  /usr/include/c++/11/locale \
+  /usr/include/c++/11/bits/locale_facets_nonio.h \
+  /usr/include/c++/11/ctime \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h \
+  /usr/include/libintl.h \
+  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
+  /usr/include/c++/11/bits/locale_conv.h \
+  /usr/include/c++/11/bits/regex_constants.h \
+  /usr/include/c++/11/bits/regex_error.h \
+  /usr/include/c++/11/bits/regex_automaton.h \
+  /usr/include/c++/11/bits/regex_automaton.tcc \
+  /usr/include/c++/11/bits/regex_scanner.h \
+  /usr/include/c++/11/bits/regex_scanner.tcc \
+  /usr/include/c++/11/bits/regex_compiler.h \
+  /usr/include/c++/11/bits/regex_compiler.tcc \
+  /usr/include/c++/11/bits/regex.h \
+  /usr/include/c++/11/bits/regex.tcc \
+  /usr/include/c++/11/bits/regex_executor.h \
+  /usr/include/c++/11/bits/regex_executor.tcc
 
 CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o: ../src/get_coordinates_run.cpp \
   /usr/include/stdc-predef.h \
@@ -5436,9 +5473,27 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/yaml-cpp/node/convert.h:
 
-/usr/include/c++/11/atomic:
-
 /usr/include/yaml-cpp/node/iterator.h:
+
+/usr/include/yaml-cpp/node/detail/node_ref.h:
+
+/usr/include/yaml-cpp/node/detail/node.h:
+
+/usr/include/yaml-cpp/node/detail/memory.h:
+
+/usr/include/yaml-cpp/node/type.h:
+
+/usr/include/yaml-cpp/node/ptr.h:
+
+/usr/include/yaml-cpp/node/detail/iterator_fwd.h:
+
+../src/getcoord_grid_generation.cpp:
+
+/usr/include/yaml-cpp/node/node.h:
+
+/usr/include/yaml-cpp/traits.h:
+
+/usr/include/yaml-cpp/mark.h:
 
 /usr/include/x86_64-linux-gnu/asm/posix_types.h:
 
@@ -5496,6 +5551,12 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/c++/11/bits/shared_ptr_atomic.h:
 
+/usr/include/c++/11/bits/regex.h:
+
+/usr/include/yaml-cpp/noexcept.h:
+
+/usr/include/c++/11/queue:
+
 /usr/include/c++/11/bits/refwrap.h:
 
 /usr/include/linux/stddef.h:
@@ -5507,6 +5568,8 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/c++/11/bits/stl_relops.h:
 
 /usr/include/limits.h:
+
+/usr/include/c++/11/bits/regex_compiler.tcc:
 
 /usr/include/c++/11/bits/uses_allocator.h:
 
@@ -5533,6 +5596,8 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/c++/11/memory:
 
 /usr/include/c++/11/bits/istream.tcc:
+
+/usr/include/c++/11/bits/regex_scanner.h:
 
 /usr/include/c++/11/bits/unique_ptr.h:
 
@@ -5565,10 +5630,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/c++/11/bits/atomic_lockfree_defines.h:
 
 /usr/include/c++/11/bits/valarray_array.tcc:
-
-/usr/include/c++/11/queue:
-
-/usr/include/yaml-cpp/noexcept.h:
 
 /usr/include/string.h:
 
@@ -5634,6 +5695,10 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 
+/usr/include/yaml-cpp/exceptions.h:
+
+/usr/include/c++/11/cctype:
+
 /usr/include/opencv4/opencv2/flann/linear_index.h:
 
 /usr/include/c++/11/iomanip:
@@ -5645,6 +5710,10 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
 
 /usr/include/opencv4/opencv2/flann/logger.h:
+
+/usr/include/yaml-cpp/node/detail/node_data.h:
+
+/usr/include/c++/11/stack:
 
 /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
 
@@ -5659,6 +5728,10 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/c++/11/clocale:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
+
+/usr/include/yaml-cpp/node/impl.h:
+
+/usr/include/c++/11/string_view:
 
 /usr/include/c++/11/bits/stl_construct.h:
 
@@ -5679,8 +5752,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/c++/11/cstdio:
 
 /usr/include/opencv4/opencv2/stitching/detail/warpers.hpp:
-
-/usr/include/yaml-cpp/node/ptr.h:
 
 /usr/include/c++/11/bits/concept_check.h:
 
@@ -5768,7 +5839,7 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/yaml-cpp/dll.h:
 
-/usr/include/yaml-cpp/node/detail/node_ref.h:
+/usr/include/c++/11/bits/regex_automaton.tcc:
 
 /usr/include/c++/11/debug/debug.h:
 
@@ -5874,8 +5945,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/opencv4/opencv2/videoio.hpp:
 
-/usr/include/yaml-cpp/node/type.h:
-
 /usr/include/c++/11/ext/numeric_traits.h:
 
 /usr/include/opencv4/opencv2/ml.hpp:
@@ -5912,6 +5981,8 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
 
+/usr/include/c++/11/bits/regex_executor.tcc:
+
 /usr/include/opencv4/opencv2/stitching/detail/util_inl.hpp:
 
 /usr/include/c++/11/iosfwd:
@@ -5935,6 +6006,8 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/linux/errno.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/c++locale.h:
+
+/usr/include/c++/11/bits/regex.tcc:
 
 /usr/include/c++/11/streambuf:
 
@@ -6104,7 +6177,9 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/nlohmann/detail/meta/call_std/begin.hpp:
 
-../src/get_coordinates_run.cpp:
+/usr/include/c++/11/algorithm:
+
+/usr/include/c++/11/bits/stl_algo.h:
 
 /usr/include/c++/11/bits/hashtable.h:
 
@@ -6113,6 +6188,62 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/opencv4/opencv2/imgproc.hpp:
 
 /usr/include/c++/11/bits/unordered_map.h:
+
+/usr/include/c++/11/bitset:
+
+/usr/include/c++/11/bits/locale_facets_nonio.h:
+
+/usr/include/c++/11/ctime:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h:
+
+/usr/include/c++/11/bits/basic_ios.h:
+
+/usr/include/opencv4/opencv2/flann/composite_index.h:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h:
+
+/usr/include/opencv4/opencv2/flann/timer.h:
+
+/usr/include/c++/11/bits/char_traits.h:
+
+/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
+
+/usr/include/libintl.h:
+
+/usr/include/opencv4/opencv2/stitching/detail/exposure_compensate.hpp:
+
+/usr/include/c++/11/bits/locale_conv.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/wchar.h:
+
+/usr/include/nlohmann/detail/exceptions.hpp:
+
+/usr/include/c++/11/bits/regex_constants.h:
+
+/usr/include/c++/11/atomic:
+
+/usr/include/c++/11/bits/regex_error.h:
+
+/usr/include/opencv4/opencv2/core/cvstd.hpp:
+
+/usr/include/c++/11/bits/regex_automaton.h:
+
+/usr/include/locale.h:
+
+/usr/include/opencv4/opencv2/core/fast_math.hpp:
+
+/usr/include/nlohmann/detail/input/input_adapters.hpp:
+
+/usr/include/c++/11/bits/regex_compiler.h:
+
+/usr/include/opencv4/opencv2/ml/ml.inl.hpp:
+
+/usr/include/c++/11/bits/regex_executor.h:
+
+../src/get_coordinates_run.cpp:
 
 ../src/getcoord_origincoord_return.cpp:
 
@@ -6186,12 +6317,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/opencv4/opencv2/core/base.hpp:
 
-/usr/include/c++/11/algorithm:
-
-/usr/include/c++/11/bits/stl_algo.h:
-
-/usr/include/opencv4/opencv2/core/cvstd.hpp:
-
 /usr/include/opencv4/opencv2/core/cvstd_wrapper.hpp:
 
 /usr/include/opencv4/opencv2/core/neon_utils.hpp:
@@ -6212,10 +6337,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/opencv4/opencv2/core/saturate.hpp:
 
-/usr/include/locale.h:
-
-/usr/include/opencv4/opencv2/core/fast_math.hpp:
-
 /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h:
 
 /usr/include/opencv4/opencv2/core/bufferpool.hpp:
@@ -6227,8 +6348,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/nlohmann/detail/input/lexer.hpp:
 
 /usr/include/c++/11/ratio:
-
-/usr/include/c++/11/ctime:
 
 /usr/include/c++/11/bits/parse_numbers.h:
 
@@ -6318,51 +6437,29 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/opencv4/opencv2/flann/random.h:
 
+/usr/include/c++/11/regex:
+
 /usr/include/opencv4/opencv2/flann/kdtree_single_index.h:
 
 /usr/include/opencv4/opencv2/flann/hierarchical_clustering_index.h:
 
 /usr/include/opencv4/opencv2/flann/lsh_table.h:
 
-/usr/include/c++/11/bits/locale_facets_nonio.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h:
-
-/usr/include/c++/11/bits/basic_ios.h:
-
-/usr/include/opencv4/opencv2/flann/composite_index.h:
-
-/usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h:
-
-/usr/include/opencv4/opencv2/flann/timer.h:
-
-/usr/include/c++/11/bits/char_traits.h:
-
-/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
-
-/usr/include/libintl.h:
-
-/usr/include/opencv4/opencv2/stitching/detail/exposure_compensate.hpp:
-
-/usr/include/c++/11/bits/locale_conv.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
-
-/usr/include/wchar.h:
-
-/usr/include/nlohmann/detail/exceptions.hpp:
-
 /usr/include/c++/11/bits/quoted_string.h:
 
 /usr/include/c++/11/math.h:
+
+/usr/include/c++/11/bits/stream_iterator.h:
+
+/usr/include/c++/11/bits/regex_scanner.tcc:
+
+/usr/include/opencv4/opencv2/flann/ground_truth.h:
 
 /usr/include/opencv4/opencv2/highgui.hpp:
 
 /usr/include/opencv4/opencv2/imgcodecs.hpp:
 
 /usr/include/opencv4/opencv2/imgproc/segmentation.hpp:
-
-/usr/include/opencv4/opencv2/ml/ml.inl.hpp:
 
 /usr/include/nlohmann/detail/iterators/primitive_iterator.hpp:
 
@@ -6398,10 +6495,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/nlohmann/json.hpp:
 
-/usr/include/opencv4/opencv2/flann/ground_truth.h:
-
-/usr/include/c++/11/bits/stream_iterator.h:
-
 /usr/include/x86_64-linux-gnu/asm/sockios.h:
 
 /usr/include/c++/11/numeric:
@@ -6432,10 +6525,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/nlohmann/thirdparty/hedley/hedley.hpp:
 
-/usr/include/c++/11/string_view:
-
-/usr/include/yaml-cpp/node/impl.h:
-
 /usr/include/c++/11/unordered_map:
 
 /usr/include/nlohmann/detail/meta/void_t.hpp:
@@ -6443,10 +6532,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/c++/11/cassert:
 
 /usr/include/nlohmann/detail/meta/cpp_future.hpp:
-
-/usr/include/c++/11/cctype:
-
-/usr/include/yaml-cpp/exceptions.h:
 
 /usr/include/nlohmann/detail/meta/identity_tag.hpp:
 
@@ -6474,8 +6559,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 
 /usr/include/nlohmann/byte_container_with_subtype.hpp:
 
-/usr/include/nlohmann/detail/input/input_adapters.hpp:
-
 /usr/include/c++/11/pstl/glue_numeric_defs.h:
 
 /usr/include/opencv4/opencv2/stitching/detail/blenders.hpp:
@@ -6487,8 +6570,6 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/nlohmann/detail/input/parser.hpp:
 
 /usr/include/nlohmann/detail/iterators/internal_iterator.hpp:
-
-/usr/include/yaml-cpp/traits.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
 
@@ -6529,19 +6610,3 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator
 /usr/include/x86_64-linux-gnu/curl/urlapi.h:
 
 /usr/include/yaml-cpp/emittermanip.h:
-
-/usr/include/yaml-cpp/mark.h:
-
-../src/getcoord_grid_generation.cpp:
-
-/usr/include/yaml-cpp/node/node.h:
-
-/usr/include/yaml-cpp/node/detail/iterator_fwd.h:
-
-/usr/include/yaml-cpp/node/detail/node.h:
-
-/usr/include/yaml-cpp/node/detail/memory.h:
-
-/usr/include/c++/11/stack:
-
-/usr/include/yaml-cpp/node/detail/node_data.h:

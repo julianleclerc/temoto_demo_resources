@@ -274,7 +274,7 @@ std::string LLMCoordinator::LLM_Search(const std::string& object_class,
         }
         
         // Check if this is an error response from the API
-        if (validation.isMember("error")) {
+        if (validation.isMember("error") && validation["error"].asString() != "none") {
             std::cout << "[DEBUG LLM] API returned an error" << std::endl;
             Json::Value errorResponse;
             errorResponse["success"] = "false";

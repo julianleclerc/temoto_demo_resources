@@ -1,4 +1,4 @@
-# Install script for directory: /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates
+# Install script for directory: /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -49,7 +49,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/get_coordinates"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/get_coordinates")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/get_coordinates")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/get_coordinates" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/get_coordinates")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -66,5 +66,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

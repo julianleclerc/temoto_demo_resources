@@ -1,7 +1,7 @@
 CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o: \
- /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp \
+ /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp \
  /usr/include/stdc-predef.h \
- /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/include/get_coordinates/getcoord_pixelcoord_return.h \
+ /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/include/get_coordinates/getcoord_pixelcoord_return.h \
  /usr/include/nlohmann/json.hpp /usr/include/c++/11/algorithm \
  /usr/include/c++/11/utility \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \

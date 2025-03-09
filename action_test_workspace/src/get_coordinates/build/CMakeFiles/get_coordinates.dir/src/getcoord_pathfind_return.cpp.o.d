@@ -1,7 +1,7 @@
 CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o: \
- /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp \
+ /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp \
  /usr/include/stdc-predef.h \
- /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/include/get_coordinates/getcoord_pathfind_return.h \
+ /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/include/get_coordinates/getcoord_pathfind_return.h \
  /usr/include/opencv4/opencv2/opencv.hpp \
  /usr/include/opencv4/opencv2/opencv_modules.hpp \
  /usr/include/opencv4/opencv2/core.hpp \

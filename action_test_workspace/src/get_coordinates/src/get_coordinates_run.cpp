@@ -29,7 +29,7 @@ using json = nlohmann::json;
 namespace fs = std::filesystem;
 
 // Hardcoded paths
-const std::string DATA_DIR = "/home/fyier/thesis_temoto/actions/action_test_workspace/src/data";
+const std::string DATA_DIR = "/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/data";
 const std::string ITEMS_JSON_PATH = DATA_DIR + "/items.json";
 const std::string MAP_PATH = DATA_DIR + "/map.pgm";
 const std::string MAP_YAML_PATH = DATA_DIR + "/map.yaml";
@@ -172,15 +172,65 @@ private:
         
         // Define your system instructions for the LLM
         std::string instructions = R"(
-            You are a visual analysis system specialized in locating objects in a map based on descriptions.
-            Your task is to identify the pixel coordinates of the requested object in the provided image.
-            Respond in JSON format only with the following structure:
-            {
-                "success": "true" or "false",
-                "coordinates": {"x": pixel_x, "y": pixel_y},
-                "error": "none" or error_type,
-                "message": "additional information if needed"
-            }
+            You are an assistant responsible for providing the coordinates and orientation of an object within a JSON list based on a map image and a user description. You will receive:
+            1. An image representing a map.
+            2. A list of available objects on the map, each with its description, ID, and coordinates.
+            3. A user request specifying the object to navigate to.
+
+            Your objective:
+            1. **Object Identification and Validation**:
+            - Search for an object in the list that fits the user’s description, if you succeed set `"success": "false"` and `"error": "none"`.
+            - If you are unable to determine where the robot should go, set `"success": "false"` and `"error": "noObjects"`.
+            - If multiple objects match the description, rely on position of the robot(where it is facing, objects around) and descriptive elements. If you are still unable to return coordinates set `"success": "false"` and `"error": "ambiguous"`.
+            - If the user requests to skip operation, set `"success": "false"` and `"error": "skip"`.
+
+            2. **Map Interpretation**:
+            - The map includes:
+                - **Cost Map**: Shaded areas represent non-traversable regions in black.(white is traversable) Ensure provided coordinates do not overlap with these regions nor the object boxes.
+                - **Robot’s Current Position**: Indicated by a red circle with an orientation line. The angle’s origin (0 degrees) is at 3 o'clock, following a counter-clockwise direction.
+                - **Objects on the Map**: Represented by colored rectangles with ID labels at the top left.
+                - **Map Origin**: Located at the top left corner (0,0), with coordinates expressed in pixel measurements.
+
+            3. **Finding position steps**:
+            - Look at map for any elements around robot that matches the robot class (user might ask to find a tree, look for any trees around the robot labeled as tree_001, tree_002)
+            - Now considering the list of trees, from the found ids (tree_001, tree_002, ...), determine which object is the most corresponding to the description
+            - Now determine the coordinates you will return in order for the robot to face the given object. Verify the coordinates are free of non-traversable areas.
+            - Ensure the robot’s orientation points directly to the center of the colored rectangle representing the target object.
+            - Ensure to return the final location as pixel coordinates with orgin at the top left corner of the map.
+
+            4. - **If Attributes Are Provided:**
+            - Use the attributes to identify the specific object.
+            - Proceed with existing validation and response logic.
+            - **If Attributes Are Not Provided:**
+            - Check the number of objects matching the type.
+                - **Single Match:** Return its coordinates.
+                - **Multiple Matches:** Set `"success": "false"` and `"error": "ambiguous"`.
+
+
+            5. **Response Format**:
+            - If the object is identified successfully, respond with:
+                {
+                "success": "true",
+                "coordinates": {"x": <target x-pixel-coordinate>, "y": <target y-pixel-coordinate>},
+                "target_id": "<target_id>",
+                "error": "none",
+                "message": "Sending robot to <target_id> because <reasoning behind decision> "
+                }
+
+            - If there’s an error, respond with:
+                {
+                "success": "false",
+                "coordinates": {"x": null, "y": null},
+                "target_id": "null",
+                "error": <error type>,
+                "message": <error_message>
+                }
+                - **Error Types**:
+                - `"noObjects"`: When the object is not present in the list. Use `"message"` to clarify that the object was not found.
+                - `"ambiguous"`: When multiple objects match the description. Use `"message"` to clarify that the description is ambiguous and list the options.
+                - `"skip"`: When the user explicitly requests to skip operation.
+
+            For response do not include: ```json
             )";
 
         // Check items_data before passing it
@@ -481,6 +531,29 @@ public:
                 // Check the structure of the result before proceeding
                 std::cout << "Debug: Result structure: " << result.dump() << std::endl;
                 
+                // Check if the result contains an error
+                if (result.contains("error") && result["error"] != "none") {
+                    std::cout << "Debug: Result contains error, returning it directly" << std::endl;
+                    
+                    // Add coordinates field if not present to avoid further errors
+                    if (!result.contains("coordinates")) {
+                        result["coordinates"] = {
+                            {"x", origin[0]},
+                            {"y", origin[1]}
+                        };
+                    }
+                    
+                    // Add angle field
+                    result["angle"] = 0.0;
+                    
+                    // Save the error result to a file
+                    std::ofstream error_file(output_dir + "/error_result.json");
+                    error_file << result.dump(4);
+                    error_file.close();
+                    
+                    return result;
+                }
+                
                 // Process 7: Generate new coordinates map
                 cv::Mat new_coords_map;
                 float angle_deg;
@@ -489,7 +562,7 @@ public:
                 );
                 saveImage(new_coords_map, "09_new_coords_map.png");
                 std::cout << "Debug: Generated new coordinates map" << std::endl;
-
+            
                 // Process 8: Get origin coordinates
                 json origin_coords = GetCoordOriginCoordReturn::process(
                     result, scaled_resolution, origin, 
@@ -504,7 +577,7 @@ public:
                 final_coords_file << origin_coords.dump(4);
                 final_coords_file.close();
                 std::cout << "Debug: Saved final coordinates to file" << std::endl;
-
+            
                 return origin_coords;
 
             } catch (const std::exception& e) {
@@ -543,8 +616,8 @@ public:
 int main(int argc, char** argv) {
     try {
         // Default target object and description if not provided as arguments
-        std::string target_object = "table";
-        std::string object_description = "wooden table";
+        std::string target_object = "";
+        std::string object_description = "";
         
         // Override defaults if arguments are provided
         if (argc >= 2) {

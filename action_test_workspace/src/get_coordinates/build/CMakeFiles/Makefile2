@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates
+CMAKE_SOURCE_DIR = /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build
+CMAKE_BINARY_DIR = /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/get_coordinates.dir/clean
 CMakeFiles/get_coordinates.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/get_coordinates.dir/build.make CMakeFiles/get_coordinates.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/get_coordinates.dir/build.make CMakeFiles/get_coordinates.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14 "Built target get_coordinates"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14 "Built target get_coordinates"
 .PHONY : CMakeFiles/get_coordinates.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/get_coordinates.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles 14
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles 14
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/get_coordinates.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles 0
 .PHONY : CMakeFiles/get_coordinates.dir/rule
 
 # Convenience name for target.

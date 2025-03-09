@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates
+CMAKE_SOURCE_DIR = /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build
+CMAKE_BINARY_DIR = /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/get_coordinates.dir/depend.make
@@ -72,184 +72,184 @@ include CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o: ../src/get_coordinates_run.cpp
 CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o -MF CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o -MF CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp
 
 CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp > CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp > CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp -o CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/get_coordinates_run.cpp -o CMakeFiles/get_coordinates.dir/src/get_coordinates_run.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o: ../src/getcoord_scalemap_generation.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_scalemap_generation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_scalemap_generation.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_scalemap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_scalemap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_scalemap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_scalemap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_scalemap_generation.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o: ../src/getcoord_costmap_generation.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_costmap_generation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_costmap_generation.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_costmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_costmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_costmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_costmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_costmap_generation.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o: ../src/getcoord_nonTraversable_generation.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_nonTraversable_generation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_nonTraversable_generation.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_nonTraversable_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_nonTraversable_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_nonTraversable_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_nonTraversable_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_nonTraversable_generation.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o: ../src/getcoord_grid_generation.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_grid_generation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_grid_generation.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_grid_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_grid_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_grid_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_grid_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_grid_generation.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o: ../src/getcoord_objectmap_generation.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_objectmap_generation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_objectmap_generation.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_objectmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_objectmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_objectmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_objectmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_objectmap_generation.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o: ../src/getcoord_pixelcoord_return.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pixelcoord_return.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_pixelcoord_return.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o: ../src/getcoord_newcoordmap_generation.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_newcoordmap_generation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_newcoordmap_generation.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_newcoordmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_newcoordmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_newcoordmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_newcoordmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_newcoordmap_generation.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o: ../src/getcoord_origincoord_return.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_origincoord_return.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_origincoord_return.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_origincoord_return.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_origincoord_return.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_origincoord_return.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_origincoord_return.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_origincoord_return.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o: ../src/getcoord_pathfind_return.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_pathfind_return.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_pathfind_return.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o: ../src/getcoord_robotmap_generation.cpp
 CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_robotmap_generation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o -MF CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_robotmap_generation.cpp
 
 CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_robotmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_robotmap_generation.cpp > CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/getcoord_robotmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/getcoord_robotmap_generation.cpp -o CMakeFiles/get_coordinates.dir/src/getcoord_robotmap_generation.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o: ../src/ai_core.cpp
 CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o -MF CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/ai_core.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o -MF CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/ai_core.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/ai_core.cpp
 
 CMakeFiles/get_coordinates.dir/src/ai_core.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/ai_core.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/ai_core.cpp > CMakeFiles/get_coordinates.dir/src/ai_core.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/ai_core.cpp > CMakeFiles/get_coordinates.dir/src/ai_core.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/ai_core.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/ai_core.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/ai_core.cpp -o CMakeFiles/get_coordinates.dir/src/ai_core.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/ai_core.cpp -o CMakeFiles/get_coordinates.dir/src/ai_core.cpp.s
 
 CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: CMakeFiles/get_coordinates.dir/flags.make
 CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: ../src/llm_coordinator.cpp
 CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: CMakeFiles/get_coordinates.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o -MF CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o -c /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o -MF CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o.d -o CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o -c /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp
 
 CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp > CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp > CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.i
 
 CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp -o CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp -o CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.s
 
 # Object files for target get_coordinates
 get_coordinates_OBJECTS = \
@@ -341,7 +341,7 @@ get_coordinates: /usr/lib/x86_64-linux-gnu/libopencv_photo.so.4.5.4d
 get_coordinates: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.4.5.4d
 get_coordinates: /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.5.4d
 get_coordinates: CMakeFiles/get_coordinates.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable get_coordinates"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable get_coordinates"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/get_coordinates.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -353,6 +353,6 @@ CMakeFiles/get_coordinates.dir/clean:
 .PHONY : CMakeFiles/get_coordinates.dir/clean
 
 CMakeFiles/get_coordinates.dir/depend:
-	cd /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/build/CMakeFiles/get_coordinates.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/build/CMakeFiles/get_coordinates.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/get_coordinates.dir/depend
 

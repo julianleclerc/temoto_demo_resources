@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include <stdexcept>
-#include <fstream>
+#include <regex>
 
 namespace get_coordinates {
 
@@ -18,6 +18,68 @@ static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::stri
         // Handle memory problem
         return 0;
     }
+}
+
+/**
+ * Extracts JSON data from LLM responses that may contain debug information or markdown code blocks
+ * 
+ * @param raw_response The raw response string containing debug logs and JSON data
+ * @return Json::Value containing the parsed JSON data
+ */
+Json::Value extract_json_from_llm_response(const std::string& raw_response) {
+    std::cout << "[DEBUG] Extracting JSON from LLM response" << std::endl;
+    
+    // First try to extract JSON from markdown code blocks
+    std::string json_str = extract_json_string_from_llm_response(raw_response);
+    
+    // Parse the JSON
+    Json::Value json_data;
+    Json::Reader reader;
+    bool parse_success = reader.parse(json_str, json_data);
+    
+    if (!parse_success) {
+        std::cout << "[DEBUG] Failed to parse extracted JSON: " << reader.getFormattedErrorMessages() << std::endl;
+        return Json::Value(Json::objectValue);
+    }
+    
+    std::cout << "[DEBUG] Successfully parsed JSON data" << std::endl;
+    return json_data;
+}
+
+/**
+ * Extracts JSON data as a string from LLM responses that may contain debug information or markdown code blocks
+ * 
+ * @param raw_response The raw response string containing debug logs and JSON data
+ * @return std::string containing just the JSON part
+ */
+std::string extract_json_string_from_llm_response(const std::string& raw_response) {
+    std::cout << "[DEBUG] Extracting JSON string from LLM response" << std::endl;
+    
+    // Method 1: Try to extract JSON from markdown code blocks (```json ... ```)
+    std::regex json_code_block_regex("```json\\s*\\n(\\{[\\s\\S]*?\\})\\s*\\n```");
+    std::smatch json_code_match;
+    
+    if (std::regex_search(raw_response, json_code_match, json_code_block_regex) && json_code_match.size() > 1) {
+        std::string json_from_code_block = json_code_match[1].str();
+        std::cout << "[DEBUG] Found JSON in code block, length: " << json_from_code_block.length() << std::endl;
+        return json_from_code_block;
+    }
+    
+    // Method 2: If no code block is found, try to find the outermost JSON object
+    std::cout << "[DEBUG] No JSON code block found, looking for outermost JSON object" << std::endl;
+    size_t json_start = raw_response.find('{');
+    size_t json_end = raw_response.rfind('}');
+    
+    if (json_start == std::string::npos || json_end == std::string::npos || json_end <= json_start) {
+        std::cout << "[DEBUG] Failed to locate valid JSON in response" << std::endl;
+        return "{}"; // Return empty JSON object if no valid JSON is found
+    }
+    
+    // Extract the JSON string
+    std::string json_str = raw_response.substr(json_start, json_end - json_start + 1);
+    std::cout << "[DEBUG] Extracted JSON string using fallback method, length: " << json_str.length() << std::endl;
+    
+    return json_str;
 }
 
 AICore::AICore() {
@@ -99,12 +161,45 @@ std::string AICore::AI_Image_Prompt(const std::string& messages,
     try {
         std::string response = send_request(request_data);
         std::cout << "[DEBUG AI] Got response from API" << std::endl;
-        return response;
+        
+        // Process the response to extract just the JSON part from any code blocks or text
+        return process_llm_response(response);
     } catch (const std::exception& e) {
         std::cout << "[DEBUG AI] Error in send_request: " << e.what() << std::endl;
         // Return a dummy response for testing when API is unavailable
         return createDummyResponse();
     }
+}
+
+/**
+ * Process LLM response to extract clean JSON data
+ * 
+ * @param raw_response The raw response string from the LLM
+ * @return std::string containing the processed JSON response
+ */
+std::string AICore::process_llm_response(const std::string& raw_response) {
+    std::cout << "[DEBUG AI] Processing LLM response, length: " << raw_response.length() << std::endl;
+    
+    // Extract JSON from the response that might include debug logs
+    std::string json_str = extract_json_string_from_llm_response(raw_response);
+    
+    if (json_str == "{}") {
+        std::cout << "[DEBUG AI] No valid JSON found in response" << std::endl;
+        return createDummyResponse();
+    }
+    
+    std::cout << "[DEBUG AI] Extracted JSON: " << json_str << std::endl;
+    return json_str;
+}
+
+/**
+ * Get parsed JSON data from LLM response
+ * 
+ * @param raw_response The raw response string from the LLM
+ * @return Json::Value containing the parsed JSON data
+ */
+Json::Value AICore::get_json_from_llm_response(const std::string& raw_response) {
+    return extract_json_from_llm_response(raw_response);
 }
 
 std::string AICore::createDummyResponse() {
@@ -179,6 +274,16 @@ std::string AICore::send_request(const std::string& payload) {
                     
                     std::string assistant_content = response_json["choices"][0]["message"]["content"].asString();
                     std::cout << "[DEBUG AI] Extracted assistant content, length: " << assistant_content.length() << std::endl;
+                    
+                    // The key change: Extract any JSON from the assistant_content
+                    // This will handle cases where the assistant includes text and JSON in code blocks
+                    std::string extracted_json = extract_json_string_from_llm_response(assistant_content);
+                    if (extracted_json != "{}") {
+                        std::cout << "[DEBUG AI] Found valid JSON in assistant content" << std::endl;
+                        return extracted_json;
+                    }
+                    
+                    // Return the full content if no JSON was found
                     return assistant_content;
                 } else {
                     std::cout << "[DEBUG AI] Response JSON doesn't have expected structure" << std::endl;

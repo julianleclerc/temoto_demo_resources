@@ -1,0 +1,7 @@
+{
+  "name": "GetCoordinates",
+  "type": "sync",
+  "input_parameters": {
+    "location": {"pvf_type": "string"}
+  }
+}

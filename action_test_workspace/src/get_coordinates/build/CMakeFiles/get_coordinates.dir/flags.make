@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = -DJSON_DIAGNOSTICS=0 -DJSON_USE_IMPLICIT_CONVERSIONS=1
 
-CXX_INCLUDES = -I/home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/include -I/usr/include/jsoncpp -isystem /usr/include/opencv4
+CXX_INCLUDES = -I/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/include -I/usr/include/jsoncpp -isystem /usr/include/opencv4
 
 CXX_FLAGS = -std=gnu++17
 

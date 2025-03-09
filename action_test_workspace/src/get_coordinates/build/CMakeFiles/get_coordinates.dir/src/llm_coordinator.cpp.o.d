@@ -1,7 +1,7 @@
 CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: \
- /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp \
+ /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/src/llm_coordinator.cpp \
  /usr/include/stdc-predef.h \
- /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/include/get_coordinates/llm_coordinator.h \
+ /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/include/get_coordinates/llm_coordinator.h \
  /usr/include/c++/11/string \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
@@ -191,7 +191,7 @@ CMakeFiles/get_coordinates.dir/src/llm_coordinator.cpp.o: \
  /usr/include/c++/11/bits/stl_deque.h /usr/include/c++/11/bits/deque.tcc \
  /usr/include/c++/11/stack /usr/include/c++/11/bits/stl_stack.h \
  /usr/include/jsoncpp/json/writer.h \
- /home/fyier/thesis_temoto/actions/action_test_workspace/src/get_coordinates/include/get_coordinates/ai_core.h \
+ /home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/get_coordinates/include/get_coordinates/ai_core.h \
  /usr/include/c++/11/fstream /usr/include/c++/11/bits/codecvt.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++io.h \
