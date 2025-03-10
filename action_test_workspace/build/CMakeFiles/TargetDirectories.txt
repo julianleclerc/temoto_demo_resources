@@ -1,2 +1,0 @@
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/CMakeFiles/edit_cache.dir
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/CMakeFiles/rebuild_cache.dir

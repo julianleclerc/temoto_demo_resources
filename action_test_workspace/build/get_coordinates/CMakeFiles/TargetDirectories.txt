@@ -1,7 +1,0 @@
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates/CMakeFiles/get_coordinates.dir
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates/CMakeFiles/edit_cache.dir
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates/CMakeFiles/rebuild_cache.dir
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates/CMakeFiles/list_install_components.dir
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates/CMakeFiles/install.dir
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates/CMakeFiles/install/local.dir
-/home/fyier/thesis_temoto/actions/action_test_workspace/build/get_coordinates/CMakeFiles/install/strip.dir

@@ -1,0 +1,49 @@
+cmake_minimum_required(VERSION 3.5)
+project(get_coordinates)
+add_compile_options(-std=c++17)
+
+# Find dependencies
+find_package(OpenCV REQUIRED)
+find_package(yaml-cpp REQUIRED)
+find_package(fmt REQUIRED)
+find_package(jsoncpp REQUIRED)
+find_package(CURL REQUIRED)
+find_package(nlohmann_json REQUIRED)
+
+# Add all source files to the target
+add_library(${PROJECT_NAME} SHARED 
+  src/${PROJECT_NAME}.cpp
+  src/get_coordinates_run.cpp
+  src/ai_core.cpp
+  src/getcoord_costmap_generation.cpp
+  src/getcoord_grid_generation.cpp
+  src/getcoord_newcoordmap_generation.cpp
+  src/getcoord_nonTraversable_generation.cpp
+  src/getcoord_objectmap_generation.cpp
+  src/getcoord_origincoord_return.cpp
+  src/getcoord_pathfind_return.cpp
+  src/getcoord_pixelcoord_return.cpp
+  src/getcoord_robotmap_generation.cpp
+  src/getcoord_scalemap_generation.cpp
+  src/llm_coordinator.cpp
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC include data)
+
+target_link_libraries(${PROJECT_NAME} 
+  temoto_action_engine
+  ${OpenCV_LIBRARIES}
+  yaml-cpp
+  fmt::fmt
+  jsoncpp
+  ${CURL_LIBRARIES}
+  nlohmann_json::nlohmann_json
+)
+
+class_loader_hide_library_symbols(${PROJECT_NAME}) # update to new version 
+
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION include/${PROJECT_NAME})
+install(DIRECTORY data/ DESTINATION share/${PROJECT_NAME}/data)
+
+ament_package()
