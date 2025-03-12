@@ -4,14 +4,45 @@
   <name>get_coordinates</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="todo@todo.com">robert</maintainer>
+  <maintainer email="todo@todo.com">TODO: name</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+  <depend>temoto_action_engine_ros2</depend>
 
+  <!-- For OpenCV -->
+  <build_depend>libopencv-dev</build_depend>
+  <exec_depend>libopencv-dev</exec_depend>
+
+  <!-- For yaml-cpp -->
+  <build_depend>libyaml-cpp-dev</build_depend>
+  <exec_depend>libyaml-cpp-dev</exec_depend>
+
+  <!-- For fmt -->
+  <build_depend>libfmt-dev</build_depend>
+  <exec_depend>libfmt-dev</exec_depend>
+
+  <!-- For jsoncpp -->
+  <build_depend>libjsoncpp-dev</build_depend>
+  <exec_depend>libjsoncpp-dev</exec_depend>
+
+  <!-- For CURL -->
+  <build_depend>libcurl4-openssl-dev</build_depend>
+  <exec_depend>libcurl4-openssl-dev</exec_depend>
+
+  <!-- For nlohmann_json -->
+  <build_depend>nlohmann-json3-dev</build_depend>
+  <exec_depend>nlohmann-json3-dev</exec_depend>
+
+  <!-- For pluginlib (ROS 2 package) -->
+  <build_depend>pluginlib</build_depend>
+  <exec_depend>pluginlib</exec_depend>
+
+  <depend>ament_index_cpp</depend>
+  
   <export>
     <build_type>ament_cmake</build_type>
   </export>

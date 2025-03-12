@@ -26,12 +26,14 @@
 #include "get_coordinates/llm_coordinator.hpp"
 
 #include "get_coordinates/get_coordinates_run.hpp"
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-// Hardcoded paths
-const std::string DATA_DIR = "/home/fyier/thesis_temoto/temoto_chat_interface_actions/action_test_workspace/src/data";
+// paths
+std::string package_path = ament_index_cpp::get_package_share_directory("get_coordinates");
+const std::string DATA_DIR = package_path + "/data";
 const std::string ITEMS_JSON_PATH = DATA_DIR + "/items.json";
 const std::string MAP_PATH = DATA_DIR + "/map.pgm";
 const std::string MAP_YAML_PATH = DATA_DIR + "/map.yaml";
@@ -172,16 +174,16 @@ private:
     void initializeLLMCoordinator() {
         std::cout << "DEBUG INIT_LLM: Starting LLM Coordinator initialization" << std::endl;
         
-        // Define your system instructions for the LLM
+        // Updated instructions to reflect working with just object descriptions
         std::string instructions = R"(
             You are an assistant responsible for providing the coordinates and orientation of an object within a JSON list based on a map image and a user description. You will receive:
             1. An image representing a map.
             2. A list of available objects on the map, each with its description, ID, and coordinates.
-            3. A user request specifying the object to navigate to.
+            3. A user request specifying a description of the object to navigate to.
 
             Your objective:
             1. **Object Identification and Validation**:
-            - Search for an object in the list that fits the user’s description, if you succeed set `"success": "false"` and `"error": "none"`.
+            - Search for an object in the list that fits the user's description, if you succeed set `"success": "true"` and `"error": "none"`.
             - If you are unable to determine where the robot should go, set `"success": "false"` and `"error": "noObjects"`.
             - If multiple objects match the description, rely on position of the robot(where it is facing, objects around) and descriptive elements. If you are still unable to return coordinates set `"success": "false"` and `"error": "ambiguous"`.
             - If the user requests to skip operation, set `"success": "false"` and `"error": "skip"`.
@@ -189,27 +191,18 @@ private:
             2. **Map Interpretation**:
             - The map includes:
                 - **Cost Map**: Shaded areas represent non-traversable regions in black.(white is traversable) Ensure provided coordinates do not overlap with these regions nor the object boxes.
-                - **Robot’s Current Position**: Indicated by a red circle with an orientation line. The angle’s origin (0 degrees) is at 3 o'clock, following a counter-clockwise direction.
+                - **Robot's Current Position**: Indicated by a red circle with an orientation line. The angle's origin (0 degrees) is at 3 o'clock, following a counter-clockwise direction.
                 - **Objects on the Map**: Represented by colored rectangles with ID labels at the top left.
                 - **Map Origin**: Located at the top left corner (0,0), with coordinates expressed in pixel measurements.
 
             3. **Finding position steps**:
-            - Look at map for any elements around robot that matches the robot class (user might ask to find a tree, look for any trees around the robot labeled as tree_001, tree_002)
-            - Now considering the list of trees, from the found ids (tree_001, tree_002, ...), determine which object is the most corresponding to the description
+            - Look at map for any elements that match the description (user might ask to find "the blue chair", so look for objects that match this description)
+            - From the found objects, determine which one corresponds most closely to the description
             - Now determine the coordinates you will return in order for the robot to face the given object. Verify the coordinates are free of non-traversable areas.
-            - Ensure the robot’s orientation points directly to the center of the colored rectangle representing the target object.
+            - Ensure the robot's orientation points directly to the center of the colored rectangle representing the target object.
             - Ensure to return the final location as pixel coordinates with orgin at the top left corner of the map.
 
-            4. - **If Attributes Are Provided:**
-            - Use the attributes to identify the specific object.
-            - Proceed with existing validation and response logic.
-            - **If Attributes Are Not Provided:**
-            - Check the number of objects matching the type.
-                - **Single Match:** Return its coordinates.
-                - **Multiple Matches:** Set `"success": "false"` and `"error": "ambiguous"`.
-
-
-            5. **Response Format**:
+            4. **Response Format**:
             - If the object is identified successfully, respond with:
                 {
                 "success": "true",
@@ -219,7 +212,7 @@ private:
                 "message": "Sending robot to <target_id> because <reasoning behind decision> "
                 }
 
-            - If there’s an error, respond with:
+            - If there's an error, respond with:
                 {
                 "success": "false",
                 "coordinates": {"x": null, "y": null},
@@ -228,7 +221,7 @@ private:
                 "message": <error_message>
                 }
                 - **Error Types**:
-                - `"noObjects"`: When the object is not present in the list. Use `"message"` to clarify that the object was not found.
+                - `"noObjects"`: When no object matching the description is found. Use `"message"` to clarify that the object was not found.
                 - `"ambiguous"`: When multiple objects match the description. Use `"message"` to clarify that the description is ambiguous and list the options.
                 - `"skip"`: When the user explicitly requests to skip operation.
 
@@ -328,7 +321,8 @@ public:
         }
     }
 
-    json findCoordinates(const std::string& map_path, const std::string& target_object, const std::string& object_description, const json& robot_position = json()) {
+    // Modified findCoordinates to work with just object description
+    json findCoordinates(const std::string& map_path, const std::string& object_description, const json& robot_position = json()) {
         
         bool success_map_init = false;
         // Declare these variables at the top of the function so they're accessible in all scopes
@@ -439,9 +433,8 @@ public:
                 
                 std::cout << "Debug: Starting LLM coordinate search" << std::endl;
                 ////// GET COORDINATES USING LLM HERE //////
-                // Prepare request message
+                // Prepare request message with just the description
                 json request_msg = {
-                    {"class", target_object},
                     {"description", object_description}
                 };
 
@@ -620,7 +613,6 @@ json findCoordinates(
     const std::string& items_json_path,
     const std::string& map_yaml_path,
     const std::string& output_dir,
-    const std::string& target_object,
     const std::string& object_description,
     const json& robot_position
 ) {
@@ -628,12 +620,11 @@ json findCoordinates(
         // Initialize coordinate finder
         CoordinateFinder finder(items_json_path, output_dir, map_yaml_path);
 
-        // Find coordinates for the target object
+        // Find coordinates for the object using just the description
         return finder.findCoordinates(
-            map_path,          // Map image path
-            target_object,     // Target object class
+            map_path,           // Map image path
             object_description, // Object description
-            robot_position     // Robot position
+            robot_position      // Robot position
         );
     } catch (const std::exception& e) {
         json error_response = {
@@ -649,25 +640,20 @@ json findCoordinates(
 // Main function
 int main(int argc, char** argv) {
     try {
-        // Default target object and description if not provided as arguments
-        std::string target_object = "";
+        // Default object description if not provided as an argument
         std::string object_description = "";
         
-        // Override defaults if arguments are provided
+        // Override default if argument is provided
         if (argc >= 2) {
-            target_object = argv[1];
-        }
-        
-        if (argc >= 3) {
-            object_description = argv[2];
+            object_description = argv[1];
         }
         
         // Initialize robot position for pathfinding (if needed)
         json robot_position = json::object();
         
-        if (argc >= 5) {
-            robot_position["x"] = std::stod(argv[3]);
-            robot_position["y"] = std::stod(argv[4]);
+        if (argc >= 4) {
+            robot_position["x"] = std::stod(argv[2]);
+            robot_position["y"] = std::stod(argv[3]);
         }
         
         // Print startup information
@@ -676,7 +662,6 @@ int main(int argc, char** argv) {
         std::cout << "Map Path: " << MAP_PATH << std::endl;
         std::cout << "Map YAML Path: " << MAP_YAML_PATH << std::endl;
         std::cout << "Items JSON Path: " << ITEMS_JSON_PATH << std::endl;
-        std::cout << "Target Object: " << target_object << std::endl;
         std::cout << "Object Description: " << object_description << std::endl;
         if (!robot_position.empty()) {
             std::cout << "Robot Position: x=" << robot_position["x"] << ", y=" << robot_position["y"] << std::endl;
@@ -697,13 +682,12 @@ int main(int argc, char** argv) {
             // Initialize coordinate finder with hardcoded paths
             CoordinateFinder finder(ITEMS_JSON_PATH, DATA_DIR, MAP_YAML_PATH);
 
-            // Find coordinates for the target object
+            // Find coordinates for the object using just the description
             std::cout << "Debug: Calling findCoordinates..." << std::endl;
             json result = finder.findCoordinates(
-                MAP_PATH,          // Map image path
-                target_object,     // Target object class
+                MAP_PATH,           // Map image path
                 object_description, // Object description
-                robot_position     // Optional robot position
+                robot_position      // Optional robot position
             );
 
             // Print result

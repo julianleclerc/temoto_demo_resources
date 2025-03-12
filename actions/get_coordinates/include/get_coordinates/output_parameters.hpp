@@ -17,14 +17,9 @@ struct orientation_t
   double y;
 };
 
-struct pose_t
+struct output_parameters_t
 {
   position_t position;
   orientation_t orientation;
 };
 
-struct output_parameters_t
-{
-  std::string location;
-  pose_t pose;
-};

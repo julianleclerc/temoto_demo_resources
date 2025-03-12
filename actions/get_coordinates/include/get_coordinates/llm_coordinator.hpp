@@ -43,14 +43,12 @@ private:
     /**
      * Search for coordinates using the LLM
      * 
-     * @param object_class The object class to search for
      * @param object_description The object description
      * @param error_log Any error logs from previous attempts
      * @param object_map The base64-encoded image of the object map
      * @return std::string The JSON response with coordinates
      */
-    std::string LLM_Search(const std::string& object_class, 
-                          const std::string& object_description, 
+    std::string LLM_Search(const std::string& object_description, 
                           const std::string& error_log, 
                           const Json::Value& object_map);
     

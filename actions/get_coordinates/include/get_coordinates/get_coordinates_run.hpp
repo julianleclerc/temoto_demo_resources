@@ -11,7 +11,6 @@ json findCoordinates(
     const std::string& items_json_path,
     const std::string& map_yaml_path,
     const std::string& output_dir,
-    const std::string& target_object,
     const std::string& object_description,
     const json& robot_position = json()
 );

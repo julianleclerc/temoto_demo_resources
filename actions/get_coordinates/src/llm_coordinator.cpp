@@ -26,108 +26,58 @@ void LLMCoordinator::initialize(const Json::Value& data_json,
 std::string LLMCoordinator::getcoord_search(const Json::Value& message, const Json::Value& object_map) {
     std::cout << "[DEBUG LLM] getcoord_search called" << std::endl;
     
-    // Get message attributes
-    std::string object_class = message.get("class", "").asString();
+    // Get message attributes - just use the description field
     std::string object_description = message.get("description", " ").asString();
     std::string error_log = "";
     
-    std::cout << "[DEBUG LLM] Got object_class: " << object_class << std::endl;
     std::cout << "[DEBUG LLM] Got object_description: " << object_description << std::endl;
     
-    // Check if the object class exists in the data
-    Json::Value classes = data.get("classes", Json::Value(Json::arrayValue));
-    bool class_found = false;
+    // Call LLM_Search and find coordinates
+    std::cout << "[DEBUG LLM] Calling LLM_Search to find coordinates" << std::endl;
+    log_info("Requesting coord from AI with description: " + object_description);
+    std::string assistant_reply = LLM_Search(object_description, error_log, object_map);
     
-    std::cout << "[DEBUG LLM] Checking for class in " << classes.size() << " classes" << std::endl;
-    for (const auto& cls : classes) {
-        std::cout << "[DEBUG LLM] Checking class: " << cls.asString() << std::endl;
-        if (cls.asString() == object_class) {
-            class_found = true;
-            std::cout << "[DEBUG LLM] Class found!" << std::endl;
-            break;
-        }
-    }
-    
-    if (class_found) {
-        std::cout << "[DEBUG LLM] Class found in data" << std::endl;
-        Json::Value items = data.get("items", Json::Value(Json::objectValue)).get(object_class, Json::Value(Json::arrayValue));
+    std::cout << "[DEBUG LLM] Got LLM_Search response, length: " << assistant_reply.length() << std::endl;
+    if (assistant_reply.empty()) {
+        std::cout << "[DEBUG LLM] Warning: Empty assistant_reply" << std::endl;
+        Json::Value empty_response;
+        empty_response["success"] = "false";
+        empty_response["error"] = "emptyResponse";
+        empty_response["message"] = "The AI returned an empty response";
         
-        // Bug fix: Changed from items.size() == -1 to items.size() > 0
-        std::cout << "[DEBUG LLM] Items size: " << items.size() << std::endl;
-        if (items.size() == -1) { // ignore
-            std::cout << "[DEBUG LLM] Using existing coordinates from items data" << std::endl;
-            Json::Value item = items[0];
-            Json::Value response;
-            response["success"] = "true";
-            response["coordinates"] = item["coordinates"];
-            response["error"] = "none";
-            
-            std::string assistant_reply = Json::FastWriter().write(response);
-            log_info("Sending response: " + assistant_reply);
-            std::cout << "[DEBUG LLM] Returning existing coordinates response" << std::endl;
-            return assistant_reply;
-        } else {
-            // Call LLM_Search and find coordinates
-            std::cout << "[DEBUG LLM] Calling LLM_Search to find coordinates" << std::endl;
-            log_info("Requesting coord from AI for: " + object_class + ", with attributes: " + object_description);
-            std::string assistant_reply = LLM_Search(object_class, object_description, error_log, object_map);
-            
-            std::cout << "[DEBUG LLM] Got LLM_Search response, length: " << assistant_reply.length() << std::endl;
-            if (assistant_reply.empty()) {
-                std::cout << "[DEBUG LLM] Warning: Empty assistant_reply" << std::endl;
-                Json::Value empty_response;
-                empty_response["success"] = "false";
-                empty_response["error"] = "emptyResponse";
-                empty_response["message"] = "The AI returned an empty response";
-                
-                std::string error_reply = Json::FastWriter().write(empty_response);
-                log_warn("Empty response from AI, returning error: " + error_reply);
-                return error_reply;
-            }
-            
-            Json::Value assistant_reply_json;
-            Json::Reader reader;
-            std::cout << "[DEBUG LLM] Parsing assistant_reply: " << assistant_reply << std::endl;
-            bool parse_success = reader.parse(assistant_reply, assistant_reply_json);
-            
-            if (!parse_success) {
-                std::cout << "[DEBUG LLM] Failed to parse assistant_reply as JSON" << std::endl;
-                // Create a valid JSON response with the raw text
-                Json::Value error_response;
-                error_response["success"] = "false";
-                error_response["error"] = "parseError";
-                error_response["message"] = "Failed to parse AI response";
-                error_response["raw_response"] = assistant_reply;
-                
-                std::string error_reply = Json::FastWriter().write(error_response);
-                log_warn("Parse error, returning: " + error_reply);
-                return error_reply;
-            }
-            
-            log_debug("Sending response: " + assistant_reply);
-            std::cout << "[DEBUG LLM] Returning LLM_Search response" << std::endl;
-            return assistant_reply;
-        }
+        std::string error_reply = Json::FastWriter().write(empty_response);
+        log_warn("Empty response from AI, returning error: " + error_reply);
+        return error_reply;
     }
     
-    // Object class not found
-    std::cout << "[DEBUG LLM] Object class not found" << std::endl;
-    log_info("Object class not found");
-    Json::Value not_found_response;
-    not_found_response["success"] = "false";
-    not_found_response["error"] = "notExisting";
-    not_found_response["message"] = "The specified object class was not found.";
+    Json::Value assistant_reply_json;
+    Json::Reader reader;
+    std::cout << "[DEBUG LLM] Parsing assistant_reply: " << assistant_reply << std::endl;
+    bool parse_success = reader.parse(assistant_reply, assistant_reply_json);
     
-    std::string response = Json::FastWriter().write(not_found_response);
-    std::cout << "[DEBUG LLM] Returning not found response: " << response << std::endl;
-    return response;
+    if (!parse_success) {
+        std::cout << "[DEBUG LLM] Failed to parse assistant_reply as JSON" << std::endl;
+        // Create a valid JSON response with the raw text
+        Json::Value error_response;
+        error_response["success"] = "false";
+        error_response["error"] = "parseError";
+        error_response["message"] = "Failed to parse AI response";
+        error_response["raw_response"] = assistant_reply;
+        
+        std::string error_reply = Json::FastWriter().write(error_response);
+        log_warn("Parse error, returning: " + error_reply);
+        return error_reply;
+    }
+    
+    log_debug("Sending response: " + assistant_reply);
+    std::cout << "[DEBUG LLM] Returning LLM_Search response" << std::endl;
+    return assistant_reply;
 }
 
-std::string LLMCoordinator::LLM_Search(const std::string& object_class, 
-                                      const std::string& object_description, 
+std::string LLMCoordinator::LLM_Search(const std::string& object_description, 
                                       const std::string& error_log, 
                                       const Json::Value& object_map) {
-    std::cout << "[DEBUG LLM] LLM_Search called for: " << object_class << ", " << object_description << std::endl;
+    std::cout << "[DEBUG LLM] LLM_Search called for description: " << object_description << std::endl;
         
     // Initialize messages with system instructions
     Json::Value messages(Json::arrayValue);
@@ -183,15 +133,14 @@ std::string LLMCoordinator::LLM_Search(const std::string& object_class,
     mapMsg["content"] = mapContent;
     messages.append(mapMsg);
 
-    // Add the object and description
+    // Add the object description
     Json::Value objectMsg;
     objectMsg["role"] = "user";
 
     Json::Value objectContent(Json::arrayValue);
     Json::Value objectTextContent;
     objectTextContent["type"] = "text";
-    objectTextContent["text"] = "Return the coordinates for: " + object_class + 
-        ", with attributes: " + object_description;
+    objectTextContent["text"] = "Return the coordinates for object with description: " + object_description;
     objectContent.append(objectTextContent);
 
     objectMsg["content"] = objectContent;

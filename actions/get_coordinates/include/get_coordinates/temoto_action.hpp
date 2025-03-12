@@ -7,6 +7,9 @@
 #include "get_coordinates/input_parameters.hpp"
 #include "get_coordinates/output_parameters.hpp"
 
+#include <boost/config.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/dll/alias.hpp>
 
 /**
  * @brief Class that integrates TeMoto Base Subsystem specific and Action Engine specific codebases.
@@ -29,13 +32,12 @@ public:
     return getUmrfNodeConst().getFullName();
   }
 
-  virtual void updateParameters(const ActionParameters& parameters_in) /// How do i update output parameters??
+  virtual void updateParameters(const ActionParameters& parameters_in)
   {
   }
-  
 
   input_parameters_t params_in;
-  ouput_parameters_t params_out;
+  output_parameters_t params_out;
 
 private:
 
@@ -48,13 +50,13 @@ private:
 
   void setOutputParameters()
   {
-    const auto& params{getUmrfNodeConst().setOutputParameters()}; // what is the correct function, .setOutputParameters() correct?
+    auto& params{getUmrfNode().getOutputParametersNc()};
 
-    params_out.pose.position.x = params.getParameterData<double>("pose::position::x");
-    params_out.pose.position.y = params.getParameterData<double>("pose::position::y");
-    params_out.pose.position.z = params.getParameterData<double>("pose::position::z");
-    params_out.pose.orientation.r = params.getParameterData<double>("pose::orientation::r");
-    params_out.pose.orientation.p = params.getParameterData<double>("pose::orientation::p");
-    params_out.pose.orientation.y = params.getParameterData<double>("pose::orientation::y");
+    params.setParameter("position::x", "number", boost::any(params_out.position.x));
+    params.setParameter("position::y", "number", boost::any(params_out.position.y));
+    params.setParameter("position::z", "number", boost::any(params_out.position.z));
+    params.setParameter("orientation::r", "number", boost::any(params_out.orientation.r));
+    params.setParameter("orientation::p", "number", boost::any(params_out.orientation.p));
+    params.setParameter("orientation::y", "number", boost::any(params_out.orientation.y));
   }
 };
