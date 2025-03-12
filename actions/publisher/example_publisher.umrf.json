@@ -1,0 +1,14 @@
+{
+  "name": "Publisher",
+  "type": "sync",
+  "input_parameters": {
+    "topic": {"pvf_type": "string"},
+    "robot_name": {"pvf_type": "string"},
+    "reference_frame": {"pvf_type": "string"},
+    "naviation_pose_2d": {
+      "x": {"pvf_type": "number"},
+      "y": {"pvf_type": "number"},
+      "yaw": {"pvf_type": "number"}      
+    }
+  }
+}

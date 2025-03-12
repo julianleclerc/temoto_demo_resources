@@ -1,0 +1,37 @@
+{
+    "graph_name": "example_publisher",
+    "graph_description": "publisher",
+    "graph_entry": [
+      {
+        "name": "Publisher",
+        "instance_id": 0
+      }
+    ],
+    "graph_exit": [
+      {
+        "name": "Publisher",
+        "instance_id": 0
+      }
+    ],
+    "actions": [
+      {
+        "name": "Publisher",
+        "instance_id": 0,
+        "type": "sync",
+        "input_parameters": {
+          "topic": {"pvf_type": "string", "pvf_value": "cmd_vel"},
+          "robot_name": {"pvf_type": "string", "pvf_value": "spot"},
+          "reference_frame": {"pvf_type": "string", "pvf_value": "base_link"},
+          "naviation_pose_2d": {            
+            "x": {"pvf_type": "number", "pvf_value": 1.0},
+            "y": {"pvf_type": "number", "pvf_value": 2.0},
+            "yaw": {"pvf_type": "number", "pvf_value": 3.0}            
+          }
+        },
+        "gui_attributes": {
+          "position": { "x": 0, "y": 0 }
+        }
+      }      
+    ]
+  }
+  

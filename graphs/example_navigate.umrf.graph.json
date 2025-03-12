@@ -1,0 +1,43 @@
+{
+  "graph_name": "example_navigate_to_pose",
+  "graph_description": "Navigation action",
+  "graph_entry": [
+    {
+      "name": "NavigateToPose",
+      "instance_id": 0
+    }
+  ],
+  "graph_exit": [
+    {
+      "name": "NavigateToPose",
+      "instance_id": 0
+    }
+  ],
+  "actions": [
+    {
+      "name": "NavigateToPose",
+      "instance_id": 0,
+      "type": "sync",
+      "input_parameters": {
+        "robot_name": {"pvf_type": "string"},
+        "location": {"pvf_type": "string", "pvf_value": "workshop"},
+        "pose": {
+          "frame_id": {"pvf_type": "string", "pvf_value": "map"},
+          "position": {
+            "x": {"pvf_type": "number", "pvf_value": 1.11},
+            "y": {"pvf_type": "number", "pvf_value": 2.2},
+            "z": {"pvf_type": "number", "pvf_value": 3.3}
+          },
+          "orientation": {
+            "r": {"pvf_type": "number", "pvf_value": 0.0},
+            "p": {"pvf_type": "number", "pvf_value": 0.0},
+            "y": {"pvf_type": "number", "pvf_value": 0.123}
+          }
+        }
+      },
+      "gui_attributes": {
+        "position": { "x": 0, "y": 0 }
+      }
+    }    
+  ]
+}
