@@ -100,24 +100,24 @@ bool onRun()
           double angle = result["angle"].get<double>();
           
           // Update the pose in params_out
-          params_out.position.x = x;
-          params_out.position.y = y;
-          params_out.position.z = 0.0;
+          params_out.pose.position.x = x;
+          params_out.pose.position.y = y;
+          params_out.pose.position.z = 0.0;
           
           // Set orientation (yaw)
-          params_out.orientation.r = 0.0;
-          params_out.orientation.p = 0.0;
-          params_out.orientation.y = angle;
+          params_out.pose.orientation.r = 0.0;
+          params_out.pose.orientation.p = 0.0;
+          params_out.pose.orientation.y = angle;
           
           TEMOTO_PRINT_OF(fmt::format("Target coordinates: x={}, y={}, angle={}", x, y, angle), getName());
         } else {
           // No angle provided, set default orientation
-          params_out.position.x = x;
-          params_out.position.y = y;
-          params_out.position.z = 0.0;
-          params_out.orientation.r = 0.0;
-          params_out.orientation.p = 0.0;
-          params_out.orientation.y = 0.0;
+          params_out.pose.position.x = x;
+          params_out.pose.position.y = y;
+          params_out.pose.position.z = 0.0;
+          params_out.pose.orientation.r = 0.0;
+          params_out.pose.orientation.p = 0.0;
+          params_out.pose.orientation.y = 0.0;
           
           TEMOTO_PRINT_OF(fmt::format("Target coordinates: x={}, y={} (no angle provided)", x, y), getName());
         }

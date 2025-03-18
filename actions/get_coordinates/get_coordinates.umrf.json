@@ -5,15 +5,17 @@
     "location": {"pvf_type": "string"}
   },
   "output_parameters": {
-    "position": {
-      "x": {"pvf_type": "number"},
-      "y": {"pvf_type": "number"},
-      "z": {"pvf_type": "number"}
-    },
-    "orientation": {
-      "r": {"pvf_type": "number"},
-      "p": {"pvf_type": "number"},
-      "y": {"pvf_type": "number"}
+    "pose": {
+      "position": {
+        "x": {"pvf_type": "number"},
+        "y": {"pvf_type": "number"},
+        "z": {"pvf_type": "number"}
+      },
+      "orientation": {
+        "r": {"pvf_type": "number"},
+        "p": {"pvf_type": "number"},
+        "y": {"pvf_type": "number"}
+      }
     }
   }
 }

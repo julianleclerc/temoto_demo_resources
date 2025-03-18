@@ -17,9 +17,14 @@ struct orientation_t
   double y;
 };
 
-struct output_parameters_t
+struct pose_t
 {
   position_t position;
   orientation_t orientation;
+};
+
+struct output_parameters_t
+{
+  pose_t pose;
 };
 

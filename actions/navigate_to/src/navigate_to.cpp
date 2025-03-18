@@ -3,10 +3,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include <nav2_msgs/action/navigate_to_pose.hpp>
-#include <functional>  // For std::bind
-#include <future>      // For std::shared_future
+#include <functional> 
+#include <future>
 
-// Add this line to use the placeholders
 using namespace std::placeholders;  // For _1, _2, etc.
 
 #include <fmt/core.h>
@@ -37,7 +36,7 @@ bool onRun()
   TEMOTO_PRINT_OF("Running", getName());
 
   // Check if node and action client are initialized
-  if (!node_ || !navigation_action_client_)
+  if (!node_ || !navigation_action_client_ || !init_success_)
   {
     RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Node or action client not properly initialized");
     return false;
@@ -55,25 +54,13 @@ bool onRun()
   navigation_goal.pose.pose.position.y = params_in.pose.position.y;
   navigation_goal.pose.pose.position.z = params_in.pose.position.z;
   
-  // Set the orientation - this is important for navigation
+  // Set the orientation
   navigation_goal.pose.pose.orientation.x = 0.0;
   navigation_goal.pose.pose.orientation.y = 0.0;
   navigation_goal.pose.pose.orientation.z = 0.0;
-  navigation_goal.pose.pose.orientation.w = 1.0;  // Default to no rotation
-  
-  // If orientation is provided in params_in, use it instead
-  // Assuming your structure has orientation fields
-  if (params_in.pose.orientation.r != 0.0 || 
-      params_in.pose.orientation.p != 0.0 || 
-      params_in.pose.orientation.y != 0.0)
-  {
-    // Convert your orientation to quaternion if needed
-    // This is a simple example - you might need proper euler to quaternion conversion
-    navigation_goal.pose.pose.orientation.w = params_in.pose.orientation.r;
-    navigation_goal.pose.pose.orientation.x = params_in.pose.orientation.p;
-    navigation_goal.pose.pose.orientation.y = params_in.pose.orientation.y;
-  }
+  navigation_goal.pose.pose.orientation.w = 1.0;  // no rotation
 
+  // Log the goal
   RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), 
               "Sending navigation goal: Position(x=%f, y=%f, z=%f), Orientation(x=%f, y=%f, z=%f, w=%f)",
               navigation_goal.pose.pose.position.x,
@@ -98,8 +85,7 @@ bool onRun()
   auto future_goal_handle = navigation_action_client_->async_send_goal(navigation_goal, send_goal_options);
   navigation_goal_sent_ = true;
 
-  // If we see the robot is moving, we can assume the goal is accepted even if we don't get
-  // the explicit callback confirmation
+  // For now, if we see the robot is moving, we can assume the goal is accepted even if we don't get (might want to change this down the line)
   RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Assuming navigation goal is accepted since the robot is moving");
   navigation_goal_accepted_ = true;
   
@@ -113,7 +99,6 @@ bool onRun()
   RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Waiting for navigation to complete...");
   
   // This loop will block until navigation completes or fails
-  // We'll also use a timeout as a fallback mechanism 
   auto navigation_start_time = node_->now();
   auto last_print = navigation_start_time;
   const double max_navigation_time = 300.0; // 5 minutes max timeout
@@ -123,7 +108,7 @@ bool onRun()
     rclcpp::spin_some(node_);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     
-    // Print a dot every second to show we're still waiting
+    // Print a dot every second to show we're still waiting so that it looks cool
     auto current_time = node_->now();
     if ((current_time - last_print).seconds() >= 1.0)
     {
@@ -138,7 +123,7 @@ bool onRun()
       }
     }
     
-    // Safety timeout in case we never get the completion callback
+    // Timeout in case we never get the completion callback
     if ((node_->now() - navigation_start_time).seconds() > max_navigation_time) {
       RCLCPP_WARN(rclcpp::get_logger("navigate_to_pose"), 
                  "Navigation timeout after %f seconds. Assuming success since robot is moving.",
@@ -180,6 +165,9 @@ void onInit()
 {
   TEMOTO_PRINT_OF("Initializing", getName());
 
+  // Initialize the node and action client
+  init_success_ = true;
+
   // Create a rclcpp::Node object
   node_ = std::make_shared<rclcpp::Node>("navigate_to_pose_node");
 
@@ -196,6 +184,7 @@ void onInit()
   {
     RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), 
                 "Navigation action server not available after 5 seconds");
+    init_success_ = false;        
   }
   else
   {
@@ -291,10 +280,7 @@ void result_callback(const GoalHandle::WrappedResult & result)
       navigation_success_ = false;
       break;
   }
-  
-  // Note: Don't call rclcpp::shutdown() here as it would shut down the ROS system
-  // We want to let onRun() handle the return flow
-}
+  }
 
 private:
   // Node and action client
@@ -309,6 +295,7 @@ private:
   bool navigation_goal_accepted_;
   bool navigation_complete_;
   bool navigation_success_;
+  bool init_success_;
 
 }; // NavigateTo class
 
