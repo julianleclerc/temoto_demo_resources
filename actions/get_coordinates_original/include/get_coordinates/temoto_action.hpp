@@ -1,8 +1,8 @@
 #pragma once
 
 #include "temoto_action_engine/action_base.h"
-#include "temoto_action_engine/util/error.hpp"
-#include "temoto_action_engine/util/logging.hpp"
+#include "temoto_action_engine/temoto_error.h"
+#include "temoto_action_engine/messaging.h"
 
 #include "get_coordinates/input_parameters.hpp"
 #include "get_coordinates/output_parameters.hpp"
