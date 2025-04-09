@@ -24,8 +24,8 @@
           "reference_frame": {"pvf_type": "string", "pvf_value": "base_link"},
           "naviation_pose_2d": {            
             "x": {"pvf_type": "number", "pvf_value": 1.0},
-            "y": {"pvf_type": "number", "pvf_value": 2.0},
-            "yaw": {"pvf_type": "number", "pvf_value": 3.0}            
+            "y": {"pvf_type": "number", "pvf_value": 0.0},
+            "yaw": {"pvf_type": "number", "pvf_value": 0.0}
           }
         },
         "gui_attributes": {

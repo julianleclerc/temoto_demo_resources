@@ -1,0 +1,24 @@
+{
+  "name": "MoveHandToPose",
+  "type": "sync",
+  "input_parameters": {
+    "robot_name": {"pvf_type": "string"},
+    "planning_group": {"pvf_type": "string"},    
+    "target_link": {"pvf_type": "string"},
+    "pose": {
+      "frame_id": {"pvf_type": "string"},
+      "position": {
+        "x": {"pvf_type": "number"},
+        "y": {"pvf_type": "number"},
+        "z": {"pvf_type": "number"}
+      },
+      "orientation": {
+        "x": {"pvf_type": "number"},
+        "y": {"pvf_type": "number"},
+        "z": {"pvf_type": "number"},
+        "w": {"pvf_type": "number"}
+      }
+    },
+    "max_planning_time": {"pvf_type": "number"}
+  }
+}

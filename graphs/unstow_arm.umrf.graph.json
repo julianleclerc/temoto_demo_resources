@@ -1,0 +1,32 @@
+{
+    "graph_name": "unstow_arm",
+    "graph_description": "unstow_arm",
+    "graph_entry": [
+      {
+        "name": "TriggerService",
+        "instance_id": 0
+      }
+    ],
+    "graph_exit": [
+      {
+        "name": "TriggerService",
+        "instance_id": 0
+      }
+    ],
+    "actions": [
+      {
+        "name": "TriggerService",
+        "instance_id": 0,
+        "type": "sync",
+        "input_parameters": {
+          "service_name": {"pvf_type": "string", "pvf_value": "/spot_manipulation_driver/unstow_arm"}          
+        },
+        "gui_attributes": {
+          "position": { "x": 0, "y": 0 }
+        }
+      }      
+    ]
+  }
+  
+
+ 

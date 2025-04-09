@@ -1,21 +1,21 @@
 {
-  "graph_name": "example_navigate_to_pose",
-  "graph_description": "Navigation action",
+  "graph_name": "example_trigger_service",
+  "graph_description": "Call a ros service",
   "graph_entry": [
     {
-      "name": "NavigateToPose",
+      "name": "TriggerService",
       "instance_id": 0
     }
   ],
   "graph_exit": [
     {
-      "name": "NavigateToPose",
+      "name": "TriggerService",
       "instance_id": 0
     }
   ],
   "actions": [
     {
-      "name": "NavigateToPose",
+      "name": "TriggerService",
       "instance_id": 0,
       "type": "sync",
       "input_parameters": {

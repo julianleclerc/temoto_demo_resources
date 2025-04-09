@@ -1,0 +1,8 @@
+{
+  "name": "TakePhoto",
+  "type": "sync",
+  "input_parameters": {
+    "topic": {"pvf_type": "string"},
+    "output_dir": {"pvf_type": "string"}
+  }
+}

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>navigate_to_pose</name>
+  <name>take_photo</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="fabianparra@utexas.edu">nrg-fabian</maintainer>
@@ -13,11 +13,7 @@
   <test_depend>ament_lint_common</test_depend>
 
   <depend>rclcpp</depend>
-  <depend>rclcpp_action</depend>
-  <depend>geometry_msgs</depend>
-  <depend>nav2_msgs</depend>
-  <depend>tf2</depend>
-  <depend>temoto_action_engine_ros2</depend>
+  <depend>sensor_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

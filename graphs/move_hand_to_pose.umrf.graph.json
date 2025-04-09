@@ -1,0 +1,54 @@
+{
+  "graph_name": "move_hand_to_pose",
+  "graph_description": "Plan and execute trajectories",
+  "graph_entry": [
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 0
+    }
+  ],
+  "graph_exit": [
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 0
+    }
+  ],
+  "actions": [
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 0,
+      "type": "sync",
+      "input_parameters": {
+        "robot_name": {"pvf_type": "string", "pvf_value": "spot"},
+        "planning_group": {"pvf_type": "string", "pvf_value": "arm"},
+        "target_link": {"pvf_type": "string", "pvf_value": "arm0_hand"},
+        "pose": {
+          "frame_id": {"pvf_type": "string", "pvf_value": "arm0_base_link"},
+          "position": {
+            "x": {"pvf_type": "number", "pvf_value": 0.766},
+            "y": {"pvf_type": "number", "pvf_value": -0.013},
+            "z": {"pvf_type": "number", "pvf_value": 0.082}
+          },
+          "orientation": {
+            "x": {"pvf_type": "number", "pvf_value": 0.0},
+            "y": {"pvf_type": "number", "pvf_value": 0.0},
+            "z": {"pvf_type": "number", "pvf_value": 0.0},
+            "w": {"pvf_type": "number", "pvf_value": 1.0}
+          }
+        },
+        "max_planning_time": {"pvf_type": "number", "pvf_value": 5.0}
+      },
+      "gui_attributes": {
+        "position": { "x": 0, "y": 0 }
+      }
+    }    
+  ]
+}
+
+
+
+
+
+
+
+

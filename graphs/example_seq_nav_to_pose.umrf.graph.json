@@ -1,0 +1,106 @@
+{
+    "graph_name": "example_seq_nav",
+    "graph_description": "Three navigation actions invoked in a sequence",
+    "graph_entry": [
+      {
+        "name": "NavigateToPose",
+        "instance_id": 0
+      }
+    ],
+    "graph_exit": [
+      {
+        "name": "NavigateToPose",
+        "instance_id": 2
+      }
+    ],
+    "actions": [
+      {
+        "name": "NavigateToPose",
+        "instance_id": 0,
+        "type": "sync",
+        "input_parameters": {
+            "robot_name": {"pvf_type": "string", "pvf_value": "spot_nav"},
+            "pose": {
+            "frame_id": {"pvf_type": "string", "pvf_value": "spot_nav/map"},
+            "position": {
+                "x": {"pvf_type": "number", "pvf_value": 2.33},
+                "y": {"pvf_type": "number", "pvf_value": 7.56},
+                "z": {"pvf_type": "number", "pvf_value": 0.0}
+            },
+            "orientation": {
+                "r": {"pvf_type": "number", "pvf_value": 0.0},
+                "p": {"pvf_type": "number", "pvf_value": 0.0},
+                "y": {"pvf_type": "number", "pvf_value": -1.57}
+            }
+            }
+        },
+        "children": [
+          {
+            "name": "NavigateToPose",
+            "instance_id": 1
+          }
+        ]
+      },
+      {
+        "name": "NavigateToPose",
+        "instance_id": 1,
+        "type": "sync",
+        "input_parameters": {
+            "robot_name": {"pvf_type": "string", "pvf_value": "spot_nav"},
+            "pose": {
+            "frame_id": {"pvf_type": "string", "pvf_value": "spot_nav/map"},
+            "position": {
+                "x": {"pvf_type": "number", "pvf_value": 2.69},
+                "y": {"pvf_type": "number", "pvf_value": 9.44},
+                "z": {"pvf_type": "number", "pvf_value": 0.0}
+            },
+            "orientation": {
+                "r": {"pvf_type": "number", "pvf_value": 0.0},
+                "p": {"pvf_type": "number", "pvf_value": 0.0},
+                "y": {"pvf_type": "number", "pvf_value": 1.27}
+            }
+            }
+        },
+        "parents": [
+          {
+            "name": "NavigateToPose",
+            "instance_id": 0
+          }
+        ],
+        "children": [
+          {
+            "name": "NavigateToPose",
+            "instance_id": 2
+          }
+        ]
+      },
+      {
+        "name": "NavigateToPose",
+        "instance_id": 2,
+        "type": "sync",
+        "input_parameters": {
+            "robot_name": {"pvf_type": "string", "pvf_value": "spot_nav"},
+            "pose": {
+            "frame_id": {"pvf_type": "string", "pvf_value": "spot_nav/map"},
+            "position": {
+                "x": {"pvf_type": "number", "pvf_value": 5.53},
+                "y": {"pvf_type": "number", "pvf_value": 8.3},
+                "z": {"pvf_type": "number", "pvf_value": 0.0}
+            },
+            "orientation": {
+                "r": {"pvf_type": "number", "pvf_value": 0.0},
+                "p": {"pvf_type": "number", "pvf_value": 0.0},
+                "y": {"pvf_type": "number", "pvf_value": 0.0}
+            }
+            }
+        },
+        "parents": [
+          {
+            "name": "NavigateToPose",
+            "instance_id": 1
+          }
+        ]
+      }
+    ]
+  }
+  

@@ -1,0 +1,7 @@
+{
+  "name": "TriggerService",
+  "type": "sync",
+  "input_parameters": {
+    "service_name": {"pvf_type": "string"}    
+  }
+}

@@ -1,20 +1,16 @@
-cmake_minimum_required(VERSION 3.8)
-project(navigate_to_pose)
+cmake_minimum_required(VERSION 3.5)
+project(take_photo)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+add_compile_options(-std=c++20)
 
-# Find dependencies
+# find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
 find_package(temoto_action_engine REQUIRED)
 find_package(temoto_action_engine_ros2 REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav2_msgs REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(class_loader REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
 
 add_library(${PROJECT_NAME} SHARED src/${PROJECT_NAME}.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -24,16 +20,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} temoto_action_engine)
 
-# Link libraries
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp  
-  rclcpp_action
-  geometry_msgs
-  nav2_msgs
-  tf2
-  temoto_action_engine
+  cv_bridge
   temoto_action_engine_ros2
-  class_loader
+  sensor_msgs
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)

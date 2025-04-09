@@ -12,9 +12,10 @@ struct position_t
 
 struct orientation_t
 {
-  double r;
-  double p;
+  double x;
   double y;
+  double z;
+  double w;
 };
 
 struct pose_t
@@ -27,6 +28,9 @@ struct pose_t
 struct input_parameters_t
 {
   std::string robot_name;
+  std::string planning_group;
+  std::string target_link;
   pose_t pose;
+  double max_planning_time;
 };
 

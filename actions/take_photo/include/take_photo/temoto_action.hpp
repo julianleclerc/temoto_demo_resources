@@ -4,7 +4,7 @@
 #include "temoto_action_engine/temoto_error.h"
 #include "temoto_action_engine/messaging.h"
 
-#include "navigate_to_pose/input_parameters.hpp"
+#include "take_photo/input_parameters.hpp"
 
 #include <boost/config.hpp>
 #include <boost/shared_ptr.hpp>
@@ -43,14 +43,8 @@ private:
   {
     const auto& params{getUmrfNodeConst().getInputParameters()};
 
-    params_in.robot_name = params.getParameterData<std::string>("robot_name");
-    params_in.pose.frame_id = params.getParameterData<std::string>("pose::frame_id");
-    params_in.pose.position.x = params.getParameterData<double>("pose::position::x");
-    params_in.pose.position.y = params.getParameterData<double>("pose::position::y");
-    params_in.pose.position.z = params.getParameterData<double>("pose::position::z");
-    params_in.pose.orientation.r = params.getParameterData<double>("pose::orientation::r");
-    params_in.pose.orientation.p = params.getParameterData<double>("pose::orientation::p");
-    params_in.pose.orientation.y = params.getParameterData<double>("pose::orientation::y");
+    params_in.topic = params.getParameterData<std::string>("topic");
+    params_in.output_dir = params.getParameterData<std::string>("output_dir");
   }
 
   void setOutputParameters()

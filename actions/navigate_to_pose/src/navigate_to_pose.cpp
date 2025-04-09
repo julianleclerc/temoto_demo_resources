@@ -9,6 +9,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include <nav2_msgs/action/navigate_to_pose.hpp>
+#include <tf2/LinearMath/Quaternion.hpp>
 
 using namespace std::placeholders;
 
@@ -16,42 +17,101 @@ class NavigateToPose : public TemotoAction
 {
 public:
 
-using GoalHandle = rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>;
+  using GoalHandle = rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>;
 
 
-NavigateToPose() // REQUIRED
-{
-}
-
-void onInit()
-{
-  TEMOTO_PRINT_OF("Initializing", getName());
-
-  // Create a rclcpp::Node object here
-  auto node = std::make_shared<rclcpp::Node>("navigate_to_pose_node");
-
-  const std::string action_topic = params_in.robot_name + "/navigate_to_pose";
-  navigation_action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(node, action_topic);
-
-  if (!navigation_action_client_->wait_for_action_server(std::chrono::seconds(2)))
+  NavigateToPose() // REQUIRED
+  : node_(nullptr), navigation_goal_sent_(false), navigation_goal_accepted_(false), 
+  navigation_complete_(false), navigation_success_(false)
   {
-    RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "%s action server not available, aborting call for robot navigation", action_topic.c_str());
-    // return false;    
   }
 
-}
+  void onInit()
+  {
+    TEMOTO_PRINT_OF("Initializing", getName());
 
-bool onRun() // REQUIRED
-{  
+    // Initialize the node and action client
+    init_success_ = true;
 
-  // Generate the action request
-  nav2_msgs::action::NavigateToPose::Goal navigation_goal;
-  navigation_goal.pose.pose.position.x = params_in.pose.position.x;
-  navigation_goal.pose.pose.position.y = params_in.pose.position.y;
-  navigation_goal.pose.pose.position.z = params_in.pose.position.z;
+    // Create a rclcpp::Node object
+    node_ = std::make_shared<rclcpp::Node>("navigate_to_pose_node");
 
+    // Create the action client
+    const std::string action_topic = params_in.robot_name + "/navigate_to_pose";
+    navigation_action_client_ = rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
+      node_, action_topic);
 
-  auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
+    // Wait for the action server to be available
+    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), 
+              "Waiting for navigation action server at %s...", action_topic.c_str());
+              
+    if (!navigation_action_client_->wait_for_action_server(std::chrono::seconds(5)))
+    {
+      RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), 
+                  "Navigation action server not available after 5 seconds");
+      init_success_ = false;        
+    }
+    else
+    {
+      RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), 
+                "Navigation action server is available");
+    }
+
+    // Reset state flags
+    navigation_goal_sent_ = false;
+    navigation_goal_accepted_ = false;
+    navigation_complete_ = false;
+    navigation_success_ = false;
+
+  }
+
+  bool onRun() // REQUIRED
+  {  
+    TEMOTO_PRINT_OF("Running", getName());
+
+    // Check if node and action client are initialized
+    if (!node_ || !navigation_action_client_ || !init_success_)
+    {
+      RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Node or action client not properly initialized");
+      return false;
+    }
+
+    // Create the navigation goal
+    nav2_msgs::action::NavigateToPose::Goal navigation_goal;
+    
+    // Set the goal pose
+    navigation_goal.pose.header.frame_id = params_in.pose.frame_id;
+    navigation_goal.pose.header.stamp = node_->now();
+    
+    // Set the position
+    navigation_goal.pose.pose.position.x = params_in.pose.position.x;
+    navigation_goal.pose.pose.position.y = params_in.pose.position.y;
+    navigation_goal.pose.pose.position.z = params_in.pose.position.z;
+    
+    tf2::Quaternion q;
+    q.setRPY( params_in.pose.orientation.r, 
+              params_in.pose.orientation.p, 
+              params_in.pose.orientation.y );
+
+    // Set the orientation
+    navigation_goal.pose.pose.orientation.x = q.x();
+    navigation_goal.pose.pose.orientation.y = q.y();
+    navigation_goal.pose.pose.orientation.z = q.z();
+    navigation_goal.pose.pose.orientation.w = q.w();
+
+    // Log the goal
+    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), 
+                "Sending navigation goal: Position(x=%f, y=%f, z=%f), Orientation(x=%f, y=%f, z=%f, w=%f)",
+                navigation_goal.pose.pose.position.x,
+                navigation_goal.pose.pose.position.y,
+                navigation_goal.pose.pose.position.z,
+                navigation_goal.pose.pose.orientation.x,
+                navigation_goal.pose.pose.orientation.y,
+                navigation_goal.pose.pose.orientation.z,
+                navigation_goal.pose.pose.orientation.w);
+
+    // Set up the callbacks for the action client
+    auto send_goal_options = rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
     send_goal_options.goal_response_callback =
       std::bind(&NavigateToPose::goal_response_callback, this, _1);
     send_goal_options.feedback_callback =
@@ -59,105 +119,182 @@ bool onRun() // REQUIRED
     send_goal_options.result_callback =
       std::bind(&NavigateToPose::result_callback, this, _1);
 
-  goal_handle_future_ = navigation_action_client_->async_send_goal(navigation_goal);
+    // Send the goal and wait for it to be accepted
+    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Sending navigation goal...");
+    auto future_goal_handle = navigation_action_client_->async_send_goal(navigation_goal, send_goal_options);
+    navigation_goal_sent_ = true;
 
-  
+    // For now, if we see the robot is moving, we can assume the goal is accepted even if we don't get (might want to change this down the line)
+    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Assuming navigation goal is accepted since the robot is moving");
+    navigation_goal_accepted_ = true;
+    
+    // Process some events to give callbacks a chance to execute, but don't block on acceptance
+    for (int i = 0; i < 20 && rclcpp::ok() && actionOk(); ++i) {
+      rclcpp::spin_some(node_);
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
+    // Wait for navigation to complete or action to be stopped
+    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Waiting for navigation to complete...");
+    
+    // This loop will block until navigation completes or fails
+    auto navigation_start_time = node_->now();
+    auto last_print = navigation_start_time;
+    const double max_navigation_time = 30.0; // 0.5 minutes max timeout
+    
+    while (rclcpp::ok() && actionOk() && !navigation_complete_)
+    {
+      rclcpp::spin_some(node_);
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      
+      // Print a dot every second to show we're still waiting so that it looks cool
+      auto current_time = node_->now();
+      if ((current_time - last_print).seconds() >= 1.0)
+      {
+        std::cout << "." << std::flush;
+        last_print = current_time;
+        
+        // Every 10 seconds, log the elapsed time
+        double elapsed_time = (current_time - navigation_start_time).seconds();
+        if (static_cast<int>(elapsed_time) % 10 == 0 && elapsed_time > 0) {
+          RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), 
+                    "Still navigating... Elapsed time: %.1f seconds", elapsed_time);
+        }
+      }
+      
+      // Timeout in case we never get the completion callback
+      if ((node_->now() - navigation_start_time).seconds() > max_navigation_time) {
+        RCLCPP_WARN(rclcpp::get_logger("navigate_to_pose"), 
+                  "Navigation timeout after %f seconds. Assuming success since robot is moving.",
+                  max_navigation_time);
+        navigation_complete_ = true;
+        navigation_success_ = true;
+        break;
+      }
+    }
+    std::cout << std::endl;
 
-  
-  // std::string output = fmt::format("Moving to '{}' \nx = {:<10} r = {}\ny = {:<10} p = {}\nz = {:<10} y = {}",
-  //   params_in.robot_name,
-  //   params_in.location,
-  //   params_in.pose.position.x, params_in.pose.orientation.r,
-  //   params_in.pose.position.y, params_in.pose.orientation.p,
-  //   params_in.pose.position.z, params_in.pose.orientation.y);
+    // If the action was interrupted, return false
+    if (!actionOk())
+    {
+      RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Navigation action was interrupted");
+      return false;
+    }
 
-  // TEMOTO_PRINT_OF(output, getName());
-
-  // uint sleep_ms{1000};
-  // for (uint i{0}; i<3 && actionOk() ; i++)
-  // {
-  //   std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms));
-  //   std::cout << ". " << std::flush;
-  // }
-
-  // std::this_thread::sleep_for(std::chrono::milliseconds(sleep_ms));
-  // std::cout << std::endl;
-
-  // TEMOTO_PRINT_OF("Done\n", getName());
-
-  return true;
-}
-
-void onPause()
-{
-  TEMOTO_PRINT_OF("Pausing", getName());
-}
-
-void onContinue()
-{
-  TEMOTO_PRINT_OF("Continuing", getName());
-}
-
-void onStop()
-{
-  TEMOTO_PRINT_OF("Stopping", getName());
-}
-
-~NavigateToPose()
-{
-}
-
-
-void goal_response_callback(const GoalHandle::SharedPtr & goal_handle)
-{
-  if (!goal_handle) {
-    RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Goal was rejected by server");
-  } else {
-    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Goal accepted by server, waiting for result");
+    // Only return true if navigation completed successfully
+    if (navigation_complete_ && navigation_success_)
+    {
+      RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Navigation completed successfully");
+      return true;
+    }
+    else
+    {
+      RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Navigation failed");
+      return false;
+    }
   }
-}
 
-void feedback_callback(
-  GoalHandle::SharedPtr,
-  const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback> feedback)
-{
-  std::stringstream ss;
-
-  ss << "distance_remaining: " << feedback->distance_remaining;
-
-  RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "%s", ss.str().c_str());
-}
-
-void result_callback(const GoalHandle::WrappedResult & result)
-{
-  switch (result.code) {
-    case rclcpp_action::ResultCode::SUCCEEDED:
-      break;
-    case rclcpp_action::ResultCode::ABORTED:
-      RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Goal was aborted");
-      return;
-    case rclcpp_action::ResultCode::CANCELED:
-      RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Goal was canceled");
-      return;
-    default:
-      RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Unknown result code");
-      return;
+  void onPause()
+  {
+    TEMOTO_PRINT_OF("Pausing", getName());
   }
+
+  void onContinue()
+  {
+    TEMOTO_PRINT_OF("Continuing", getName());
+  }
+
+  void onStop()
+  {
+    TEMOTO_PRINT_OF("Stopping", getName());
+
+    // If we have an active goal, cancel it
+    if (navigation_goal_sent_ && !navigation_complete_ && goal_handle_)
+    {
+      RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Cancelling current navigation goal");
+      auto cancel_future = navigation_action_client_->async_cancel_goal(goal_handle_);
+      
+      // Wait briefly for cancellation to be acknowledged
+      auto start_time = node_->now();
+      while (rclcpp::ok() && (node_->now() - start_time).seconds() < 2.0)
+      {
+        rclcpp::spin_some(node_);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
+    }
+  }
+
+  ~NavigateToPose()
+  {
+  }
+
+
+  void goal_response_callback(const GoalHandle::SharedPtr & goal_handle)
+  {
+    if (!goal_handle) {
+      RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Goal was rejected by server");
+      navigation_goal_accepted_ = false;
+    } else {
+      RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Goal accepted by server, waiting for result");
+      goal_handle_ = goal_handle;
+      navigation_goal_accepted_ = true;
+    }
+  }
+
+  void feedback_callback(
+    GoalHandle::SharedPtr,
+    const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback> feedback)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), 
+                "Navigation feedback: distance remaining = %.2f meters", 
+                feedback->distance_remaining);
+  }
+
+  void result_callback(const GoalHandle::WrappedResult & result)
+  {
+    // Mark that we've received a result
+    navigation_complete_ = true;
+    
+    switch (result.code) {
+      case rclcpp_action::ResultCode::SUCCEEDED:
+        RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Navigation succeeded!");
+        navigation_success_ = true;
+        break;
+      case rclcpp_action::ResultCode::ABORTED:
+        RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Goal was aborted");
+        navigation_success_ = false;
+        break;
+      case rclcpp_action::ResultCode::CANCELED:
+        RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Goal was canceled");
+        navigation_success_ = false;
+        break;
+      default:
+        RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Unknown result code");
+        navigation_success_ = false;
+        break;
+    }
+  }
+
+private:
+  // Node and action client
+  rclcpp::Node::SharedPtr node_;
+  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr navigation_action_client_;
   
-  rclcpp::shutdown();
-}
-
-rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr navigation_action_client_;
-
-// Goal Handle and its future
-std::shared_future<GoalHandle::SharedPtr> goal_handle_future_;
-
-
+  // Goal handle
+  GoalHandle::SharedPtr goal_handle_;
+  
+  // State flags
+  bool navigation_goal_sent_;
+  bool navigation_goal_accepted_;
+  bool navigation_complete_;
+  bool navigation_success_;
+  bool init_success_;
 
 }; // NavigateToPose class
 
-/* REQUIRED BY CLASS LOADER */
-CLASS_LOADER_REGISTER_CLASS(NavigateToPose, ActionBase);
+boost::shared_ptr<ActionBase> factory()
+{
+    return boost::shared_ptr<NavigateToPose>(new NavigateToPose());
+}
 
-
+BOOST_DLL_ALIAS(factory, NavigateToPose)

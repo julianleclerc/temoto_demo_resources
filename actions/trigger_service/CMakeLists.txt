@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(navigate_to_pose)
+project(trigger_service)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -11,9 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(temoto_action_engine REQUIRED)
 find_package(temoto_action_engine_ros2 REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav2_msgs REQUIRED)
-find_package(tf2 REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(class_loader REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED src/${PROJECT_NAME}.cpp)
@@ -27,10 +25,7 @@ target_link_libraries(${PROJECT_NAME} temoto_action_engine)
 # Link libraries
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp  
-  rclcpp_action
-  geometry_msgs
-  nav2_msgs
-  tf2
+  std_srvs
   temoto_action_engine
   temoto_action_engine_ros2
   class_loader
