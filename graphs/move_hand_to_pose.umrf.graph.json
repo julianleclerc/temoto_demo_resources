@@ -25,9 +25,9 @@
         "pose": {
           "frame_id": {"pvf_type": "string", "pvf_value": "arm0_base_link"},
           "position": {
-            "x": {"pvf_type": "number", "pvf_value": 0.766},
-            "y": {"pvf_type": "number", "pvf_value": -0.013},
-            "z": {"pvf_type": "number", "pvf_value": 0.082}
+            "x": {"pvf_type": "number", "pvf_value": 0.760},
+            "y": {"pvf_type": "number", "pvf_value": 0.01},
+            "z": {"pvf_type": "number", "pvf_value": 0.420}
           },
           "orientation": {
             "x": {"pvf_type": "number", "pvf_value": 0.0},

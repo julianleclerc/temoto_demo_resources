@@ -20,18 +20,17 @@
       "type": "sync",
       "input_parameters": {
         "robot_name": {"pvf_type": "string", "pvf_value": "spot_nav"},
-        "location": {"pvf_type": "string", "pvf_value": "workshop"},
         "pose": {
-          "frame_id": {"pvf_type": "string", "pvf_value": "base_link"},
+          "frame_id": {"pvf_type": "string", "pvf_value": "spot_nav/map"},
           "position": {
-            "x": {"pvf_type": "number", "pvf_value": 1.0},
-            "y": {"pvf_type": "number", "pvf_value": 0.0},
+            "x": {"pvf_type": "number", "pvf_value": 4.599},
+            "y": {"pvf_type": "number", "pvf_value": 8.838},
             "z": {"pvf_type": "number", "pvf_value": 0.0}
           },
           "orientation": {
             "r": {"pvf_type": "number", "pvf_value": 0.0},
             "p": {"pvf_type": "number", "pvf_value": 0.0},
-            "y": {"pvf_type": "number", "pvf_value": 0.0}
+            "y": {"pvf_type": "number", "pvf_value": 1.57}
           }
         }
       },

@@ -1,0 +1,118 @@
+{
+  "graph_name": "manip_seq",
+  "graph_description": "Three manipulation actions invoked in a sequence",
+  "graph_entry": [
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 0
+    }
+  ],
+  "graph_exit": [
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 2
+    }
+  ],
+  "actions": [
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 0,
+      "type": "sync",
+      "input_parameters": {
+        "robot_name": {"pvf_type": "string", "pvf_value": "spot"},
+        "planning_group": {"pvf_type": "string", "pvf_value": "arm"},
+        "target_link": {"pvf_type": "string", "pvf_value": "arm0_hand"},
+        "pose": {
+          "frame_id": {"pvf_type": "string", "pvf_value": "arm0_base_link"},
+          "position": {
+            "x": {"pvf_type": "number", "pvf_value": 0.780},
+            "y": {"pvf_type": "number", "pvf_value": -0.203},
+            "z": {"pvf_type": "number", "pvf_value": 0.15}
+          },
+          "orientation": {
+            "x": {"pvf_type": "number", "pvf_value": 0.0},
+            "y": {"pvf_type": "number", "pvf_value": 0.0},
+            "z": {"pvf_type": "number", "pvf_value": 0.0},
+            "w": {"pvf_type": "number", "pvf_value": 1.0}
+          }
+        },
+        "max_planning_time": {"pvf_type": "number", "pvf_value": 5.0}
+      },
+      "children": [
+        {
+          "name": "MoveHandToPose",
+          "instance_id": 1
+        }
+      ]
+    },
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 1,
+      "type": "sync",
+      "input_parameters": {
+        "robot_name": {"pvf_type": "string", "pvf_value": "spot"},
+        "planning_group": {"pvf_type": "string", "pvf_value": "arm"},
+        "target_link": {"pvf_type": "string", "pvf_value": "arm0_hand"},
+        "pose": {
+          "frame_id": {"pvf_type": "string", "pvf_value": "arm0_base_link"},
+          "position": {
+            "x": {"pvf_type": "number", "pvf_value": 0.760},
+            "y": {"pvf_type": "number", "pvf_value": 0.01},
+            "z": {"pvf_type": "number", "pvf_value": 0.420}
+          },
+          "orientation": {
+            "x": {"pvf_type": "number", "pvf_value": 0.0},
+            "y": {"pvf_type": "number", "pvf_value": 0.0},
+            "z": {"pvf_type": "number", "pvf_value": 0.0},
+            "w": {"pvf_type": "number", "pvf_value": 1.0}
+          }
+        },
+        "max_planning_time": {"pvf_type": "number", "pvf_value": 5.0}
+      },
+      "parents": [
+        {
+          "name": "MoveHandToPose",
+          "instance_id": 0
+        }
+      ],
+      "children": [
+        {
+          "name": "MoveHandToPose",
+          "instance_id": 2
+        }
+      ]
+    },
+    {
+      "name": "MoveHandToPose",
+      "instance_id": 2,
+      "type": "sync",
+      "input_parameters": {
+        "robot_name": {"pvf_type": "string", "pvf_value": "spot"},
+        "planning_group": {"pvf_type": "string", "pvf_value": "arm"},
+        "target_link": {"pvf_type": "string", "pvf_value": "arm0_hand"},
+        "pose": {
+          "frame_id": {"pvf_type": "string", "pvf_value": "arm0_base_link"},
+          "position": {
+            "x": {"pvf_type": "number", "pvf_value": 0.780},
+            "y": {"pvf_type": "number", "pvf_value": 0.203},
+            "z": {"pvf_type": "number", "pvf_value": 0.15}
+          },
+          "orientation": {
+            "x": {"pvf_type": "number", "pvf_value": 0.0},
+            "y": {"pvf_type": "number", "pvf_value": 0.0},
+            "z": {"pvf_type": "number", "pvf_value": 0.0},
+            "w": {"pvf_type": "number", "pvf_value": 1.0}
+          }
+        },
+        "max_planning_time": {"pvf_type": "number", "pvf_value": 5.0}
+      },
+      "parents": [
+        {
+          "name": "MoveHandToPose",
+          "instance_id": 1
+        }
+      ]
+    }
+  ]
+}
+  
