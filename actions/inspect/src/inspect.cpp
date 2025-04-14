@@ -1,5 +1,22 @@
 #include "inspect/temoto_action.hpp"
 
+#include <fmt/core.h>
+#include <chrono>
+#include <thread>
+
+
+#include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/image.hpp"
+#include "std_msgs/msg/string.hpp"
+#include <cv_bridge/cv_bridge.h>
+
+#include <opencv2/opencv.hpp>
+#include <memory>
+#include <nlohmann/json.hpp>
+#include "inspect/ai_core.hpp"
+
+using json = nlohmann::json;
+
 class Inspect : public TemotoAction
 {
 public:
@@ -10,7 +27,7 @@ public:
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-Inspect()
+Inspect() : image_received_(false)
 {
 }
 
@@ -25,6 +42,152 @@ bool onRun()
    * Set output parameters via "params_out" member
    */
 
+  std::string output = fmt::format("Performing inspection for: {}\n", params_in.inspect);
+  TEMOTO_PRINT_OF(output, getName());
+
+  // Define I/O
+  node_ = std::make_shared<rclcpp::Node>("inspection");
+  image_subscription_ = node_->create_subscription<sensor_msgs::msg::Image>(
+      "/cam_feed", 10, std::bind(&Inspect::image_callback, this, std::placeholders::_1));
+
+  inspection_publisher_ = node_->create_publisher<std_msgs::msg::String>(
+    "chat_interface_feedback", 10);
+  RCLCPP_INFO(node_->get_logger(), "Created publisher on topic: chat_interface_feedback");
+    
+  display_publisher_ = node_->create_publisher<std_msgs::msg::String>(
+    "/display_feed", 10);
+  RCLCPP_INFO(node_->get_logger(), "Created publisher on topic: /display_feed");
+
+  // take picture
+  const double timeout_duration = 5;
+  auto start_time = node_->now();
+  
+  // Store the captured image
+  cv::Mat captured_image;
+
+  // Wait until at least one image is received and processed
+  while (rclcpp::ok() && actionOk() && !image_received_)
+  {
+      if (!actionOk())
+      {
+          RCLCPP_INFO(node_->get_logger(), "Action was interrupted");
+          return false;
+      }
+
+      if ((node_->now() - start_time).seconds() > timeout_duration)
+      {
+          RCLCPP_WARN(node_->get_logger(), "Timeout reached, no image received.");
+          return false;
+      }
+      
+      // Spin to process the incoming message
+      rclcpp::spin_some(node_);
+  }
+
+  // Assuming the callback stored the image in captured_image
+  if (image_received_ && !captured_image_.empty()) {
+    publishImage(captured_image_);
+  } else {
+    RCLCPP_ERROR(node_->get_logger(), "No valid image received for processing");
+    return false;
+  }
+
+  std::string instructions = 
+  "You are an advanced computer vision system designed for image inspection.\n"
+  "You will receive an object or area to inspect along with a picture.\n"
+  "Your task is to analyze the image and provide inspection results.\n"
+  "\n"
+  "IMPORTANT: Your response MUST be a valid JSON string with EXACTLY this format:\n"
+  "{\n"
+  "  \"inspection_message\": \"Your detailed inspection findings here. Be specific about what you observe and any potential issues.\",\n"
+  "  \"requires_attention\": false\n"
+  "}\n"
+  "\n"
+  "- The \"inspection_message\" field should contain your detailed analysis of what you see in the image related to the inspection request.\n"
+  "- The \"requires_attention\" field must be a boolean (true or false, no quotes):\n"
+  "  - Set it to true if you detect any issues that require human intervention (safety concerns, missing components, damage, etc.)\n"
+  "  - Set it to false if everything appears normal and no intervention is needed.\n"
+  "\n"
+  "Do NOT include any text outside the JSON structure. Your entire response must be parseable as valid JSON.\n";
+
+  // Create messages for the AI
+  std::vector<ai_core::Message> messages;
+  // Log errors
+  json temoto_log;
+
+  // System message to define the AI's role
+  messages.push_back({
+      "system", 
+      instructions
+  });
+
+  // User message to define the inspection target
+  std::string user_message = "Can you determine anything suspicious for: " + params_in.inspect + "\n";
+  messages.push_back({
+    "user", 
+    user_message
+  });
+
+  std::string ai_response = ai_core::AIImagePrompt(
+    messages,
+    captured_image_,  // Use the captured image
+    0.7f,    // temperature
+    1024,    // max_tokens
+    0.0f,    // frequency_penalty
+    0.0f     // presence_penalty
+  );
+
+  // Check if there was an error in the JSON response
+  json response_json;
+  try {
+    RCLCPP_INFO(node_->get_logger(), "AI response received (size: %zu bytes). Parsing JSON...", ai_response.size());
+    RCLCPP_INFO(node_->get_logger(), "Response preview: %s", 
+                ai_response.length() > 100 ? (ai_response.substr(0, 97) + "...").c_str() : ai_response.c_str());
+    
+    // Clean the response to extract only valid JSON
+    std::string cleaned_response = cleanLLMJsonResponse(ai_response);
+    if (cleaned_response.empty()) {
+      RCLCPP_ERROR(node_->get_logger(), "Failed to extract valid JSON from LLM response");
+      throw std::runtime_error("Failed to extract valid JSON from LLM response");
+    }
+    
+    response_json = json::parse(cleaned_response);
+    RCLCPP_INFO(node_->get_logger(), "JSON parsed successfully");
+  } catch (const json::exception& e) {
+    RCLCPP_ERROR(node_->get_logger(), "JSON parsing error: %s", e.what());
+    RCLCPP_ERROR(node_->get_logger(), "Raw response: %s", ai_response.c_str());
+    
+    temoto_log["type"] = "error";
+    temoto_log["message"] = "Internal error with llm response inside the inspection action, try again";
+    writeLog(temoto_log.dump());
+    throw std::runtime_error("Internal error with llm response inside the inspection action");
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(node_->get_logger(), "Error processing response: %s", e.what());
+    
+    temoto_log["type"] = "error";
+    temoto_log["message"] = "Internal error with llm response inside the inspection action, try again";
+    writeLog(temoto_log.dump());
+    throw std::runtime_error("Internal error with llm response inside the inspection action");
+  }
+
+  // Check for error indicator -> raise error if yes 
+  if (response_json["requires_attention"].get<bool>()) {
+    publishInspectionResult(response_json["inspection_message"]);
+    
+    std::string error_message = "A concern has been raised in the inspection: " + 
+                                response_json["inspection_message"].get<std::string>() + "\n";
+    
+    temoto_log["type"] = "error";
+    temoto_log["message"] = error_message;
+    writeLog(temoto_log.dump());
+    throw std::runtime_error("Potential issue raised in the inspection");
+  }
+
+  // Publish inspection result
+  publishInspectionResult(response_json["inspection_message"]);
+  params_out.inspection_result = response_json["inspection_message"];
+  std::cout << "Inspection completed successfully" << std::endl;
+
   return true;
 }
 
@@ -37,6 +200,15 @@ bool onRun()
 void onInit()
 {
   TEMOTO_PRINT_OF("Initializing", getName());
+  // Check API key
+  const char* api_key = std::getenv("OPENAI_API_KEY");
+  if (api_key == nullptr || strlen(api_key) == 0) {
+    TEMOTO_PRINT_OF("WARNING: OPENAI_API_KEY environment variable not set or empty!", getName());
+    throw std::runtime_error("API KEY not proprely set, unable to start inspection.");
+
+  } else {
+    TEMOTO_PRINT_OF("API key found (length: " + std::to_string(strlen(api_key)) + " characters)", getName());
+  }
 }
 
 void onPause()
@@ -58,6 +230,144 @@ void onStop()
 {
 }
 
+void publishInspectionResult(const std::string& inspection) {
+  RCLCPP_INFO(node_->get_logger(), "=== PUBLISHING INSPECTION RESULT ===");
+  
+  try {
+    json j;
+    j["targets"] = {"David"};
+    j["type"] = "response";
+    j["message"] = inspection;
+    
+    std::string json_str = j.dump();
+    RCLCPP_INFO(node_->get_logger(), "Created JSON message for chat_interface_feedback: %s", 
+                json_str.length() > 100 ? (json_str.substr(0, 97) + "...").c_str() : json_str.c_str());
+    
+    std_msgs::msg::String msg;
+    msg.data = json_str;
+    
+    RCLCPP_INFO(node_->get_logger(), "Publishing message to chat_interface_feedback (size: %zu bytes)", 
+                msg.data.size());
+    inspection_publisher_->publish(msg);
+    RCLCPP_INFO(node_->get_logger(), "Message published successfully to chat_interface_feedback");
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(node_->get_logger(), "ERROR publishing inspection result: %s", e.what());
+  }
+  
+  RCLCPP_INFO(node_->get_logger(), "=== INSPECTION RESULT PUBLISHED ===");
+}
+
+void publishImage(const cv::Mat& image) {
+  RCLCPP_INFO(node_->get_logger(), "=== PUBLISHING IMAGE TO DISPLAY FEED ===");
+  
+  try {
+    // Encode the image to base64
+    RCLCPP_INFO(node_->get_logger(), "Encoding image to base64 (image size: %dx%d)...", 
+                image.cols, image.rows);
+    std::string encoded_image = encodeImageToBase64(image);
+    RCLCPP_INFO(node_->get_logger(), "Image encoded to base64 (encoded size: %zu bytes)", 
+                encoded_image.size());
+    
+    // Create JSON message
+    RCLCPP_INFO(node_->get_logger(), "Creating JSON message for display_feed...");
+    std::string json_msg = "{\"target\":\"David\",\"name\":\"inspection\",\"image\":\"" 
+                          + encoded_image + "\"}";
+    
+    RCLCPP_INFO(node_->get_logger(), "JSON message created (total size: %zu bytes)", json_msg.size());
+    
+    // Publish the message
+    std_msgs::msg::String msg;
+    msg.data = json_msg;
+    
+    RCLCPP_INFO(node_->get_logger(), "Publishing message to /display_feed...");
+    display_publisher_->publish(msg);
+    RCLCPP_INFO(node_->get_logger(), "Message published successfully to /display_feed");
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(node_->get_logger(), "ERROR publishing image: %s", e.what());
+  }
+  
+  RCLCPP_INFO(node_->get_logger(), "=== IMAGE PUBLISHING COMPLETED ===");
+}
+
+std::string encodeImageToBase64(const cv::Mat& image) {
+  RCLCPP_INFO(node_->get_logger(), "=== ENCODING IMAGE TO BASE64 ===");
+  
+  try {
+    // Use the ai_core implementation for encoding
+    RCLCPP_INFO(node_->get_logger(), "Calling ai_core encoding function...");
+    std::string result = ai_core::encodeImageToBase64(image);
+    RCLCPP_INFO(node_->get_logger(), "Image encoded successfully to base64 (size: %zu bytes)", result.size());
+    
+    // Print the first few characters
+    if (result.size() > 20) {
+      RCLCPP_INFO(node_->get_logger(), "Encoded data begins with: %s...", result.substr(0, 20).c_str());
+    }
+    
+    RCLCPP_INFO(node_->get_logger(), "=== BASE64 ENCODING COMPLETED ===");
+    return result;
+  } catch (const std::exception& e) {
+    RCLCPP_ERROR(node_->get_logger(), "Error encoding image to base64: %s", e.what());
+    RCLCPP_INFO(node_->get_logger(), "=== BASE64 ENCODING FAILED ===");
+    return "";
+  }
+}
+
+void image_callback(const sensor_msgs::msg::Image::SharedPtr msg)
+{
+    if (!image_received_)
+    {
+        try 
+        {            
+            cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+            captured_image_ = cv_ptr->image;
+            image_received_ = true;
+            RCLCPP_INFO(node_->get_logger(), "Image received and processed successfully");
+        } 
+        catch (const cv_bridge::Exception& e) 
+        {
+            RCLCPP_ERROR(node_->get_logger(), "Failed to convert image: %s", e.what());
+        }
+    }
+}
+
+// Helper function to clean JSON responses from LLMs
+std::string cleanLLMJsonResponse(const std::string& raw_response) {
+  RCLCPP_INFO(node_->get_logger(), "Cleaning raw LLM response to extract JSON...");
+  
+  // Find the first opening curly brace
+  size_t start_pos = raw_response.find('{');
+  if (start_pos == std::string::npos) {
+    RCLCPP_ERROR(node_->get_logger(), "No JSON object found in response (no opening brace)");
+    return "";
+  }
+  
+  // Find the last closing curly brace
+  size_t end_pos = raw_response.rfind('}');
+  if (end_pos == std::string::npos) {
+    RCLCPP_ERROR(node_->get_logger(), "No JSON object found in response (no closing brace)");
+    return "";
+  }
+  
+  // Extract just the JSON object
+  if (end_pos <= start_pos) {
+    RCLCPP_ERROR(node_->get_logger(), "Invalid JSON structure (closing brace before opening brace)");
+    return "";
+  }
+  
+  std::string cleaned_json = raw_response.substr(start_pos, end_pos - start_pos + 1);
+  RCLCPP_INFO(node_->get_logger(), "Extracted JSON: %s", 
+              cleaned_json.length() > 100 ? (cleaned_json.substr(0, 97) + "...").c_str() : cleaned_json.c_str());
+  
+  return cleaned_json;
+}
+
+private:
+    std::shared_ptr<rclcpp::Node> node_;
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscription_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr inspection_publisher_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr display_publisher_;
+    bool image_received_;
+    cv::Mat captured_image_;  // Store the captured image
 }; // Inspect class
 
 // REQUIRED, do not remove
