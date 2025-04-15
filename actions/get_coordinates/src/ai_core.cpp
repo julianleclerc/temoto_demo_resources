@@ -1,308 +1,419 @@
 #include "get_coordinates/ai_core.hpp"
+
+#include <cstdlib>
 #include <iostream>
+#include <vector>
 #include <curl/curl.h>
-#include <string>
-#include <memory>
-#include <stdexcept>
-#include <regex>
+#include <opencv2/opencv.hpp>
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
 
-namespace get_coordinates {
+namespace ai_core {
 
-// Callback function for cURL to write response data
+// Callback function for CURL
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* s) {
     size_t newLength = size * nmemb;
     try {
-        s->append((char*)contents, newLength);
+        s->append(static_cast<char*>(contents), newLength);
         return newLength;
     } catch(std::bad_alloc& e) {
-        // Handle memory problem
+        // Handle memory problem    
         return 0;
     }
 }
 
-/**
- * Extracts JSON data from LLM responses that may contain debug information or markdown code blocks
- * 
- * @param raw_response The raw response string containing debug logs and JSON data
- * @return Json::Value containing the parsed JSON data
- */
-Json::Value extract_json_from_llm_response(const std::string& raw_response) {
-    std::cout << "[DEBUG] Extracting JSON from LLM response" << std::endl;
+std::string getApiKey() {
+    std::cout << "AI Core: Getting OpenAI API key from environment..." << std::endl;
     
-    // First try to extract JSON from markdown code blocks
-    std::string json_str = extract_json_string_from_llm_response(raw_response);
-    
-    // Parse the JSON
-    Json::Value json_data;
-    Json::Reader reader;
-    bool parse_success = reader.parse(json_str, json_data);
-    
-    if (!parse_success) {
-        std::cout << "[DEBUG] Failed to parse extracted JSON: " << reader.getFormattedErrorMessages() << std::endl;
-        return Json::Value(Json::objectValue);
+    const char* apiKey = std::getenv("OPENAI_API_KEY");
+    if (!apiKey) {
+        std::cerr << "AI Core: OPENAI_API_KEY environment variable not set!" << std::endl;
+        throw std::runtime_error("OPENAI_API_KEY environment variable not set");
     }
     
-    std::cout << "[DEBUG] Successfully parsed JSON data" << std::endl;
-    return json_data;
+    std::cout << "AI Core: API key retrieved successfully" << std::endl;
+    return std::string(apiKey);
 }
 
-/**
- * Extracts JSON data as a string from LLM responses that may contain debug information or markdown code blocks
- * 
- * @param raw_response The raw response string containing debug logs and JSON data
- * @return std::string containing just the JSON part
- */
-std::string extract_json_string_from_llm_response(const std::string& raw_response) {
-    std::cout << "[DEBUG] Extracting JSON string from LLM response" << std::endl;
+std::string encodeImageToBase64(const cv::Mat& image) {
+    std::cout << "AI Core: Starting image encoding to base64..." << std::endl;
     
-    // Method 1: Try to extract JSON from markdown code blocks (```json ... ```)
-    std::regex json_code_block_regex("```json\\s*\\n(\\{[\\s\\S]*?\\})\\s*\\n```");
-    std::smatch json_code_match;
-    
-    if (std::regex_search(raw_response, json_code_match, json_code_block_regex) && json_code_match.size() > 1) {
-        std::string json_from_code_block = json_code_match[1].str();
-        std::cout << "[DEBUG] Found JSON in code block, length: " << json_from_code_block.length() << std::endl;
-        return json_from_code_block;
-    }
-    
-    // Method 2: If no code block is found, try to find the outermost JSON object
-    std::cout << "[DEBUG] No JSON code block found, looking for outermost JSON object" << std::endl;
-    size_t json_start = raw_response.find('{');
-    size_t json_end = raw_response.rfind('}');
-    
-    if (json_start == std::string::npos || json_end == std::string::npos || json_end <= json_start) {
-        std::cout << "[DEBUG] Failed to locate valid JSON in response" << std::endl;
-        return "{}"; // Return empty JSON object if no valid JSON is found
-    }
-    
-    // Extract the JSON string
-    std::string json_str = raw_response.substr(json_start, json_end - json_start + 1);
-    std::cout << "[DEBUG] Extracted JSON string using fallback method, length: " << json_str.length() << std::endl;
-    
-    return json_str;
-}
-
-AICore::AICore() {
-    std::cout << "[DEBUG AI] AICore constructor called" << std::endl;
-    // Initialize with default values
-    api_endpoint = "https://api.openai.com/v1/chat/completions";
-    
-    // Load API key from file
-    std::ifstream key_file("/home/fyier/CHATGPT_KEY");
-    if (key_file.is_open()) {
-        std::getline(key_file, api_key);
-        key_file.close();
-        
-        // Trim whitespace
-        api_key.erase(0, api_key.find_first_not_of(" \n\r\t"));
-        api_key.erase(api_key.find_last_not_of(" \n\r\t") + 1);
-        
-        std::cout << "[DEBUG AI] API key loaded from file, length: " << api_key.length() << std::endl;
-    } else {
-        std::cout << "[DEBUG AI] Warning: Could not open API key file" << std::endl;
-        api_key = "";
-    }
-    
-    // Check if API key is configured
-    if (api_key.empty()) {
-        std::cout << "[DEBUG AI] Warning: API key is empty" << std::endl;
-    }
-    
-    // Initialize cURL globally - should be called once per application
-    curl_global_init(CURL_GLOBAL_ALL);
-    std::cout << "[DEBUG AI] cURL initialized globally" << std::endl;
-}
-
-AICore::~AICore() {
-    // Clean up cURL global resources
-    curl_global_cleanup();
-    std::cout << "[DEBUG AI] AICore destructor called, cURL cleaned up" << std::endl;
-}
-
-std::string AICore::AI_Image_Prompt(const std::string& messages,
-                                   double temperature,
-                                   int max_tokens,
-                                   double frequency_penalty,
-                                   double presence_penalty) {
-    std::cout << "[DEBUG AI] AI_Image_Prompt called" << std::endl;
-    std::cout << "[DEBUG AI] messages length: " << messages.length() << std::endl;
-    
-    // Create request payload 
-    Json::Value payload;
-    Json::Reader reader;
-    bool parse_success = reader.parse(messages, payload["messages"]);
-    
-    if (!parse_success) {
-        std::cout << "[DEBUG AI] Failed to parse messages JSON" << std::endl;
-        throw std::runtime_error("Failed to parse messages JSON");
-    }
-    std::cout << "[DEBUG AI] Successfully parsed messages JSON" << std::endl;
-    
-    // Set model and parameters
-    payload["model"] = "gpt-4o";
-    payload["temperature"] = temperature;
-    payload["max_tokens"] = max_tokens;
-    payload["frequency_penalty"] = frequency_penalty;
-    payload["presence_penalty"] = presence_penalty;
-    
-    // Convert payload to string
-    Json::FastWriter writer;
-    std::string request_data = writer.write(payload);
-    std::cout << "[DEBUG AI] Request data prepared, length: " << request_data.length() << std::endl;
-    
-    // Check if API key is set
-    if (api_key.empty()) {
-        std::cout << "[DEBUG AI] Error: API key is not set" << std::endl;
-        return createDummyResponse();
-    }
-    
-    // Send the request
-    std::cout << "[DEBUG AI] Sending request to: " << api_endpoint << std::endl;
     try {
-        std::string response = send_request(request_data);
-        std::cout << "[DEBUG AI] Got response from API" << std::endl;
+        // Set JPEG compression parameters for smaller file size
+        std::vector<int> compression_params;
+        compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+        compression_params.push_back(80); // 80% quality - good balance between quality and size
         
-        // Process the response to extract just the JSON part from any code blocks or text
-        return process_llm_response(response);
+        std::vector<uchar> buf;
+        std::cout << "AI Core: Compressing image to JPEG format..." << std::endl;
+        bool success = cv::imencode(".jpg", image, buf, compression_params);
+        
+        if (!success) {
+            std::cerr << "AI Core: Failed to encode image to JPEG format" << std::endl;
+            return "";
+        }
+        
+        std::cout << "AI Core: JPEG compression successful, size: " << buf.size() << " bytes" << std::endl;
+        
+        using namespace boost::archive::iterators;
+        using base64_text = base64_from_binary<transform_width<const char *, 6, 8>>;
+        
+        std::cout << "AI Core: Converting to base64..." << std::endl;
+        std::string base64_image(base64_text((char *)buf.data()), 
+                               base64_text((char *)buf.data() + buf.size()));
+        
+        // Add padding if needed
+        size_t padding = (3 - buf.size() % 3) % 3;
+        for (size_t i = 0; i < padding; i++) {
+            base64_image.push_back('=');
+        }
+        
+        std::cout << "AI Core: Base64 encoding complete, output size: " << base64_image.size() << " bytes" << std::endl;
+        
+        return base64_image;
     } catch (const std::exception& e) {
-        std::cout << "[DEBUG AI] Error in send_request: " << e.what() << std::endl;
-        // Return a dummy response for testing when API is unavailable
-        return createDummyResponse();
+        std::cerr << "AI Core: Exception in base64 encoding: " << e.what() << std::endl;
+        return "";
     }
 }
 
-/**
- * Process LLM response to extract clean JSON data
- * 
- * @param raw_response The raw response string from the LLM
- * @return std::string containing the processed JSON response
- */
-std::string AICore::process_llm_response(const std::string& raw_response) {
-    std::cout << "[DEBUG AI] Processing LLM response, length: " << raw_response.length() << std::endl;
+Message createImageMessage(const std::string& text, const std::string& base64Image) {
+    std::cout << "AI Core: Creating image message with text: " << text << std::endl;
+    std::cout << "AI Core: Base64 image size: " << base64Image.size() << " bytes" << std::endl;
     
-    // Extract JSON from the response that might include debug logs
-    std::string json_str = extract_json_string_from_llm_response(raw_response);
+    // Construct the message as a direct content object that includes both text and image
+    // This is the format expected by the OpenAI Chat API for GPT-4o
+    nlohmann::json content = nlohmann::json::array();
     
-    if (json_str == "{}") {
-        std::cout << "[DEBUG AI] No valid JSON found in response" << std::endl;
-        return createDummyResponse();
-    }
+    // Add the text part
+    content.push_back({
+        {"type", "text"},
+        {"text", text}
+    });
     
-    std::cout << "[DEBUG AI] Extracted JSON: " << json_str << std::endl;
-    return json_str;
+    // Add the image part
+    content.push_back({
+        {"type", "image_url"},
+        {"image_url", {
+            {"url", "data:image/jpeg;base64," + base64Image}
+        }}
+    });
+    
+    std::string content_str = content.dump();
+    std::cout << "AI Core: Created message content JSON (size: " << content_str.size() << " bytes)" << std::endl;
+    
+    return Message{
+        "user",
+        content_str
+    };
 }
 
-/**
- * Get parsed JSON data from LLM response
- * 
- * @param raw_response The raw response string from the LLM
- * @return Json::Value containing the parsed JSON data
- */
-Json::Value AICore::get_json_from_llm_response(const std::string& raw_response) {
-    return extract_json_from_llm_response(raw_response);
-}
-
-std::string AICore::createDummyResponse() {
-    std::cout << "[DEBUG AI] Creating dummy response for testing" << std::endl;
-    Json::Value response;
-    response["success"] = "true";
-    response["coordinates"] = Json::Value(Json::objectValue);
-    response["coordinates"]["x"] = 200;
-    response["coordinates"]["y"] = 150;
-    response["error"] = "none";
-    response["message"] = "This is a dummy response for testing. The API key is not configured.";
+std::string callOpenAIAPI(
+    const std::vector<Message>& messages,
+    float temperature,
+    int max_tokens,
+    float frequency_penalty,
+    float presence_penalty) {
     
-    Json::FastWriter writer;
-    return writer.write(response);
-}
-
-void AICore::initialize_connection() {
-    std::cout << "[DEBUG AI] initialize_connection called" << std::endl;
-    // Placeholder for any connection initialization that needs to be done
-    // For example, setting up connection pools, authentication, etc.
-}
-
-std::string AICore::send_request(const std::string& payload) {
-    std::cout << "[DEBUG AI] send_request called with payload length: " << payload.length() << std::endl;
+    std::cout << "AI Core: Calling OpenAI API..." << std::endl;
+    std::cout << "AI Core: Number of messages: " << messages.size() << std::endl;
+    std::cout << "AI Core: Temperature: " << temperature << ", Max tokens: " << max_tokens << std::endl;
     
-    CURL* curl = curl_easy_init();
-    std::string response_string;
-    
-    if (curl) {
-        struct curl_slist* headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        std::string auth_header = "Authorization: Bearer " + api_key;
-        headers = curl_slist_append(headers, auth_header.c_str());
+    try {
+        std::cout << "AI Core: Getting API key..." << std::endl;
+        std::string apiKey;
+        try {
+            apiKey = getApiKey();
+        } catch (const std::exception& e) {
+            std::cerr << "AI Core: Failed to get API key: " << e.what() << std::endl;
+            nlohmann::json error_json = {
+                {"success", false},
+                {"message", std::string("API key error: ") + e.what()}
+            };
+            return error_json.dump();
+        }
         
-        curl_easy_setopt(curl, CURLOPT_URL, api_endpoint.c_str());
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
+        // Initialize CURL
+        std::cout << "AI Core: Initializing CURL..." << std::endl;
+        CURL* curl = curl_easy_init();
+        std::string response_string;
         
-        // Perform the request
-        std::cout << "[DEBUG AI] Performing cURL request" << std::endl;
-        CURLcode res = curl_easy_perform(curl);
-        
-        // Check for errors
-        if (res != CURLE_OK) {
-            std::cout << "[DEBUG AI] cURL request failed: " << curl_easy_strerror(res) << std::endl;
+        if (curl) {
+            std::cout << "AI Core: CURL initialized successfully" << std::endl;
+            
+            // Set URL
+            std::cout << "AI Core: Setting CURL URL to OpenAI API endpoint..." << std::endl;
+            curl_easy_setopt(curl, CURLOPT_URL, "https://api.openai.com/v1/chat/completions");
+            
+            // Set headers
+            std::cout << "AI Core: Setting CURL headers..." << std::endl;
+            struct curl_slist* headers = NULL;
+            headers = curl_slist_append(headers, "Content-Type: application/json");
+            std::string auth_header = "Authorization: Bearer " + apiKey;
+            headers = curl_slist_append(headers, auth_header.c_str());
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+            
+            // Create request JSON
+            std::cout << "AI Core: Creating request JSON..." << std::endl;
+            nlohmann::json request_json;
+            request_json["model"] = "gpt-4o";
+            request_json["temperature"] = temperature;
+            request_json["max_tokens"] = max_tokens;
+            request_json["top_p"] = 1.0;
+            request_json["frequency_penalty"] = frequency_penalty;
+            request_json["presence_penalty"] = presence_penalty;
+            
+            // Add messages
+            nlohmann::json message_array = nlohmann::json::array();
+            for (const auto& message : messages) {
+                // Handle different message content formats
+                try {
+                    // Check if the content is already JSON
+                    if (message.content.find("[{\"type\":") == 0) {
+                        // Content is already JSON, parse it
+                        nlohmann::json content_json = nlohmann::json::parse(message.content);
+                        message_array.push_back({
+                            {"role", message.role},
+                            {"content", content_json}
+                        });
+                        std::cout << "AI Core: Added message with role: " << message.role 
+                                << ", content as JSON array" << std::endl;
+                    } else {
+                        // Content is plain text
+                        message_array.push_back({
+                            {"role", message.role},
+                            {"content", message.content}
+                        });
+                        std::cout << "AI Core: Added message with role: " << message.role 
+                                << ", content as text, length: " << message.content.size() << " bytes" << std::endl;
+                    }
+                } catch (const std::exception& e) {
+                    // If parsing fails, treat as plain text
+                    message_array.push_back({
+                        {"role", message.role},
+                        {"content", message.content}
+                    });
+                    std::cout << "AI Core: Added message with role: " << message.role 
+                            << ", content as text (parse failed), length: " << message.content.size() << " bytes" << std::endl;
+                }
+            }
+            request_json["messages"] = message_array;
+            
+            // Set request data
+            std::string request_data = request_json.dump();
+            std::cout << "AI Core: Request JSON created, size: " << request_data.size() << " bytes" << std::endl;
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request_data.c_str());
+            
+            // Set response callback
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
+            
+            // Perform request
+            std::cout << "AI Core: Performing CURL request to OpenAI API..." << std::endl;
+            CURLcode res = curl_easy_perform(curl);
+            
+            // Check for errors
+            if (res != CURLE_OK) {
+                std::cerr << "AI Core: CURL error: " << curl_easy_strerror(res) << std::endl;
+                nlohmann::json error_json = {
+                    {"success", false},
+                    {"message", std::string("CURL error: ") + curl_easy_strerror(res)}
+                };
+                
+                // Clean up
+                curl_slist_free_all(headers);
+                curl_easy_cleanup(curl);
+                
+                return error_json.dump();
+            }
+            
+            std::cout << "AI Core: CURL request completed successfully" << std::endl;
+            std::cout << "AI Core: Response size: " << response_string.size() << " bytes" << std::endl;
+            
+            // Clean up
             curl_slist_free_all(headers);
             curl_easy_cleanup(curl);
-            throw std::runtime_error(std::string("cURL request failed: ") + curl_easy_strerror(res));
-        }
-        
-        std::cout << "[DEBUG AI] cURL request successful, response length: " << response_string.length() << std::endl;
-        std::cout << "[DEBUG AI] Full API response: " << response_string << std::endl;
-        
-        // Clean up
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-        
-        // Parse the response to extract just the AI's reply
-        Json::Value response_json;
-        Json::Reader reader;
-        
-        if (reader.parse(response_string, response_json)) {
-            std::cout << "[DEBUG AI] Successfully parsed response as JSON" << std::endl;
-            // For GPT-4 Vision, the content should be in choices[0].message.content
+            
+            // Parse response
             try {
-                if (response_json.isMember("choices") && response_json["choices"].isArray() && 
-                    response_json["choices"].size() > 0 && 
-                    response_json["choices"][0].isMember("message") && 
-                    response_json["choices"][0]["message"].isMember("content")) {
+                std::cout << "AI Core: Parsing JSON response..." << std::endl;
+                nlohmann::json response_json = nlohmann::json::parse(response_string);
+                
+                if (response_json.contains("choices") && !response_json["choices"].empty() &&
+                    response_json["choices"][0].contains("message") &&
+                    response_json["choices"][0]["message"].contains("content")) {
                     
-                    std::string assistant_content = response_json["choices"][0]["message"]["content"].asString();
-                    std::cout << "[DEBUG AI] Extracted assistant content, length: " << assistant_content.length() << std::endl;
-                    
-                    // The key change: Extract any JSON from the assistant_content
-                    // This will handle cases where the assistant includes text and JSON in code blocks
-                    std::string extracted_json = extract_json_string_from_llm_response(assistant_content);
-                    if (extracted_json != "{}") {
-                        std::cout << "[DEBUG AI] Found valid JSON in assistant content" << std::endl;
-                        return extracted_json;
+                    std::string content = response_json["choices"][0]["message"]["content"].get<std::string>();
+                    std::cout << "AI Core: Successfully extracted content from response (length: " 
+                              << content.size() << " bytes)" << std::endl;
+                    return content;
+                } else {
+                    std::cerr << "AI Core: Invalid response format from API" << std::endl;
+                    if (response_string.size() < 1000) {
+                        std::cerr << "AI Core: Response: " << response_string << std::endl;
+                    } else {
+                        std::cerr << "AI Core: Response too large to print" << std::endl;
                     }
                     
-                    // Return the full content if no JSON was found
-                    return assistant_content;
-                } else {
-                    std::cout << "[DEBUG AI] Response JSON doesn't have expected structure" << std::endl;
-                    // Return the full response to let LLM coordinator handle the error
-                    return response_string;
+                    nlohmann::json error_json = {
+                        {"success", false},
+                        {"message", "Invalid response format from API"}
+                    };
+                    return error_json.dump();
                 }
             } catch (const std::exception& e) {
-                std::cerr << "Error parsing API response: " << e.what() << std::endl;
-                std::cout << "[DEBUG AI] Error extracting content: " << e.what() << std::endl;
-                return response_string; // Return full response if we can't parse it
+                std::cerr << "AI Core: Error parsing response: " << e.what() << std::endl;
+                std::cerr << "AI Core: Response preview: " 
+                          << (response_string.size() > 100 ? response_string.substr(0, 100) + "..." : response_string) 
+                          << std::endl;
+                
+                nlohmann::json error_json = {
+                    {"success", false},
+                    {"message", std::string("Error parsing response: ") + e.what()}
+                };
+                return error_json.dump();
             }
         } else {
-            std::cout << "[DEBUG AI] Failed to parse response as JSON" << std::endl;
-            return response_string; // Return raw response if JSON parsing fails
+            std::cerr << "AI Core: Failed to initialize CURL" << std::endl;
+            nlohmann::json error_json = {
+                {"success", false},
+                {"message", "Failed to initialize CURL"}
+            };
+            return error_json.dump();
         }
-    } else {
-        std::cout << "[DEBUG AI] Failed to initialize cURL" << std::endl;
-        throw std::runtime_error("Failed to initialize cURL");
+    } catch (const std::exception& e) {
+        std::cerr << "AI Core: Critical error in API call: " << e.what() << std::endl;
+        nlohmann::json error_json = {
+            {"success", false},
+            {"message", std::string("Error sending data to LLM: ") + e.what()}
+        };
+        return error_json.dump();
     }
 }
 
-} // namespace get_coordinates
+std::string AIImagePrompt(
+    const std::vector<Message>& messages,
+    const cv::Mat& image,
+    float temperature,
+    int max_tokens,
+    float frequency_penalty,
+    float presence_penalty) {
+    
+    std::cout << "AI Core: Starting Image Prompt processing..." << std::endl;
+    std::cout << "AI Core: Original image dimensions: " << image.cols << "x" << image.rows << std::endl;
+    
+    try {
+        // Resize the image to reduce the token count
+        cv::Mat resized_image;
+        int max_dimension = 400; // Limit maximum dimension to 400 pixels
+        
+        double scale = 1.0;
+        if (image.cols > image.rows) {
+            scale = static_cast<double>(max_dimension) / image.cols;
+        } else {
+            scale = static_cast<double>(max_dimension) / image.rows;
+        }
+        
+        if (scale < 1.0) {
+            int new_width = static_cast<int>(image.cols * scale);
+            int new_height = static_cast<int>(image.rows * scale);
+            std::cout << "AI Core: Resizing image to " << new_width << "x" << new_height << " to reduce token count" << std::endl;
+            cv::resize(image, resized_image, cv::Size(new_width, new_height), 0, 0, cv::INTER_AREA);
+        } else {
+            std::cout << "AI Core: Image already small enough, no resizing needed" << std::endl;
+            resized_image = image.clone();
+        }
+        
+        // Use higher JPEG compression to further reduce size
+        std::vector<int> compression_params;
+        compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+        compression_params.push_back(80); // 80% quality
+        
+        // Convert image to base64
+        std::cout << "AI Core: Converting image to base64..." << std::endl;
+        std::string base64Image;
+        
+        // Test compression with different quality settings if needed
+        std::vector<uchar> buf;
+        cv::imencode(".jpg", resized_image, buf, compression_params);
+        
+        if (buf.size() > 50000) { // If still too large, compress more
+            std::cout << "AI Core: Image still large (" << buf.size() << " bytes), increasing compression..." << std::endl;
+            compression_params[1] = 65; // 65% quality
+            cv::imencode(".jpg", resized_image, buf, compression_params);
+        }
+        
+        // Convert to base64
+        using namespace boost::archive::iterators;
+        using base64_text = base64_from_binary<transform_width<const char *, 6, 8>>;
+        
+        std::string base64_image(base64_text((char *)buf.data()), 
+                               base64_text((char *)buf.data() + buf.size()));
+        
+        // Add padding if needed
+        size_t padding = (3 - buf.size() % 3) % 3;
+        for (size_t i = 0; i < padding; i++) {
+            base64_image.push_back('=');
+        }
+        
+        base64Image = base64_image;
+        
+        std::cout << "AI Core: Base64 encoding successful, compressed size: " << base64Image.size() << " bytes" << std::endl;
+        
+        if (base64Image.empty()) {
+            std::cerr << "AI Core: Failed to encode image to base64" << std::endl;
+            nlohmann::json error_json = {
+                {"success", false},
+                {"message", "Failed to encode image to base64"}
+            };
+            return error_json.dump();
+        }
+        
+        // Create modified messages for the API call
+        std::cout << "AI Core: Creating message structure for OpenAI API..." << std::endl;
+        std::vector<Message> api_messages;
+        
+        // Copy system messages as is
+        for (const auto& msg : messages) {
+            if (msg.role == "system") {
+                api_messages.push_back(msg);
+                std::cout << "AI Core: Added system message: " << msg.content << std::endl;
+            }
+        }
+        
+        // Create a user message with the image
+        std::string promptText = "Inspect this image.";
+        if (!messages.empty()) {
+            // Get prompt from the last user message if available
+            for (auto it = messages.rbegin(); it != messages.rend(); ++it) {
+                if (it->role == "user") {
+                    promptText = it->content;
+                    break;
+                }
+            }
+        }
+        
+        // Construct a multipart message with text and image
+        api_messages.push_back(createImageMessage(promptText, base64Image));
+        std::cout << "AI Core: Created user message with image" << std::endl;
+        
+        // Use our helper function to make the API call
+        std::cout << "AI Core: Calling OpenAI API with " << api_messages.size() << " messages" << std::endl;
+        return callOpenAIAPI(
+            api_messages,
+            temperature,
+            max_tokens,
+            frequency_penalty,
+            presence_penalty
+        );
+    } catch (const std::exception& e) {
+        std::cerr << "AI Core: Error in image prompt processing: " << e.what() << std::endl;
+        nlohmann::json error_json = {
+            {"success", false},
+            {"message", std::string("Error sending image to LLM: ") + e.what()}
+        };
+        return error_json.dump();
+    }
+}
+
+}  // namespace ai_core

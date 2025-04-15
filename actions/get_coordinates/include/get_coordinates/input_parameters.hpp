@@ -5,6 +5,6 @@
 
 struct input_parameters_t
 {
-  std::string location;
+  std::string target;
 };
 

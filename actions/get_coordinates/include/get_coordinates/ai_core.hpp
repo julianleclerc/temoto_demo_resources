@@ -1,46 +1,78 @@
-#pragma once
+#ifndef GETCOORDINATES_AI_CORE_HPP
+#define GETCOORDINATES_AI_CORE_HPP
 
 #include <string>
-#include <fstream>
-#include <jsoncpp/json/json.h> // Changed from json/json.h to jsoncpp/json/json.h
+#include <vector>
+#include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
 
-namespace get_coordinates {
+namespace ai_core {
 
-// Function declarations
-Json::Value extract_json_from_llm_response(const std::string& raw_response);
-std::string extract_json_string_from_llm_response(const std::string& raw_response);
-
-class AICore {
-public:
-    AICore();
-    ~AICore();
-    
-    // Main API call method for the LLM (with image)
-    std::string AI_Image_Prompt(const std::string& messages,
-                               double temperature = 1.0,
-                               int max_tokens = 300,
-                               double frequency_penalty = 0.0,
-                               double presence_penalty = 0.0);
-    
-    // Process the LLM response to extract clean JSON data
-    std::string process_llm_response(const std::string& raw_response);
-    
-    // Get parsed JSON data from LLM response
-    Json::Value get_json_from_llm_response(const std::string& raw_response);
-    
-    // Initialize connection to the API
-    void initialize_connection();
-
-private:
-    // API endpoint and key
-    std::string api_endpoint;
-    std::string api_key;
-    
-    // Send the HTTP request to the API
-    std::string send_request(const std::string& payload);
-    
-    // Create a dummy response for testing
-    std::string createDummyResponse();
+/**
+ * @struct Message
+ * @brief Structure to define messages for AI communication
+ */
+struct Message {
+    std::string role;    // Role of the message (e.g., "system", "user", "assistant")
+    std::string content; // Content of the message
 };
 
-} // namespace get_coordinates
+/**
+ * @brief Encodes an OpenCV image to base64 format
+ * @param image The image to encode
+ * @return Base64-encoded string
+ */
+std::string encodeImageToBase64(const cv::Mat& image);
+
+/**
+ * @brief Creates a message with text and image content
+ * @param text Text content of the message
+ * @param base64Image Base64-encoded image data
+ * @return Message structure with combined content
+ */
+Message createImageMessage(const std::string& text, const std::string& base64Image);
+
+/**
+ * @brief Calls the OpenAI API with a list of messages
+ * @param messages Vector of Message structures
+ * @param temperature Controls randomness (0.0-1.0)
+ * @param max_tokens Maximum tokens to generate
+ * @param frequency_penalty Penalizes token frequency (0.0-2.0)
+ * @param presence_penalty Penalizes token presence (0.0-2.0)
+ * @return API response as a string
+ */
+std::string callOpenAIAPI(
+    const std::vector<Message>& messages,
+    float temperature,
+    int max_tokens,
+    float frequency_penalty,
+    float presence_penalty);
+
+/**
+ * @brief Sends an image to the AI for analysis
+ * @param messages Vector of Message structures including prompts
+ * @param image The image to analyze
+ * @param temperature Controls randomness (0.0-1.0)
+ * @param max_tokens Maximum tokens to generate
+ * @param frequency_penalty Penalizes token frequency (0.0-2.0)
+ * @param presence_penalty Penalizes token presence (0.0-2.0)
+ * @return AI analysis result as a string
+ */
+std::string AIImagePrompt(
+    const std::vector<Message>& messages,
+    const cv::Mat& image,
+    float temperature = 0.7f,
+    int max_tokens = 1024,
+    float frequency_penalty = 0.0f,
+    float presence_penalty = 0.0f);
+
+/**
+ * @brief Retrieves the OpenAI API key from environment variables
+ * @return The API key as a string
+ * @throws std::runtime_error if the API key is not set
+ */
+std::string getApiKey();
+
+} // namespace ai_core
+
+#endif // GETCOORDINATES_AI_CORE_HPP

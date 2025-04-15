@@ -19,12 +19,14 @@ struct orientation_t
 
 struct pose_t
 {
+  std::string frame_id;
   position_t position;
   orientation_t orientation;
 };
 
-struct output_parameters_t
+struct input_parameters_t
 {
+  std::string location;
   pose_t pose;
 };
 

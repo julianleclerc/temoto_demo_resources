@@ -182,9 +182,14 @@ void onInit()
              
   if (!navigation_action_client_->wait_for_action_server(std::chrono::seconds(5)))
   {
-    RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), 
-                "Navigation action server not available after 5 seconds");
-    init_success_ = false;        
+    init_success_ = false; 
+
+    nlohmann::json errorObj;
+    errorObj["type"] = "error";
+    errorObj["message"] = "Nav2 subsribtion now working, failed navigation";
+    writeLog(errorObj.dump());
+    
+    throw std::runtime_error("Navigation action server not available after 5 seconds");        
   }
   else
   {

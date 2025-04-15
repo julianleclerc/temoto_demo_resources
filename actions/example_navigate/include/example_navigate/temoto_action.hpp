@@ -4,8 +4,7 @@
 #include "temoto_action_engine/util/error.hpp"
 #include "temoto_action_engine/util/logging.hpp"
 
-#include "get_coordinates/input_parameters.hpp"
-#include "get_coordinates/output_parameters.hpp"
+#include "example_navigate/input_parameters.hpp"
 
 #include <boost/config.hpp>
 #include <boost/shared_ptr.hpp>
@@ -37,7 +36,6 @@ public:
   }
 
   input_parameters_t params_in;
-  output_parameters_t params_out;
 
 private:
 
@@ -45,13 +43,17 @@ private:
   {
     const auto& params{getUmrfNodeConst().getInputParameters()};
 
-    params_in.target = params.getParameterData<std::string>("target");
+    params_in.location = params.getParameterData<std::string>("location");
+    params_in.pose.frame_id = params.getParameterData<std::string>("pose::frame_id");
+    params_in.pose.position.x = params.getParameterData<double>("pose::position::x");
+    params_in.pose.position.y = params.getParameterData<double>("pose::position::y");
+    params_in.pose.position.z = params.getParameterData<double>("pose::position::z");
+    params_in.pose.orientation.r = params.getParameterData<double>("pose::orientation::r");
+    params_in.pose.orientation.p = params.getParameterData<double>("pose::orientation::p");
+    params_in.pose.orientation.y = params.getParameterData<double>("pose::orientation::y");
   }
 
   void setOutputParameters()
   {
-    auto& params{getUmrfNode().getOutputParametersNc()};
-
-    params.setParameter("inspection_result", "string", boost::any(params_out.inspection_result));
   }
 };
