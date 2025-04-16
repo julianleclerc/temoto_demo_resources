@@ -115,6 +115,78 @@ IMPORTANT: Double-check your coordinates are valid (within map bounds and on whi
     )";
 }
 
+std::string createPolarInstructions() {
+    return R"(
+You are an assistant responsible for identifying a target and returning the polar coordinates to which a robot must navigate to in relation to the target. You will:
+1. Analyze a map image showing objects and robot position
+2. Identify the specific target object based on user description
+3. Return appropriate angle (from the target's center outward) at which the robot should approach
+4. Return appropriate distance to which the robot should approach the target
+
+## Map Interpretation:
+- **White areas**: Traversable spaces where the robot can move
+- **Black areas**: Obstacles that cannot be passed (both solid black and gray areas should be treated as non-traversable)
+- **Blue circle**: Robot's current position
+- **Colored rectangles**: Objects with ID labels (e.g., plant_001, chair_002)
+- **Red grid lines**: Reference grid (coordinates can be on these lines)
+
+## Finding the Right Target:
+1. IMPORTANT: Pay close attention to the exact target description provided by the user
+2. If multiple objects match the basic type (e.g., "chair"), use additional context clues like:
+   - Location qualifiers ("chair in the corner", "plant near the window")
+   - ID numbers if specified ("chair_002")
+   - Proximity to other objects ("chair next to the table")
+3. If the target specification is ambiguous, choose the most prominent or central matching object
+4. Always specify the target_id precisely as shown on the map label
+
+## Finding the Right Angle:
+1. Angle must be in degrees from 0 to 359 (or equivalently -180 to 180)
+2. The angle is measured from the center of the target outward
+3. 0 degrees points to the right (east) of the target
+4. 90 degrees points upward (north) from the target
+5. 180 degrees points to the left (west) of the target
+6. 270 degrees points downward (south) from the target
+7. CRITICAL: Analyze the surrounding obstacles and space constraints
+8. Choose an angle that:
+   - Leads to a completely white traversable area (avoid gray/black areas)
+   - Provides the clearest approach path without obstacles
+   - Considers the current robot position for optimal approach
+   - Ensures sufficient space for the robot to maneuver
+
+## Finding the Right Distance:
+1. Distance is a percentage from 0 to 100 
+2. 0% means very close to the target's edge (for interaction)
+3. 50% means a moderate distance from the target
+4. 100% means a far distance from the target
+5. Choose a distance that:
+   - Keeps the robot entirely in white space
+   - Provides enough room for the robot to maneuver
+   - Is appropriate for the target type and intended interaction
+
+## Response Format:
+{
+ "success": "true",
+ "target_id": "<target_id>",
+ "polar_coordinates": {"angle": <angle>, "distance": <distance>},
+ "error": "none",
+ "message": "Heading to <target> because <detailed reasoning>"
+}
+
+## Error Conditions:
+If you can't find a valid target or navigation point:
+{
+ "success": "false",
+ "target_id": "none",
+ "polar_coordinates": {"angle": "none", "distance": "none"},
+ "error": "<error_type>",
+ "message": "<descriptive error message>"
+}
+
+DOUBLE-CHECK your target identification before responding. Make sure the target_id matches exactly what's on the map.
+    )";
+}
+
+
 std::string cleanLLMJsonResponse(const std::string& raw_response) {
     std::cout << "LLM Solver: Cleaning raw LLM response to extract JSON..." << std::endl;
     
@@ -267,7 +339,7 @@ nlohmann::json getCoordinateOneShot(
         std::string ai_response = ai_core::AIImagePrompt(
             messages,
             map_image,  // Use the image directly
-            0.7f,       // temperature
+            0.3f,       // temperature
             1024,       // max_tokens
             0.0f,       // frequency_penalty
             0.0f        // presence_penalty
@@ -321,6 +393,97 @@ nlohmann::json getCoordinateOneShot(
         return error_json;
     }
 }
+
+nlohmann::json getCoordinatePolar(
+    const cv::Mat& map_image,
+    const std::string& target_name) {
+    
+    std::cout << "LLM Solver: Starting polar coordinate search for target: " << target_name << std::endl;
+    
+    try {
+        // Prepare the system instructions
+        std::string system_instructions = createPolarInstructions();
+        
+        // Create messages for the AI
+        std::vector<ai_core::Message> messages;
+        
+        // System message to define the AI's role
+        ai_core::Message system_message;
+        system_message.role = "system";
+        system_message.content = system_instructions;
+        messages.push_back(system_message);
+        
+        // Create the user prompt with the target information
+        std::string user_message = "Desired Target: " + target_name;
+        
+        // Create user message object
+        ai_core::Message user_msg;
+        user_msg.role = "user";
+        user_msg.content = user_message;
+        messages.push_back(user_msg);
+        
+        std::cout << "LLM Solver: Calling OpenAI API with map image for one-shot search..." << std::endl;
+        std::cout << "LLM Solver: Map image dimensions: " << map_image.cols << "x" << map_image.rows << std::endl;
+        
+        // Call AI with image prompt using the ai_core implementation
+        std::string ai_response = ai_core::AIImagePrompt(
+            messages,
+            map_image,  // Use the image directly
+            0.2f,       // temperature
+            1024,       // max_tokens
+            0.0f,       // frequency_penalty
+            0.0f        // presence_penalty
+        );
+        
+        // Clean the response to extract valid JSON
+        std::string cleaned_response = cleanLLMJsonResponse(ai_response);
+        if (cleaned_response.empty()) {
+            std::cerr << "LLM Solver: Failed to extract valid JSON from LLM response" << std::endl;
+            
+            // Return error response for processing failure
+            json error_json = {
+                {"success", "false"},
+                {"polar_coordinates", {{"x", "none"}, {"y", "none"}}},
+                {"target_id", "none"},
+                {"error", "systemError"},
+                {"message", "Failed to extract valid JSON from LLM response"}
+            };
+            return error_json;
+        }
+        
+        // Parse the cleaned response
+        try {
+            json response_json = json::parse(cleaned_response);
+            std::cout << "LLM Solver: Successfully parsed JSON response for polar search" << std::endl;
+            return response_json;
+        } catch (const json::exception& e) {
+            std::cerr << "LLM Solver: JSON parsing error: " << e.what() << std::endl;
+            
+            // Return error response for JSON parsing failure
+            json error_json = {
+                {"success", "false"},
+                {"polar_coordinates", {{"x", "none"}, {"y", "none"}}},
+                {"target_id", "none"},
+                {"error", "systemError"},
+                {"message", "Failed to parse LLM response: " + std::string(e.what())}
+            };
+            return error_json;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "LLM Solver: Critical error in getCoordinatePolar: " << e.what() << std::endl;
+        
+        // Return error response for any critical failure
+        json error_json = {
+            {"success", "false"},
+            {"polar_coordinates", {{"x", "none"}, {"y", "none"}}},
+            {"target_id", "none"},
+            {"error", "systemError"},
+            {"message", "Critical error in polar coordinate search: " + std::string(e.what())}
+        };
+        return error_json;
+    }
+}
+
 
 nlohmann::json getCoordinateFallback(
     const cv::Mat& map_image,

@@ -1,3 +1,4 @@
+// Modified map_builder.cpp to support new items.json format
 #include "get_coordinates/map_builder.hpp"
 
 #include <iostream>
@@ -10,11 +11,6 @@
 const cv::Scalar COLOR_OBSTACLE(0, 0, 0);       // Black for obstacles
 const cv::Scalar COLOR_FREE(255, 255, 255);     // White for free space
 const cv::Scalar COLOR_ROBOT(0, 0, 255);        // Blue for robot
-const cv::Scalar COLOR_PLANT(0, 255, 0);        // Green for plants
-const cv::Scalar COLOR_CHAIR(255, 165, 0);      // Orange for chairs
-const cv::Scalar COLOR_TABLE(165, 42, 42);      // Brown for tables
-const cv::Scalar COLOR_FRIDGE(173, 216, 230);   // Light blue for fridges
-const cv::Scalar COLOR_UNKNOWN(128, 128, 128);  // Gray for unknown objects
 const cv::Scalar COLOR_GRID(0, 0, 255);         // Red for grid lines
 
 cv::Mat MapBuilder::BuildMap(
@@ -215,7 +211,7 @@ cv::Mat MapBuilder::generateCostMap(const cv::Mat& map_img, const json& params)
     
     // Create binary map - assuming 0 (black) for obstacles, 255 (white) for free space
     cv::Mat binary_map;
-    cv::threshold(map_img, binary_map, 128, 255, cv::THRESH_BINARY);
+    cv::threshold(map_img, binary_map, 0, 255, cv::THRESH_BINARY);
     
     // Initialize the cost map (white background)
     cv::Mat cost_map = cv::Mat::ones(map_img.size(), CV_8UC1) * 255;
@@ -242,8 +238,8 @@ cv::Mat MapBuilder::generateCostMap(const cv::Mat& map_img, const json& params)
     cv::Mat inflation_mask;
     cv::bitwise_and(inflation_zone, inflation_zone_limit, inflation_mask);
     
-    // Assign gray (70) to the inflation zone in the cost map
-    cost_map.setTo(cv::Scalar(70), inflation_mask);
+    // Assign BLACK (0) to the inflation zone in the cost map instead of gray (70)
+    cost_map.setTo(cv::Scalar(0), inflation_mask);
     
     // Assign black (0) to obstacle cells
     cost_map.setTo(cv::Scalar(0), obstacles);
@@ -390,16 +386,6 @@ cv::Mat MapBuilder::drawObjectsOnMap(const cv::Mat& map, const json& items_data,
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> color_dist(50, 200);  // Range 50-200 for R,G,B values
     
-    // Check if items_data has the expected structure
-    if (!items_data.contains("items")) {
-        std::cerr << "Error: items_data does not contain 'items' key" << std::endl;
-        return result;
-    }
-    
-    // Get the items data
-    const json& items = items_data["items"];
-    std::cout << "Found " << items.size() << " object classes" << std::endl;
-    
     // Create a rectangle representing the full image
     cv::Rect image_rect(0, 0, result.cols, result.rows);
     
@@ -411,143 +397,128 @@ cv::Mat MapBuilder::drawObjectsOnMap(const cv::Mat& map, const json& items_data,
         cv::Point position;
         std::string text;
         cv::Scalar color;
-        double font_scale;
-        int thickness;
     };
     std::vector<LabelInfo> labels;
     
     // FIRST PASS: Draw all bounding boxes
-    for (auto& [item_class, items_list] : items.items()) {
-        std::cout << "Processing object class: " << item_class << " with " << items_list.size() << " items" << std::endl;
-        
-        for (const auto& item : items_list) {
-            try {
-                // Get item details
-                std::string item_id = item["id"];
-                json coordinates = item["coordinates"];
-                json dimensions = item["dimensions"];
-                
-                std::cout << "Drawing item: " << item_id << std::endl;
-                
-                // Get coordinates and dimensions
-                double x = coordinates["x"];
-                double y = coordinates["y"];
-                double width = dimensions["width"];
-                double height = dimensions["height"];
-                
-                std::cout << "  World position: (" << x << ", " << y << ") meters" << std::endl;
-                std::cout << "  Dimensions: " << width << "x" << height << " meters" << std::endl;
-                
-                // Convert world coordinates to pixel coordinates
-                cv::Point center = worldToMapCoordinates(x, y, params, map_height);
-                std::cout << "  Pixel position: (" << center.x << ", " << center.y << ") px" << std::endl;
-                
-                // Convert dimensions from meters to pixels
-                double resolution = params.value("resolution", 0.05);
-                double scale_factor = params.value("scale_factor", 1.0);
-                double scaled_resolution = resolution / scale_factor;
-                int pixel_width = static_cast<int>(width / scaled_resolution);
-                int pixel_height = static_cast<int>(height / scaled_resolution);
-                
-                std::cout << "  Pixel dimensions: " << pixel_width << "x" << pixel_height << " px" << std::endl;
-                
-                // Define rectangle padding (in pixels)
-                int rectangle_padding = 5;
-                
-                // Calculate rectangle corners
-                cv::Point top_left(
-                    center.x - pixel_width / 2 - rectangle_padding,
-                    center.y - pixel_height / 2 - rectangle_padding
-                );
-                
-                cv::Point bottom_right(
-                    center.x + pixel_width / 2 + rectangle_padding,
-                    center.y + pixel_height / 2 + rectangle_padding
-                );
-                
-                // Ensure coordinates are within map bounds
-                cv::Rect object_rect(top_left, bottom_right);
-                object_rect &= image_rect;
-                
-                if (object_rect.width <= 0 || object_rect.height <= 0) {
-                    std::cout << "  Warning: Object rectangle is outside map bounds, skipping" << std::endl;
-                    continue;  // Skip if rectangle is outside bounds
-                }
-                
-                // Generate or retrieve color for this item ID
-                cv::Scalar color;
-                if (id_colors.find(item_id) == id_colors.end()) {
-                    // Generate a new random color for this ID
-                    color = cv::Scalar(
-                        color_dist(gen),  // Blue
-                        color_dist(gen),  // Green
-                        color_dist(gen)   // Red
-                    );
-                    id_colors[item_id] = color;
-                } else {
-                    // Use existing color for this ID
-                    color = id_colors[item_id];
-                }
-                
-                // Draw filled rectangle with transparency
-                cv::Mat overlay;
-                result.copyTo(overlay);
-                cv::rectangle(overlay, object_rect, color, -1);  // -1 for filled rectangle
-                
-                // Add the filled rectangle with transparency
-                double alpha = 0.3;  // 30% opacity
-                cv::addWeighted(overlay, alpha, result, 1 - alpha, 0, result);
-                
-                // Draw rectangle border
-                cv::rectangle(result, object_rect, color, 2);  // 2 pixels border width
-                
-                // Calculate the center of the object bounding box
-                cv::Point center_of_box = cv::Point(
-                    object_rect.x + object_rect.width / 2,
-                    object_rect.y + object_rect.height / 2
-                );
-                
-                // Store label information for second pass
-                int font_face = cv::FONT_HERSHEY_SIMPLEX;
-                double font_scale = 0.3;  // Smaller font
-                int thickness = 1;
-                int baseline = 0;
-                
-                // Use only the item ID for the label
-                std::string label_text = item_id;
-                
-                // Get text size to center it properly
-                cv::Size text_size = cv::getTextSize(label_text, font_face, font_scale, thickness, &baseline);
-                
-                // Calculate text position to center it in the box
-                cv::Point text_org(
-                    center_of_box.x - text_size.width / 2,
-                    center_of_box.y + text_size.height / 2
-                );
-                
-                // Save label for second pass
-                labels.push_back({text_org, label_text, color, font_scale, thickness});
-                
-            } catch (const std::exception& e) {
-                std::cerr << "Error processing object: " << e.what() << std::endl;
+    // Iterate through all items in the simplified format
+    for (auto& [item_id, item] : items_data.items()) {
+        try {
+            std::cout << "Drawing item: " << item_id << std::endl;
+            
+            // Get coordinates and dimensions
+            const json& coordinates = item["coordinates"];
+            const json& dimensions = item["dimensions"];
+            
+            double x = coordinates["x"];
+            double y = coordinates["y"];
+            double width = dimensions["width"];
+            double height = dimensions["height"];
+            
+            std::cout << "  World position: (" << x << ", " << y << ") meters" << std::endl;
+            std::cout << "  Dimensions: " << width << "x" << height << " meters" << std::endl;
+            
+            // Convert world coordinates to pixel coordinates
+            cv::Point center = worldToMapCoordinates(x, y, params, map_height);
+            std::cout << "  Pixel position: (" << center.x << ", " << center.y << ") px" << std::endl;
+            
+            // Convert dimensions from meters to pixels
+            double resolution = params.value("resolution", 0.05);
+            double scale_factor = params.value("scale_factor", 1.0);
+            double scaled_resolution = resolution / scale_factor;
+            int pixel_width = static_cast<int>(width / scaled_resolution);
+            int pixel_height = static_cast<int>(height / scaled_resolution);
+            
+            std::cout << "  Pixel dimensions: " << pixel_width << "x" << pixel_height << " px" << std::endl;
+            
+            // Define rectangle padding (in pixels)
+            int rectangle_padding = 5;
+            
+            // Calculate rectangle corners
+            cv::Point top_left(
+                center.x - pixel_width / 2 - rectangle_padding,
+                center.y - pixel_height / 2 - rectangle_padding
+            );
+            
+            cv::Point bottom_right(
+                center.x + pixel_width / 2 + rectangle_padding,
+                center.y + pixel_height / 2 + rectangle_padding
+            );
+            
+            // Ensure coordinates are within map bounds
+            cv::Rect object_rect(top_left, bottom_right);
+            object_rect &= image_rect;
+            
+            if (object_rect.width <= 0 || object_rect.height <= 0) {
+                std::cout << "  Warning: Object rectangle is outside map bounds, skipping" << std::endl;
+                continue;  // Skip if rectangle is outside bounds
             }
+            
+            // Generate or retrieve color for this item ID
+            cv::Scalar color;
+            color = cv::Scalar(
+                color_dist(gen),  // Blue
+                color_dist(gen),  // Green
+                color_dist(gen)   // Red
+            );
+            
+            // Draw filled rectangle with transparency
+            cv::Mat overlay;
+            result.copyTo(overlay);
+            cv::rectangle(overlay, object_rect, color, -1);  // -1 for filled rectangle
+            
+            // Add the filled rectangle with transparency
+            double alpha = 0.3;  // 30% opacity
+            cv::addWeighted(overlay, alpha, result, 1 - alpha, 0, result);
+            
+            // Draw rectangle border
+            cv::rectangle(result, object_rect, color, 2);  // 2 pixels border width
+            
+            // Calculate the center of the object bounding box
+            cv::Point center_of_box = cv::Point(
+                object_rect.x + object_rect.width / 2,
+                object_rect.y + object_rect.height / 2
+            );
+            
+            // Store label information for second pass
+            // Keep original item_id as label text (no abbreviation)
+            std::string label_text = item_id;
+            
+            // Save label position and text
+            labels.push_back({center_of_box, label_text, color});
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error processing object: " << e.what() << std::endl;
         }
     }
     
     // SECOND PASS: Draw all labels on top
-    int font_face = cv::FONT_HERSHEY_SIMPLEX;
+    int font_face = cv::FONT_HERSHEY_PLAIN;  // PLAIN font is more compact
+    double font_scale = 0.6;  // Extremely small font
+    int thickness = 1;  // Thinnest lines
+    
     for (const auto& label : labels) {
-        // Draw black outline for text
+        // Get text size to center it properly
+        int baseline = 0;
+        cv::Size text_size = cv::getTextSize(label.text, font_face, font_scale, thickness, &baseline);
+        
+        // Calculate position to center text in object
+        cv::Point text_org(
+            label.position.x - text_size.width / 2,
+            label.position.y + text_size.height / 2
+        );
+        
+        // Draw white text outline for readability (thin outline)
         cv::putText(result, label.text, 
-                    label.position, 
-                    font_face, label.font_scale, 
-                    cv::Scalar(0, 0, 0), label.thickness + 1, cv::LINE_AA);
-                    
-        // Draw white text
+                  text_org, 
+                  font_face, font_scale, 
+                  cv::Scalar(240, 240, 240), thickness + 1, cv::LINE_8);
+        
+        // Draw black text on top
         cv::putText(result, label.text, 
-                    label.position, 
-                    font_face, label.font_scale, 
-                    cv::Scalar(255, 255, 255), label.thickness, cv::LINE_AA);
+                  text_org, 
+                  font_face, font_scale, 
+                  cv::Scalar(0, 0, 0), thickness, cv::LINE_8);
     }
     
     return result;
@@ -565,7 +536,7 @@ cv::Mat MapBuilder::drawRobotPosition(const cv::Mat& object_map, const json& par
     std::cout << "Robot pixel position: (" << robot_point.x << ", " << robot_point.y << ") px" << std::endl;
     
     // Draw the robot position as a filled circle
-    int circle_radius = 10; // Increased radius for better visibility
+    int circle_radius = 5; 
     
     // Draw a larger border around the circle for better visibility
     cv::circle(robot_map, robot_point, circle_radius + 2, cv::Scalar(0, 0, 0), -1);
@@ -574,57 +545,8 @@ cv::Mat MapBuilder::drawRobotPosition(const cv::Mat& object_map, const json& par
     cv::circle(robot_map, robot_point, circle_radius, cv::Scalar(255, 0, 0), -1);
     
     // Add a white dot in the center for better visibility
-    cv::circle(robot_map, robot_point, 3, cv::Scalar(255, 255, 255), -1);
-    
-    // Add 'ROBOT' text label
-    std::string label = "ROBOT";
-    int font_face = cv::FONT_HERSHEY_SIMPLEX;
-    double font_scale = 0.4;  // Smaller font
-    int thickness = 1;
-    int baseline = 0;
-    
-    // Get text size
-    cv::Size text_size = cv::getTextSize(label, font_face, font_scale, thickness, &baseline);
-    
-    // Create a background rectangle for the text
-    cv::Rect text_background(
-        robot_point.x - text_size.width / 2 - 4,
-        robot_point.y + circle_radius + 2,
-        text_size.width + 8,
-        text_size.height + 8
-    );
-    
-    // Make sure the label is within image bounds
-    if (text_background.x < 0) {
-        text_background.x = 0;
-    }
-    if (text_background.y < 0) {
-        text_background.y = 0;
-    }
-    if (text_background.x + text_background.width > robot_map.cols) {
-        text_background.x = robot_map.cols - text_background.width;
-    }
-    if (text_background.y + text_background.height > robot_map.rows) {
-        text_background.y = robot_map.rows - text_background.height;
-    }
-    
-    // Draw white background for text
-    cv::rectangle(robot_map, text_background, cv::Scalar(255, 255, 255), -1);
-    // Draw border around text background
-    cv::rectangle(robot_map, text_background, cv::Scalar(0, 0, 0), 1);
-    
-    // Draw text - calculate text position based on background position
-    cv::putText(
-        robot_map,
-        label,
-        cv::Point(text_background.x + 4, text_background.y + text_size.height + 2),
-        font_face,
-        font_scale,
-        cv::Scalar(0, 0, 0),  // Black text
-        thickness,
-        cv::LINE_AA
-    );
-    
+    cv::circle(robot_map, robot_point, 3, cv::Scalar(240, 240, 240), -1);
+        
     return robot_map;
 }
 
@@ -662,6 +584,10 @@ cv::Mat MapBuilder::displayTargetCoordinate(
         return result;
     }
     
+    // Get target ID
+    std::string target_id = llm_response.contains("target_id") ? 
+                            llm_response["target_id"].get<std::string>() : "unknown";
+    
     // Get pixel coordinates from LLM response
     int pixel_x = llm_response["coordinates"]["x"];
     int pixel_y = llm_response["coordinates"]["y"];
@@ -680,7 +606,7 @@ cv::Mat MapBuilder::displayTargetCoordinate(
     cv::Point target_point(pixel_x, pixel_y);
     
     // Draw a simple red dot at the target location
-    int radius = 8;
+    int radius = 5;
     cv::circle(result, target_point, radius, cv::Scalar(0, 0, 255), -1); // Red filled circle in BGR
     
     // Save the result if path is provided

@@ -109,9 +109,10 @@ bool onRun()
   }
 
   // Initialize map configuration parameters 
-  double inflation_radius_m = 0.5;  // inflation radius in meters
+  double inflation_radius_m = 0.2;  // inflation radius in meters
   double scale_factor = 2.0;
   double grid_scale = 20.0;  // Setting grid scale to 20 pixels as in Python code
+  double max_polar_distance = 0; // Max distance for the polar coordinate distance in meters
 
   // if fail to get transform, hardcode robot position to (0, 0)
   json robot_position = {
@@ -137,9 +138,6 @@ bool onRun()
   } catch (const fs::filesystem_error& e) {
     RCLCPP_ERROR(node_->get_logger(), "Error creating debug directory: %s", e.what());
   }
-
-  // AI stuff
-  std::string COORDINATES_METHOD = "oneCoordSearch";
     
   // Load map configuration (will throw on failure)
   loadMapConfig(MAP_YAML_PATH);
@@ -161,7 +159,7 @@ bool onRun()
       items_data = loadJsonFile(ITEMS_JSON_PATH);
       RCLCPP_INFO(node_->get_logger(), "Successfully loaded items_data");
       
-      // Inspect the top-level structure
+      // Inspect the top-level structure - with new format, we should see item IDs directly
       std::string keys_str = "items_data keys: ";
       for (auto& [key, val] : items_data.items()) {
           keys_str += key + " ";
@@ -198,47 +196,246 @@ bool onRun()
   cv::Mat object_map = MapBuilder::BuildMap(map, params, items_data, robot_pos, map_output_path);
   RCLCPP_INFO(node_->get_logger(), "Map building completed successfully");
 
-  /*
+/*
    * STEP THREE: PROMPT LLM
   */
 
-  // Get coordinates
-  json llm_solver_response = LLMSolver::getCoordinateOneShot(object_map, params_in.target);
+  std::string COORDINATES_METHOD = "polarSearch";
+  int pixel_x = 0;
+  int pixel_y = 0;
+  double world_x = 0.0;
+  double world_y = 0.0;
+  json llm_solver_response;
   
-  // Check for success
-  std::string success = llm_solver_response["success"];
-  if (success == "false") {
-    std::string message = llm_solver_response["message"];
-
-    RCLCPP_INFO(node_->get_logger(), "Failure to get coordinates: %s", message.c_str());
-    nlohmann::json errorObj;
-    errorObj["type"] = "error";
-    errorObj["message"] = "Get Coordinates was not successful: " + message;
-    writeLog(errorObj.dump());
+  /*  Method 1: One shot get coordinates */
+  if (COORDINATES_METHOD == "oneCoordSearch") {
+    // Get coordinates
+    llm_solver_response = LLMSolver::getCoordinateOneShot(object_map, params_in.target);
     
-    throw std::runtime_error("Get Coordinates was not successful: " + message);
-  }  
+    // Check for success
+    std::string success = llm_solver_response["success"];
+    if (success == "false") {
+      std::string message = llm_solver_response["message"];
 
-  // Extract pixel coordinates from the LLM response
-  int pixel_x = llm_solver_response["coordinates"]["x"];
-  int pixel_y = llm_solver_response["coordinates"]["y"];
+      RCLCPP_INFO(node_->get_logger(), "Failure to get coordinates: %s", message.c_str());
+      nlohmann::json errorObj;
+      errorObj["type"] = "error";
+      errorObj["message"] = "Get Coordinates was not successful: " + message;
+      writeLog(errorObj.dump());
+      
+      throw std::runtime_error("Get Coordinates was not successful: " + message);
+    }  
+
+    // Extract pixel coordinates from the LLM response
+    pixel_x = llm_solver_response["coordinates"]["x"];
+    pixel_y = llm_solver_response["coordinates"]["y"];
+    
+    // Convert to world coordinates
+    world_x = pixel_x * resolution_ + origin_[0];
+    world_y = (map.rows - pixel_y) * resolution_ + origin_[1];
+    
+    // Display Coordinates on map as a simple red dot
+    std::string visualization_output_path = (fs::path(DATA_DIR) / "target_visualization.png").string();
+    cv::Mat visualization = MapBuilder::displayTargetCoordinate(
+        object_map, 
+        llm_solver_response, 
+        params, 
+        visualization_output_path);
+  } else if(COORDINATES_METHOD == "polarSearch") {
+    // Get polar coordinates
+    llm_solver_response = LLMSolver::getCoordinatePolar(object_map, params_in.target);
+    // Check for success
+    std::string success = llm_solver_response["success"];
+    if (success == "false") {
+      std::string message = llm_solver_response["message"];
+
+      RCLCPP_INFO(node_->get_logger(), "Failure to get coordinates: %s", message.c_str());
+      nlohmann::json errorObj;
+      errorObj["type"] = "error";
+      errorObj["message"] = "Get Coordinates was not successful: " + message;
+      writeLog(errorObj.dump());
+      
+      throw std::runtime_error("Get Coordinates was not successful: " + message);
+    }
+
+    // Get polar coordinates from LLM response
+    double angle_degrees = llm_solver_response["polar_coordinates"]["angle"];
+    double distance_percentage = llm_solver_response["polar_coordinates"]["distance"];
+
+    // Log raw angle value for debugging
+    RCLCPP_INFO(node_->get_logger(), "Raw angle from LLM: %f degrees", angle_degrees);
+
+    // Normalize angle to 0-360 range
+    while (angle_degrees < 0) angle_degrees += 360;
+    while (angle_degrees >= 360) angle_degrees -= 360;
+
+    RCLCPP_INFO(node_->get_logger(), "Normalized angle: %f degrees", angle_degrees);
+
+    // Get target object ID and find its position
+    std::string target_id = llm_solver_response["target_id"];
+    bool target_found = false;
+    double target_world_x = 0.0;
+    double target_world_y = 0.0;
+
+    // First, get the target's world coordinates
+    if (items_data.contains(target_id)) {
+        target_world_x = items_data[target_id]["coordinates"]["x"];
+        target_world_y = items_data[target_id]["coordinates"]["y"];
+        target_found = true;
+        
+        RCLCPP_INFO(node_->get_logger(), "Found target %s at world coordinates: (%f, %f) meters", 
+                    target_id.c_str(), target_world_x, target_world_y);
+    }
+
+    if (!target_found) {
+        RCLCPP_ERROR(node_->get_logger(), "Target object with ID %s not found in items_data", target_id.c_str());
+        throw std::runtime_error("Target object not found");
+    }
+
+    // Convert target world coordinates to pixel coordinates for visualization
+    cv::Point target_pixel = MapBuilder::worldToMapCoordinates(target_world_x, target_world_y, params, object_map.rows);
+    int target_center_x = target_pixel.x;
+    int target_center_y = target_pixel.y;
+
+    RCLCPP_INFO(node_->get_logger(), "Target pixel coordinates: (%d, %d)", target_center_x, target_center_y);
+
+    // Convert angle to radians - Using standard convention: 0° is East, angles increase counterclockwise
+    double angle_radians = angle_degrees * M_PI / 180.0;
+
+    // Calculate distance in world units (meters)
+    double max_distance_meters = max_polar_distance; // Usually 1 meter
+    double distance_meters = (distance_percentage / 100.0) * max_distance_meters;
+
+    RCLCPP_INFO(node_->get_logger(), "Distance: %f%% of max (%f m) = %f meters", 
+                distance_percentage, max_distance_meters, distance_meters);
+
+                
+    /* Get first available coordinate that's white */
+    int available_x_coordinate = target_center_x;
+    int available_y_coordinate = target_center_y;
+    int distance_pixels = 0;
+    bool found_white_pixel = false;
+
+    // Calculate scaled_resolution
+    double scaled_resolution = resolution_ / scale_factor;
+
+    // Start from the target and move outward along the angle until finding a white pixel
+    while (!found_white_pixel) {
+        // Calculate new coordinates by moving along the angle
+        available_x_coordinate = std::round(distance_pixels * std::cos(angle_radians) + target_center_x);
+        available_y_coordinate = std::round(distance_pixels * std::sin(angle_radians) + target_center_y);
+        
+        // Check if coordinates are within the map bounds
+        if (available_x_coordinate < 0 || available_x_coordinate >= object_map.cols ||
+            available_y_coordinate < 0 || available_y_coordinate >= object_map.rows) {
+            // Point is outside map bounds, stop searching
+            RCLCPP_WARN(node_->get_logger(), "Reached map boundary while searching for white pixel");
+            break;
+        }
+        
+        // Check if the pixel is white
+        // OpenCV Mat is accessed with at<type>(y, x) - note y (row) comes first
+        cv::Vec3b pixel_color = object_map.at<cv::Vec3b>(available_y_coordinate, available_x_coordinate);
+        
+        // Check if pixel is white (all channels are 255)
+        if ((pixel_color[0] == 255 && pixel_color[1] == 255 && pixel_color[2] == 255) || (pixel_color[0] == 0 && pixel_color[1] == 0 && pixel_color[2] == 255)) {
+            RCLCPP_INFO(node_->get_logger(), "Found white pixel at distance %d pixels", distance_pixels);
+            found_white_pixel = true;
+            break;
+        }
+        
+        // Move to next pixel along the line
+        distance_pixels++;
+        
+        // Optional: Add a safety limit to prevent infinite loops
+        if (distance_pixels > 1000) {
+            RCLCPP_WARN(node_->get_logger(), "Reached maximum search distance without finding white pixel");
+            break;
+        }
+    }
+
+    // Add the extra pixel distance to the original distance
+    double extra_distance_meters = (distance_pixels * scaled_resolution);
+    distance_meters += extra_distance_meters;
+
+    RCLCPP_INFO(node_->get_logger(), "Added %f meters from pixel search, new distance: %f meters", 
+                extra_distance_meters, distance_meters);
+
+
+
+    // Calculate offset in world coordinates (meters)
+    // In world coordinates: x increases east, y increases north
+    double world_offset_x = distance_meters * std::cos(angle_radians);
+    double world_offset_y = distance_meters * std::sin(angle_radians);
+
+    RCLCPP_INFO(node_->get_logger(), "World coordinate offset: (%f, %f) meters", 
+                world_offset_x, world_offset_y);
+
+    // Calculate final position in world coordinates
+    double final_world_x = target_world_x + world_offset_x;
+    double final_world_y = target_world_y + world_offset_y;
+
+    RCLCPP_INFO(node_->get_logger(), "Final world coordinates: (%f, %f) meters", 
+                final_world_x, final_world_y);
+
+    // Convert final world coordinates to pixel coordinates for visualization
+    cv::Point final_pixel = MapBuilder::worldToMapCoordinates(final_world_x, final_world_y, params, object_map.rows);
+    pixel_x = final_pixel.x;
+    pixel_y = final_pixel.y;
+
+    RCLCPP_INFO(node_->get_logger(), "Final pixel coordinates: (%d, %d)", pixel_x, pixel_y);
+
+    // Ensure coordinates are within map bounds
+    pixel_x = std::min(std::max(0, pixel_x), object_map.cols - 1);
+    pixel_y = std::min(std::max(0, pixel_y), object_map.rows - 1);
+
+    // Debug any code
+    RCLCPP_INFO(node_->get_logger(), "Target world: (%f, %f)", target_world_x, target_world_y);
+    RCLCPP_INFO(node_->get_logger(), "Polar coords: angle=%f°, distance=%f%%", angle_degrees, distance_percentage);
+    RCLCPP_INFO(node_->get_logger(), "World offset: (%f, %f)", world_offset_x, world_offset_y);
+    RCLCPP_INFO(node_->get_logger(), "Final world: (%f, %f)", final_world_x, final_world_y);
+    RCLCPP_INFO(node_->get_logger(), "Final pixel: (%d, %d)", pixel_x, pixel_y);
+    
+    // Try direct inversion of y-coordinate to test if that fixes the issue
+    int test_pixel_y = object_map.rows - pixel_y;
+    RCLCPP_INFO(node_->get_logger(), "Test inverted y: (%d, %d)", pixel_x, test_pixel_y);
+    
+    // Let's also try a direct world-to-pixel conversion for comparison
+    cv::Point direct_pixel = MapBuilder::worldToMapCoordinates(final_world_x, final_world_y, params, object_map.rows);
+    RCLCPP_INFO(node_->get_logger(), "Direct world-to-pixel: (%d, %d)", direct_pixel.x, direct_pixel.y);
+
+    // Create JSON for visualization (using the pixel coordinates)
+    json cartesian_llm_response = {
+        {"target_id", target_id},
+        {"coordinates", {{"x", pixel_x}, {"y", pixel_y}}},
+        {"success", "true"}
+    };
+
+    // Display Coordinates on map as a simple red dot
+    std::string visualization_output_path = (fs::path(DATA_DIR) / "target_visualization.png").string();
+    cv::Mat visualization = MapBuilder::displayTargetCoordinate(
+        object_map, 
+        cartesian_llm_response, 
+        params, 
+        visualization_output_path);
+
+    RCLCPP_INFO(node_->get_logger(), "Polar coordinates: angle=%f degrees, distance=%f%% -> Cartesian: (%d, %d)",
+            angle_degrees, distance_percentage, pixel_x, pixel_y);
+  }
+
   
-  // Display Coordinates on map as a simple red dot
-  std::string visualization_output_path = (fs::path(DATA_DIR) / "target_visualization.png").string();
-  cv::Mat visualization = MapBuilder::displayTargetCoordinate(
-      object_map, 
-      llm_solver_response, 
-      params, 
-      visualization_output_path);
-
   /*
   * STEP FOUR: GET COORDINATES
   */
 
-  // Get realworld coordinates  for nav2 (fix to scale, resolution and origin) <- Solve this
-
-  double world_x = pixel_x * resolution_ + origin_[0];
-  double world_y = (map.rows - pixel_y) * resolution_ + origin_[1];
+  // No need to recalculate world coordinates here if we already did it in the coordinate methods
+  // But if we need to ensure they're set correctly, we can do it again:
+  
+  // Ensure world coordinates are correctly set if they weren't already
+  if (world_x == 0.0 && world_y == 0.0) {
+    world_x = pixel_x * resolution_ + origin_[0];
+    world_y = (map.rows - pixel_y) * resolution_ + origin_[1];
+  }
   
   RCLCPP_INFO(node_->get_logger(), "Real-world coordinates for Nav2: x=%f, y=%f", world_x, world_y);
   
@@ -260,7 +457,8 @@ bool onRun()
   response_json["pixel_coordinates"] = {{"x", pixel_x}, {"y", pixel_y}};
   response_json["target_id"] = target_id;
   response_json["message"] = reasoning;
-  
+
+
   // FIX: Convert JSON to string for logging
   RCLCPP_INFO(node_->get_logger(), "Response JSON: %s", response_json.dump().c_str());
 

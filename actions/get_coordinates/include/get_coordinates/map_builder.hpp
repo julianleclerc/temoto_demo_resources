@@ -50,6 +50,17 @@ public:
         const json& llm_response,
         const json& params,
         const std::string& output_path = "");
+    
+    /**
+     * Helper function to convert world coordinates to map pixel coordinates
+     * 
+     * @param x X coordinate in world frame (meters)
+     * @param y Y coordinate in world frame (meters)
+     * @param params Map parameters including resolution and origin
+     * @param map_height Height of the map in pixels
+     * @return Pixel coordinates as cv::Point
+     */
+    static cv::Point worldToMapCoordinates(double x, double y, const json& params, int map_height);
 
 private:
     // Helper function to scale the map
@@ -69,9 +80,6 @@ private:
     
     // Helper function to draw robot position on the map
     static cv::Mat drawRobotPosition(const cv::Mat& object_map, const json& params, const RobotTransform& robot_pos);
-    
-    // Helper function to convert world coordinates to map pixel coordinates
-    static cv::Point worldToMapCoordinates(double x, double y, const json& params, int map_height);
     
     // Helper function to inflate obstacles
     static cv::Mat inflateObstacles(const cv::Mat& map, int inflation_radius_pixels);

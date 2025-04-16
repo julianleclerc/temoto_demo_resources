@@ -30,6 +30,17 @@ nlohmann::json getCoordinateOneShot(
     const std::string& target_name);
 
 /**
+ * @brief Polar method for getting coordinates
+ * 
+ * @param map_image The map image as OpenCV Mat
+ * @param target_name The name of the target
+ * @return nlohmann::json Response with the target information
+ */
+nlohmann::json getCoordinatePolar(
+    const cv::Mat& map_image,
+    const std::string& target_name);
+
+/**
  * @brief Fallback method for getting coordinates when full implementation isn't available
  * 
  * @param map_image The map image as OpenCV Mat
