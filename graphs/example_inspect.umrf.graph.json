@@ -1,0 +1,35 @@
+{
+  "graph_name": "example_inspect",
+  "graph_description": "Inspect a room",
+  "graph_entry": [
+    {
+      "name": "Inspect",
+      "instance_id": 0
+    }
+  ],
+  "graph_exit": [
+    {
+      "name": "Inspect",
+      "instance_id": 0,
+      "conditions": [
+        "on_true -> ignore",
+        "on_false -> ignore",
+        "on_error -> ignore"
+      ]
+
+    }
+  ],
+  "actions": [
+    {
+      "name": "Inspect",
+      "instance_id": 0,
+      "type": "sync",
+      "input_parameters": {
+        "inspect": {"pvf_type": "string", "pvf_value": "room"}
+      },
+      "output_parameters": {
+        "inspection_result": {"pvf_type": "string"}
+      }
+    }
+  ]
+}

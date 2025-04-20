@@ -38,8 +38,10 @@ bool onRun()
   // Check if node and action client are initialized
   if (!node_ || !navigation_action_client_ || !init_success_)
   {
-    RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Node or action client not properly initialized");
-    return false;
+    temoto_log["type"] = "error";
+    temoto_log["message"] = "Node or action client not properly initialized for navigation, should try again";
+    writeLog(temoto_log.dump());
+    throw std::runtime_error("Node or action client not properly initialized");
   }
 
   // Create the navigation goal
@@ -135,11 +137,13 @@ bool onRun()
   }
   std::cout << std::endl;
 
-  // If the action was interrupted, return false
+  // If the action was interrupted, throw
   if (!actionOk())
   {
-    RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), "Navigation action was interrupted");
-    return false;
+    temoto_log["type"] = "error";
+    temoto_log["message"] = "Navigation action was interrupted, inform user and ask how to solve..";
+    writeLog(temoto_log.dump());
+    throw std::runtime_error("Navigation action was interrupted");
   }
 
   // Only return true if navigation completed successfully
@@ -150,8 +154,11 @@ bool onRun()
   }
   else
   {
-    RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), "Navigation failed");
-    return false;
+    temoto_log["type"] = "error";
+    temoto_log["message"] = "Navigation failed, inform user and ask how to solve..";
+    writeLog(temoto_log.dump());
+    throw std::runtime_error("Navigation failed");
+
   }
 }
 
@@ -182,14 +189,9 @@ void onInit()
              
   if (!navigation_action_client_->wait_for_action_server(std::chrono::seconds(5)))
   {
-    init_success_ = false; 
-
-    nlohmann::json errorObj;
-    errorObj["type"] = "error";
-    errorObj["message"] = "Nav2 subsribtion now working, failed navigation";
-    writeLog(errorObj.dump());
-    
-    throw std::runtime_error("Navigation action server not available after 5 seconds");        
+    RCLCPP_ERROR(rclcpp::get_logger("navigate_to_pose"), 
+                "Navigation action server not available after 5 seconds");
+    init_success_ = false;        
   }
   else
   {

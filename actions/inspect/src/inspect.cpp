@@ -76,8 +76,11 @@ bool onRun()
 
       if ((node_->now() - start_time).seconds() > timeout_duration)
       {
-          RCLCPP_WARN(node_->get_logger(), "Timeout reached, no image received.");
-          return false;
+          temoto_log["type"] = "error";
+          temoto_log["message"] = "Not able to get images from the camera for inspection, 
+                                  ask user to make sure the camera is correctly publishing to ros2 topic /cam_feed";
+          writeLog(temoto_log.dump());
+          throw std::runtime_error("Timeout reached, no image received");
       }
       
       // Spin to process the incoming message

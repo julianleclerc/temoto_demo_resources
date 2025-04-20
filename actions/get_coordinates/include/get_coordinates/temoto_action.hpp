@@ -52,6 +52,11 @@ private:
   {
     auto& params{getUmrfNode().getOutputParametersNc()};
 
-    params.setParameter("inspection_result", "string", boost::any(params_out.inspection_result));
+    params.setParameter("pose::position::x", "number", boost::any(params_out.pose.position.x));
+    params.setParameter("pose::position::y", "number", boost::any(params_out.pose.position.y));
+    params.setParameter("pose::position::z", "number", boost::any(params_out.pose.position.z));
+    params.setParameter("pose::orientation::r", "number", boost::any(params_out.pose.orientation.r));
+    params.setParameter("pose::orientation::p", "number", boost::any(params_out.pose.orientation.p));
+    params.setParameter("pose::orientation::y", "number", boost::any(params_out.pose.orientation.y));
   }
 };

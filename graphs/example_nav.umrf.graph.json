@@ -1,0 +1,111 @@
+{
+  "graph_name": "example_nav",
+  "graph_description": "nav",
+  "graph_entry": [
+    {
+      "name": "GetCoordinates",
+      "instance_id": 0
+    }
+  ],
+  "graph_exit": [
+    {
+      "name": "NavigateTo",
+      "instance_id": 1,
+      "conditions": [
+        "on_true -> ignore",
+        "on_false -> ignore",
+        "on_error -> ignore"
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "GetCoordinates",
+      "instance_id": 0,
+      "type": "sync",
+      "input_parameters": {
+        "target": {"pvf_type": "string", "pvf_value": "plant next to the fridge"}
+      },
+      "output_parameters": {
+        "pose": {
+          "position": {
+            "x": {"pvf_type": "number"},
+            "y": {"pvf_type": "number"},
+            "z": {"pvf_type": "number"}
+          },
+          "orientation": {
+            "r": {"pvf_type": "number"},
+            "p": {"pvf_type": "number"},
+            "y": {"pvf_type": "number"}
+          }
+        }        
+      },
+      "children": [
+        {
+          "name": "NavigateTo",
+          "instance_id": 1
+        }
+      ]
+    },
+    {
+    "name": "NavigateTo",
+    "instance_id": 1,
+    "type": "sync",
+    "input_parameters": {
+      "pose": {
+        "position": {
+          "x": {"pvf_type": "number"},
+          "y": {"pvf_type": "number"},
+          "z": {"pvf_type": "number"}
+        },
+        "orientation": {
+          "r": {"pvf_type": "number"},
+          "p": {"pvf_type": "number"},
+          "y": {"pvf_type": "number"}
+        }
+      }        
+    },
+    "parents": [
+      {
+        "name": "GetCoordinates",
+        "instance_id": 0,
+        "conditions": [
+          "on_true -> run",
+          "on_false -> run",
+          "on_stopped -> ignore",
+          "on_error -> ignore"
+        ]
+      }
+    ],
+    "children": [
+      {
+        "name": "Inspect",
+        "instance_id": 2
+      }
+    ]
+    },
+    {
+      "name": "Inspect",
+      "instance_id": 2,
+      "type": "sync",
+      "input_parameters": {
+        "inspect": {"pvf_type": "string", "pvf_value": "the person in front"}
+      },
+      "output_parameters": {
+        "inspection_result": {"pvf_type": "string"}
+      },
+      "parents": [
+        {
+          "name": "NavigateTo",
+          "instance_id": 1,
+          "conditions": [
+            "on_true -> run",
+            "on_false -> run",
+            "on_stopped -> ignore",
+            "on_error -> ignore"
+          ]
+        }
+      ]
+    }
+  ]
+}
