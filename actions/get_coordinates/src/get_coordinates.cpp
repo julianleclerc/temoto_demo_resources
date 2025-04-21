@@ -47,14 +47,23 @@ double origin_[3] = {0.0,0.0,0.0};
 std::shared_ptr<rclcpp::Node> node_;
 rclcpp::Publisher<std_msgs::msg::String>::SharedPtr chat_publisher_;
 
+std::string getNodeName() const {
+  return node_ ? node_->get_name() : "get_coordinates";
+}
+
 void onInit()
 {
   TEMOTO_PRINT_OF("Initializing", getName());
-  node_ = std::make_shared<rclcpp::Node>("get_coordinates_node");
-
+  
+  auto now = std::chrono::system_clock::now();
+  auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+  std::string unique_node_name = "get_coordinates_node_" + std::to_string(timestamp);
+  node_ = std::make_shared<rclcpp::Node>(unique_node_name);
+  
   const std::string topic = "/chat_interface_feedback";
   chat_publisher_ = node_->create_publisher<std_msgs::msg::String>(topic, 10); 
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Created publisher on topic: chat_interface_feedback");  
+
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Created publisher on topic: chat_interface_feedback");  
 }
 
 bool onRun()
@@ -72,7 +81,7 @@ bool onRun()
 
   // Find workspace root by getting package directory and navigating up to workspace root
   std::string package_share_dir = ament_index_cpp::get_package_share_directory("get_coordinates");
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Package share directory: %s", package_share_dir.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Package share directory: %s", package_share_dir.c_str());
   
   // Navigate to workspace root (from install/share/get_coordinates)
   fs::path workspace_path = fs::path(package_share_dir);
@@ -84,9 +93,9 @@ bool onRun()
   // Ensure the path is canonical (resolves symlinks and normalizes the path)
   try {
     workspace_path = fs::canonical(workspace_path);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Workspace root path: %s", workspace_path.string().c_str());
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Workspace root path: %s", workspace_path.string().c_str());
   } catch (const fs::filesystem_error& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Error resolving workspace path: %s", e.what());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Error resolving workspace path: %s", e.what());
     throw std::runtime_error("Failed to resolve workspace path");
   }
   
@@ -96,24 +105,24 @@ bool onRun()
   const std::string MAP_YAML_PATH = (fs::path(DATA_DIR) / "map.yaml").string();
   const std::string ITEMS_JSON_PATH = (fs::path(DATA_DIR) / "items.json").string();
   
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Data directory: %s", DATA_DIR.c_str());
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Map path: %s", MAP_PATH.c_str());
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Map YAML path: %s", MAP_YAML_PATH.c_str());
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Items JSON path: %s", ITEMS_JSON_PATH.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Data directory: %s", DATA_DIR.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map path: %s", MAP_PATH.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map YAML path: %s", MAP_YAML_PATH.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Items JSON path: %s", ITEMS_JSON_PATH.c_str());
   
   // Check if the files exist
   if (!fs::exists(MAP_PATH)) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Map file not found at: %s", MAP_PATH.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Map file not found at: %s", MAP_PATH.c_str());
     throw std::runtime_error("Map file not found");
   }
   
   if (!fs::exists(MAP_YAML_PATH)) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Map YAML file not found at: %s", MAP_YAML_PATH.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Map YAML file not found at: %s", MAP_YAML_PATH.c_str());
     throw std::runtime_error("Map YAML file not found");
   }
   
   if (!fs::exists(ITEMS_JSON_PATH)) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Items JSON file not found at: %s", ITEMS_JSON_PATH.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Items JSON file not found at: %s", ITEMS_JSON_PATH.c_str());
     throw std::runtime_error("Items JSON file not found");
   }
 
@@ -142,15 +151,15 @@ bool onRun()
   try {
     if (!fs::exists(output_dir)) {
       fs::create_directories(output_dir);
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Created debug directory: %s", output_dir.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Created debug directory: %s", output_dir.c_str());
     }
   } catch (const fs::filesystem_error& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Error creating debug directory: %s", e.what());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Error creating debug directory: %s", e.what());
   }
     
   // Load map configuration (will throw on failure)
   loadMapConfig(MAP_YAML_PATH);
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Map configuration loaded: resolution=%f, origin=[%f,%f,%f]", 
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map configuration loaded: resolution=%f, origin=[%f,%f,%f]", 
               resolution_, origin_[0], origin_[1], origin_[2]);
   
   // Create JSON with map parameters
@@ -163,19 +172,19 @@ bool onRun()
   };
 
   // Load items data from JSON
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Loading JSON file: %s", ITEMS_JSON_PATH.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Loading JSON file: %s", ITEMS_JSON_PATH.c_str());
   try {
       items_data = loadJsonFile(ITEMS_JSON_PATH);
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Successfully loaded items_data");
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Successfully loaded items_data");
       
       // Inspect the top-level structure - with new format, we should see item IDs directly
       std::string keys_str = "items_data keys: ";
       for (auto& [key, val] : items_data.items()) {
           keys_str += key + " ";
       }
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "%s", keys_str.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "%s", keys_str.c_str());
   } catch (const json::exception& e) {
-      RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "JSON error loading items_data: %s", e.what());
+      RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "JSON error loading items_data: %s", e.what());
       throw;
   }
 
@@ -188,22 +197,22 @@ bool onRun()
   // Load map image
   cv::Mat map;
   try {
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Attempting to load map from: %s", MAP_PATH.c_str());
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Attempting to load map from: %s", MAP_PATH.c_str());
     map = cv::imread(MAP_PATH, cv::IMREAD_GRAYSCALE);
     if (map.empty()) {
-      RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Failed to load map image: %s", MAP_PATH.c_str());
+      RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Failed to load map image: %s", MAP_PATH.c_str());
       throw std::runtime_error("Failed to load map image");
     }
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Map loaded successfully, size: %dx%d", map.cols, map.rows);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map loaded successfully, size: %dx%d", map.cols, map.rows);
   } catch (const cv::Exception& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "OpenCV error loading map: %s", e.what());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "OpenCV error loading map: %s", e.what());
     throw;
   }
   
   // Try to build map
   std::string map_output_path = (fs::path(DATA_DIR) / "final_robot_map.png").string();
   cv::Mat object_map = MapBuilder::BuildMap(map, params, items_data, robot_pos, map_output_path);
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Map building completed successfully");
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map building completed successfully");
 
 /*
    * STEP THREE: PROMPT LLM
@@ -228,7 +237,7 @@ bool onRun()
     if (success == "false") {
       std::string message = llm_solver_response["message"];
 
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Failure to get coordinates: %s", message.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Failure to get coordinates: %s", message.c_str());
       nlohmann::json errorObj;
       errorObj["type"] = "error";
       errorObj["message"] = "Get Coordinates was not successful: " + message;
@@ -260,7 +269,7 @@ bool onRun()
     if (success == "false") {
       std::string message = llm_solver_response["message"];
 
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Failure to get coordinates: %s", message.c_str());
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Failure to get coordinates: %s", message.c_str());
       nlohmann::json errorObj;
       errorObj["type"] = "error";
       errorObj["message"] = "Get Coordinates was not successful: " + message;
@@ -274,13 +283,13 @@ bool onRun()
     double distance_percentage = llm_solver_response["polar_coordinates"]["distance"];
 
     // Log raw angle value for debugging
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Raw angle from LLM: %f degrees", angle_degrees);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Raw angle from LLM: %f degrees", angle_degrees);
 
     // Normalize angle to 0-360 range
     while (angle_degrees < 0) angle_degrees += 360;
     while (angle_degrees >= 360) angle_degrees -= 360;
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Normalized angle: %f degrees", angle_degrees);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Normalized angle: %f degrees", angle_degrees);
 
     // Get target object ID and find its position
     std::string target_id = llm_solver_response["target_id"];
@@ -294,12 +303,12 @@ bool onRun()
         target_world_y = items_data[target_id]["coordinates"]["y"];
         target_found = true;
         
-        RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Found target %s at world coordinates: (%f, %f) meters", 
+        RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Found target %s at world coordinates: (%f, %f) meters", 
                     target_id.c_str(), target_world_x, target_world_y);
     }
 
     if (!target_found) {
-        RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Target object with ID %s not found in items_data", target_id.c_str());
+        RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Target object with ID %s not found in items_data", target_id.c_str());
         throw std::runtime_error("Target object not found");
     }
 
@@ -308,7 +317,7 @@ bool onRun()
     int target_center_x = target_pixel.x;
     int target_center_y = target_pixel.y;
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Target pixel coordinates: (%d, %d)", target_center_x, target_center_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Target pixel coordinates: (%d, %d)", target_center_x, target_center_y);
 
     // Convert angle to radians - Using standard convention: 0° is East, angles increase counterclockwise
     double angle_radians = angle_degrees * M_PI / 180.0;
@@ -317,7 +326,7 @@ bool onRun()
     double max_distance_meters = max_polar_distance; // Usually 1 meter
     double distance_meters = (distance_percentage / 100.0) * max_distance_meters;
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Distance: %f%% of max (%f m) = %f meters", 
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Distance: %f%% of max (%f m) = %f meters", 
                 distance_percentage, max_distance_meters, distance_meters);
 
                 
@@ -337,7 +346,7 @@ bool onRun()
         if (available_x_coordinate < 0 || available_x_coordinate >= object_map.cols ||
             available_y_coordinate < 0 || available_y_coordinate >= object_map.rows) {
             // Point is outside map bounds, stop searching
-            RCLCPP_WARN(rclcpp::get_logger("get_coordinates"), "Reached map boundary while searching for white pixel");
+            RCLCPP_WARN(rclcpp::get_logger(getNodeName()), "Reached map boundary while searching for white pixel");
             break;
         }
         
@@ -347,7 +356,7 @@ bool onRun()
         
         // Check if pixel is white (all channels are 255)
         if ((pixel_color[0] == 255 && pixel_color[1] == 255 && pixel_color[2] == 255) || (pixel_color[0] == 0 && pixel_color[1] == 0 && pixel_color[2] == 255)) {
-            RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Found white pixel at distance %d pixels", distance_pixels);
+            RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Found white pixel at distance %d pixels", distance_pixels);
             found_white_pixel = true;
             break;
         }
@@ -357,7 +366,7 @@ bool onRun()
         
         // Optional: Add a safety limit to prevent infinite loops
         if (distance_pixels > 1000) {
-            RCLCPP_WARN(rclcpp::get_logger("get_coordinates"), "Reached maximum search distance without finding white pixel");
+            RCLCPP_WARN(rclcpp::get_logger(getNodeName()), "Reached maximum search distance without finding white pixel");
             break;
         }
     }
@@ -366,7 +375,7 @@ bool onRun()
     double extra_distance_meters = (distance_pixels * scaled_resolution);
     distance_meters += extra_distance_meters;
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Added %f meters from pixel search, new distance: %f meters", 
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Added %f meters from pixel search, new distance: %f meters", 
                 extra_distance_meters, distance_meters);
 
 
@@ -376,14 +385,14 @@ bool onRun()
     double world_offset_x = distance_meters * std::cos(angle_radians);
     double world_offset_y = distance_meters * std::sin(angle_radians);
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "World coordinate offset: (%f, %f) meters", 
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "World coordinate offset: (%f, %f) meters", 
                 world_offset_x, world_offset_y);
 
     // Calculate final position in world coordinates
     double final_world_x = target_world_x + world_offset_x;
     double final_world_y = target_world_y + world_offset_y;
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Final world coordinates: (%f, %f) meters", 
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final world coordinates: (%f, %f) meters", 
                 final_world_x, final_world_y);
 
     // Convert final world coordinates to pixel coordinates for visualization
@@ -391,26 +400,26 @@ bool onRun()
     pixel_x = final_pixel.x;
     pixel_y = final_pixel.y;
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Final pixel coordinates: (%d, %d)", pixel_x, pixel_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final pixel coordinates: (%d, %d)", pixel_x, pixel_y);
 
     // Ensure coordinates are within map bounds
     pixel_x = std::min(std::max(0, pixel_x), object_map.cols - 1);
     pixel_y = std::min(std::max(0, pixel_y), object_map.rows - 1);
 
     // Debug any code
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Target world: (%f, %f)", target_world_x, target_world_y);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Polar coords: angle=%f°, distance=%f%%", angle_degrees, distance_percentage);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "World offset: (%f, %f)", world_offset_x, world_offset_y);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Final world: (%f, %f)", final_world_x, final_world_y);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Final pixel: (%d, %d)", pixel_x, pixel_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Target world: (%f, %f)", target_world_x, target_world_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Polar coords: angle=%f°, distance=%f%%", angle_degrees, distance_percentage);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "World offset: (%f, %f)", world_offset_x, world_offset_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final world: (%f, %f)", final_world_x, final_world_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final pixel: (%d, %d)", pixel_x, pixel_y);
     
     // Try direct inversion of y-coordinate to test if that fixes the issue
     int test_pixel_y = object_map.rows - pixel_y;
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Test inverted y: (%d, %d)", pixel_x, test_pixel_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Test inverted y: (%d, %d)", pixel_x, test_pixel_y);
     
     // Let's also try a direct world-to-pixel conversion for comparison
     cv::Point direct_pixel = MapBuilder::worldToMapCoordinates(final_world_x, final_world_y, params, object_map.rows);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Direct world-to-pixel: (%d, %d)", direct_pixel.x, direct_pixel.y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Direct world-to-pixel: (%d, %d)", direct_pixel.x, direct_pixel.y);
 
     // Create JSON for visualization (using the pixel coordinates)
     json cartesian_llm_response = {
@@ -427,7 +436,7 @@ bool onRun()
         params, 
         visualization_output_path);
 
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Polar coordinates: angle=%f degrees, distance=%f%% -> Cartesian: (%d, %d)",
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Polar coordinates: angle=%f degrees, distance=%f%% -> Cartesian: (%d, %d)",
             angle_degrees, distance_percentage, pixel_x, pixel_y);
   }
 
@@ -439,7 +448,7 @@ bool onRun()
   world_x = pixel_x * scaled_resolution + origin_[0];
   world_y = (object_map.rows - pixel_y) * scaled_resolution + origin_[1];
   
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Real-world coordinates for Nav2: x=%f, y=%f", world_x, world_y);  
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Real-world coordinates for Nav2: x=%f, y=%f", world_x, world_y);  
 
   // Add coordinates to the output parameters
   json coordinates_json = {
@@ -462,7 +471,7 @@ bool onRun()
 
 
   // FIX: Convert JSON to string for logging
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Response JSON: %s", response_json.dump().c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Response JSON: %s", response_json.dump().c_str());
 
   /*
    * FINAL STEP: RETURN RESULTS
@@ -477,7 +486,7 @@ bool onRun()
   params_out.pose.orientation.r = 0;
   params_out.pose.orientation.p = 0;
   params_out.pose.orientation.y = 0;
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Inspection completed successfully");
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Inspection completed successfully");
   
   return true;
 }
@@ -506,14 +515,20 @@ void onStop()
 
 ~GetCoordinates()
 {
-  rclcpp::shutdown();
+  TEMOTO_PRINT_OF("Destroying", getName());
+  
+  if (node_) {
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Cleaning up node in destructor");
+    chat_publisher_.reset();
+    node_.reset();
+  }
 }
 
 bool loadMapConfig(const std::string& yaml_path) {
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Loading map config from: %s", yaml_path.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Loading map config from: %s", yaml_path.c_str());
   std::ifstream file(yaml_path);
   if (!file.is_open()) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Failed to open YAML file: %s", yaml_path.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Failed to open YAML file: %s", yaml_path.c_str());
     throw std::runtime_error("Failed to open map YAML file");
   }
   
@@ -527,7 +542,7 @@ bool loadMapConfig(const std::string& yaml_path) {
     if (line.find("resolution:") != std::string::npos) {
       resolution_ = std::stod(line.substr(line.find(":") + 1));
       resolution_found = true;
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Found resolution: %f", resolution_);
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Found resolution: %f", resolution_);
     }
     else if (line.find("origin:") != std::string::npos) {
       std::string origin_str = line.substr(line.find("[") + 1, line.find("]") - line.find("[") - 1);
@@ -540,12 +555,12 @@ bool loadMapConfig(const std::string& yaml_path) {
       }
       
       origin_found = true;
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Found origin: [%f, %f, %f]", origin_[0], origin_[1], origin_[2]);
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Found origin: [%f, %f, %f]", origin_[0], origin_[1], origin_[2]);
     }
   }
   
   if (!resolution_found || !origin_found) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Missing required parameters in YAML file");
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Missing required parameters in YAML file");
     throw std::runtime_error("Missing required parameters in map YAML file");
   }
   
@@ -553,26 +568,26 @@ bool loadMapConfig(const std::string& yaml_path) {
 }
 
 json loadJsonFile(const std::string& file_path) {
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Loading JSON from file: %s", file_path.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Loading JSON from file: %s", file_path.c_str());
   std::ifstream file(file_path);
   if (!file.is_open()) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Failed to open JSON file: %s", file_path.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Failed to open JSON file: %s", file_path.c_str());
     throw std::runtime_error("Failed to open JSON file: " + file_path);
   }
   
   json data;
   try {
     file >> data;
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "JSON file loaded successfully");
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "JSON file loaded successfully");
     return data;
   } catch (const json::exception& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Error parsing JSON file: %s", e.what());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Error parsing JSON file: %s", e.what());
     throw;
   }
 }
 
 void publishResult(const std::string& message) {
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "=== PUBLISHING GETCOORDINATES RESULT ===");
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "=== PUBLISHING GETCOORDINATES RESULT ===");
   
   try {
     json j;
@@ -581,65 +596,65 @@ void publishResult(const std::string& message) {
     j["message"] = message;
     
     std::string json_str = j.dump();
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Created JSON message for chat_interface_feedback: %s", 
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Created JSON message for chat_interface_feedback: %s", 
                 json_str.length() > 100 ? (json_str.substr(0, 97) + "...").c_str() : json_str.c_str());
     
     std_msgs::msg::String msg;
     msg.data = json_str;
     
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Publishing message to chat_interface_feedback (size: %zu bytes)", msg.data.size());
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Publishing message to chat_interface_feedback (size: %zu bytes)", msg.data.size());
     chat_publisher_->publish(msg);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Message published successfully to chat_interface_feedback");
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Message published successfully to chat_interface_feedback");
     
   } catch (const std::exception& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "ERROR publishing coordinate result: %s", e.what());
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "ERROR publishing coordinate result: %s", e.what());
   }
   
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "=== COORDINATE RESULT PUBLISHED ===");
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "=== COORDINATE RESULT PUBLISHED ===");
 } 
 std::string encodeImageToBase64(const cv::Mat& image) {
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "=== ENCODING IMAGE TO BASE64 ===");
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "=== ENCODING IMAGE TO BASE64 ===");
   
   try {
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Calling ai_core encoding function...");
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Calling ai_core encoding function...");
     std::string result = ai_core::encodeImageToBase64(image);
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Image encoded successfully to base64 (size: %zu bytes)", result.size());
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Image encoded successfully to base64 (size: %zu bytes)", result.size());
     
     if (result.size() > 20) {
-      RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Encoded data begins with: %s...", result.substr(0, 20).c_str());
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Encoded data begins with: %s...", result.substr(0, 20).c_str());
     }
     
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "=== BASE64 ENCODING COMPLETED ===");
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "=== BASE64 ENCODING COMPLETED ===");
     return result;
   } catch (const std::exception& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Error encoding image to base64: %s", e.what());
-    RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "=== BASE64 ENCODING FAILED ===");
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Error encoding image to base64: %s", e.what());
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "=== BASE64 ENCODING FAILED ===");
     return "";
   }
 }
 
 std::string cleanLLMJsonResponse(const std::string& raw_response) {
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Cleaning raw LLM response to extract JSON...");
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Cleaning raw LLM response to extract JSON...");
   
   size_t start_pos = raw_response.find('{');
   if (start_pos == std::string::npos) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "No JSON object found in response (no opening brace)");
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "No JSON object found in response (no opening brace)");
     return "";
   }
   
   size_t end_pos = raw_response.rfind('}');
   if (end_pos == std::string::npos) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "No JSON object found in response (no closing brace)");
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "No JSON object found in response (no closing brace)");
     return "";
   }
   
   if (end_pos <= start_pos) {
-    RCLCPP_ERROR(rclcpp::get_logger("get_coordinates"), "Invalid JSON structure (closing brace before opening brace)");
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Invalid JSON structure (closing brace before opening brace)");
     return "";
   }
   
   std::string cleaned_json = raw_response.substr(start_pos, end_pos - start_pos + 1);
-  RCLCPP_INFO(rclcpp::get_logger("get_coordinates"), "Extracted JSON: %s", 
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Extracted JSON: %s", 
               cleaned_json.length() > 100 ? (cleaned_json.substr(0, 97) + "...").c_str() : cleaned_json.c_str());
   
   return cleaned_json;
