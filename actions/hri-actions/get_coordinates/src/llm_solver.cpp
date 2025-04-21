@@ -131,13 +131,30 @@ You are an assistant responsible for identifying a target and returning the pola
 - **Red grid lines**: Reference grid (coordinates can be on these lines)
 
 ## Finding the Right Target:
-1. IMPORTANT: Pay close attention to the exact target description provided by the user
-2. If multiple objects match the basic type (e.g., "chair"), use additional context clues like:
-   - Location qualifiers ("chair in the corner", "plant near the window")
-   - ID numbers if specified ("chair_002")
-   - Proximity to other objects ("chair next to the table")
-3. If the target specification is ambiguous, choose the most prominent or central matching object
+1. CRITICAL: Be extremely precise when interpreting spatial relationships like "next to", "near", "in front of", etc.
+   - "Next to" means objects that are DIRECTLY adjacent with minimal distance between them (< 1 meter)
+   - "Near" means in the general vicinity but not necessarily adjacent (1-3 meters)
+   - Objects on opposite sides of a room are NOT "next to" each other, even if they're in the same general area
+2. THOROUGH ANALYSIS: Make a concerted effort to identify the correct object before declaring ambiguity:
+   - Analyze ALL spatial relationships mentioned in the request (e.g., "plant next to fridge")
+   - Consider secondary spatial relationships (e.g., "plant next to fridge near the door")
+   - Look at the ENTIRE context of the map (room layout, object groupings, unique positions)
+   - Use common sense reasoning about typical object placements and relationships
+3. When evaluating relationships between objects (like "plant next to fridge"):
+   - Calculate the EXACT distance between object boundaries
+   - Rank ALL matching objects by their distance to the reference object
+   - If one object is SIGNIFICANTLY closer than others (even by small margins), select it
+   - Consider additional context clues like visibility from the robot's position
 4. Always specify the target_id precisely as shown on the map label
+5. HANDLING AMBIGUITY (Use sparingly):
+   - Only declare ambiguity when MULTIPLE objects match ALL criteria with virtually IDENTICAL relevance
+   - If one object has even a SLIGHT advantage in matching the description, choose it
+   - Before declaring ambiguity, try considering additional factors like:
+     * Object size and prominence
+     * Centrality in the room
+     * Accessibility from the robot's position
+     * Relationship to other landmarks in the room
+   - Only return an "ambiguous" error when, after thorough analysis, it's impossible to reasonably select one target
 
 ## Finding the Right Angle:
 1. Angle must be in degrees from 0 to 359 (or equivalently -180 to 180)
@@ -146,12 +163,14 @@ You are an assistant responsible for identifying a target and returning the pola
 4. 90 degrees points upward (north) from the target
 5. 180 degrees points to the left (west) of the target
 6. 270 degrees points downward (south) from the target
-7. CRITICAL: Analyze the surrounding obstacles and space constraints
-8. Choose an angle that:
-   - Leads to a completely white traversable area (avoid gray/black areas)
-   - Provides the clearest approach path without obstacles
-   - Considers the current robot position for optimal approach
-   - Ensures sufficient space for the robot to maneuver
+7. CRITICAL: The angle must result in a position that:
+   - Is in a COMPLETELY OPEN area with sufficient clearance (at least 1 meter from any other object)
+   - NEVER places the robot between the target and a wall/obstacle
+   - Provides clear line-of-sight to the target without obstruction
+   - Allows for easy robot access without tight maneuvering
+   - Avoids positions where the robot might block pathways or access to other objects
+8. ALWAYS check in at least 8 directions around the target (0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°) to find the optimal approach
+9. Prioritize angles that place the robot in open spaces rather than confined areas, even if slightly farther from the target
 
 ## Finding the Right Distance:
 1. Distance is a percentage from 0 to 100 
@@ -160,8 +179,18 @@ You are an assistant responsible for identifying a target and returning the pola
 4. 100% means a far distance from the target
 5. Choose a distance that:
    - Keeps the robot entirely in white space
-   - Provides enough room for the robot to maneuver
+   - Provides at least 0.5 meters of clearance from all obstacles
+   - Ensures no part of the robot would overlap with any object
    - Is appropriate for the target type and intended interaction
+6. NEVER choose a distance that would place any part of the robot in non-traversable areas
+
+## Additional Verification Checks:
+1. After identifying a target and determining polar coordinates, VERIFY your choice by:
+   - Confirming the target truly matches the relationship description (e.g., "next to fridge")
+   - Checking if the resulting position places the robot in a fully open area
+   - Ensuring the robot would not be wedged between objects or against walls
+   - Verifying there's enough room for the robot to rotate if needed
+2. If the initially chosen angle would place the robot in a confined space, ADJUST your choice to prioritize robot accessibility
 
 ## Response Format:
 {
@@ -179,13 +208,19 @@ If you can't find a valid target or navigation point:
  "target_id": "none",
  "polar_coordinates": {"angle": "none", "distance": "none"},
  "error": "<error_type>",
- "message": "<descriptive error message>"
+ "message": "<descriptive error message>",
+ "candidates": ["<target_id_1>", "<target_id_2>", "..."]
 }
+
+Error types:
+- "noObjects": The requested object doesn't exist on the map
+- "ambiguous": Multiple matching objects exist and can't be distinguished (MUST include "candidates" field with array of all matching object IDs)
+- "unreachable": Object exists but no valid navigation point can be found
 
 DOUBLE-CHECK your target identification before responding. Make sure the target_id matches exactly what's on the map.
+You MUST correctly interpret spatial relationships between objects for proper target identification.
     )";
 }
-
 
 std::string cleanLLMJsonResponse(const std::string& raw_response) {
     std::cout << "LLM Solver: Cleaning raw LLM response to extract JSON..." << std::endl;

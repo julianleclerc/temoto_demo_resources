@@ -337,6 +337,8 @@ cv::Mat MapBuilder::generateGrid(const cv::Mat& map_img, const json& params)
             // Only draw grid lines on free space (white areas)
             if (binary_mask.at<uchar>(y, x) == 255) {
                 grid_map.at<cv::Vec3b>(y, x) = cv::Vec3b(COLOR_GRID[0], COLOR_GRID[1], COLOR_GRID[2]);
+            } else {
+                grid_map.at<cv::Vec3b>(y, x) = cv::Vec3b(COLOR_GRID[0], COLOR_GRID[1], COLOR_GRID[2]-150);
             }
         }
     }
@@ -347,6 +349,8 @@ cv::Mat MapBuilder::generateGrid(const cv::Mat& map_img, const json& params)
             // Only draw grid lines on free space (white areas)
             if (binary_mask.at<uchar>(y, x) == 255) {
                 grid_map.at<cv::Vec3b>(y, x) = cv::Vec3b(COLOR_GRID[0], COLOR_GRID[1], COLOR_GRID[2]);
+            } else {
+                grid_map.at<cv::Vec3b>(y, x) = cv::Vec3b(COLOR_GRID[0], COLOR_GRID[1], COLOR_GRID[2]-150);
             }
         }
     }

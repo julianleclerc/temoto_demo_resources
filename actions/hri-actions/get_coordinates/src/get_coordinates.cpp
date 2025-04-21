@@ -222,6 +222,8 @@ bool onRun()
   int pixel_y = 0;
   double world_x = 0.0;
   double world_y = 0.0;
+  double angle = 0;
+  std::string target_id;
   json llm_solver_response;
   // Calculate scaled_resolution
   double scaled_resolution = resolution_ / scale_factor;
@@ -292,7 +294,7 @@ bool onRun()
     RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Normalized angle: %f degrees", angle_degrees);
 
     // Get target object ID and find its position
-    std::string target_id = llm_solver_response["target_id"];
+    target_id = llm_solver_response["target_id"];
     bool target_found = false;
     double target_world_x = 0.0;
     double target_world_y = 0.0;
@@ -351,21 +353,20 @@ bool onRun()
         }
         
         // Check if the pixel is white
-        // OpenCV Mat is accessed with at<type>(y, x) - note y (row) comes first
         cv::Vec3b pixel_color = object_map.at<cv::Vec3b>(available_y_coordinate, available_x_coordinate);
         
         // Check if pixel is white (all channels are 255)
-        if ((pixel_color[0] == 255 && pixel_color[1] == 255 && pixel_color[2] == 255) || (pixel_color[0] == 0 && pixel_color[1] == 0 && pixel_color[2] == 255)) {
-            RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Found white pixel at distance %d pixels", distance_pixels);
-            found_white_pixel = true;
-            break;
+        if ((pixel_color[0] > 240 && pixel_color[1] > 240 && pixel_color[2] > 240) || (pixel_color[0] < 10 && pixel_color[1] < 10 && pixel_color[2] > 240)) {
+          RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Found white pixel at distance %d pixels", distance_pixels);
+          found_white_pixel = true;
+          break;
         }
         
         // Move to next pixel along the line
         distance_pixels++;
         
-        // Optional: Add a safety limit to prevent infinite loops
-        if (distance_pixels > 1000) {
+        // Add a safety limit to prevent infinite loops
+        if (distance_pixels > 50) {
             RCLCPP_WARN(rclcpp::get_logger(getNodeName()), "Reached maximum search distance without finding white pixel");
             break;
         }
@@ -378,10 +379,7 @@ bool onRun()
     RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Added %f meters from pixel search, new distance: %f meters", 
                 extra_distance_meters, distance_meters);
 
-
-
     // Calculate offset in world coordinates (meters)
-    // In world coordinates: x increases east, y increases north
     double world_offset_x = distance_meters * std::cos(angle_radians);
     double world_offset_y = distance_meters * std::sin(angle_radians);
 
@@ -395,33 +393,13 @@ bool onRun()
     RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final world coordinates: (%f, %f) meters", 
                 final_world_x, final_world_y);
 
+    // Final visual graph
     // Convert final world coordinates to pixel coordinates for visualization
     cv::Point final_pixel = MapBuilder::worldToMapCoordinates(final_world_x, final_world_y, params, object_map.rows);
     pixel_x = final_pixel.x;
     pixel_y = final_pixel.y;
 
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final pixel coordinates: (%d, %d)", pixel_x, pixel_y);
-
-    // Ensure coordinates are within map bounds
-    pixel_x = std::min(std::max(0, pixel_x), object_map.cols - 1);
-    pixel_y = std::min(std::max(0, pixel_y), object_map.rows - 1);
-
-    // Debug any code
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Target world: (%f, %f)", target_world_x, target_world_y);
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Polar coords: angle=%f°, distance=%f%%", angle_degrees, distance_percentage);
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "World offset: (%f, %f)", world_offset_x, world_offset_y);
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final world: (%f, %f)", final_world_x, final_world_y);
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final pixel: (%d, %d)", pixel_x, pixel_y);
-    
-    // Try direct inversion of y-coordinate to test if that fixes the issue
-    int test_pixel_y = object_map.rows - pixel_y;
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Test inverted y: (%d, %d)", pixel_x, test_pixel_y);
-    
-    // Let's also try a direct world-to-pixel conversion for comparison
-    cv::Point direct_pixel = MapBuilder::worldToMapCoordinates(final_world_x, final_world_y, params, object_map.rows);
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Direct world-to-pixel: (%d, %d)", direct_pixel.x, direct_pixel.y);
-
-    // Create JSON for visualization (using the pixel coordinates)
+    // Create JSON for robot visualisation for cartesian coordinates
     json cartesian_llm_response = {
         {"target_id", target_id},
         {"coordinates", {{"x", pixel_x}, {"y", pixel_y}}},
@@ -435,57 +413,55 @@ bool onRun()
         cartesian_llm_response, 
         params, 
         visualization_output_path);
-
-    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Polar coordinates: angle=%f degrees, distance=%f%% -> Cartesian: (%d, %d)",
-            angle_degrees, distance_percentage, pixel_x, pixel_y);
+  
+    // Debug final coordinates
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Target world: (%f, %f)", target_world_x, target_world_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Polar coords: angle=%f°, distance=%f%%", angle_degrees, distance_percentage);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "World offset: (%f, %f)", world_offset_x, world_offset_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final world: (%f, %f)", final_world_x, final_world_y);
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final pixel: (%d, %d)", pixel_x, pixel_y);
   }
+
+  // Create a response message for the user
+  target_id = llm_solver_response["target_id"];
+  std::string reasoning = llm_solver_response["message"];
 
   /*
   * STEP FOUR: GET COORDINATES
   */
-    
+ 
   // Convert pixel coordinates to world coordinates using scaled resolution
   world_x = pixel_x * scaled_resolution + origin_[0];
   world_y = (object_map.rows - pixel_y) * scaled_resolution + origin_[1];
   
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Real-world coordinates for Nav2: x=%f, y=%f", world_x, world_y);  
 
-  // Add coordinates to the output parameters
-  json coordinates_json = {
-    {"x", world_x},
-    {"y", world_y},
-    {"target_id", llm_solver_response["target_id"]}
-  };
+  // Calculate angle robot -> target
+  double target_y = items_data[target_id]["coordinates"]["y"];
+  double target_x = items_data[target_id]["coordinates"]["x"];
+  double angle_rad = std::atan2(target_y - world_y, target_x - world_x);
+  while (angle_rad < 0) angle_rad += 2 * M_PI;
+  angle = angle_rad;
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final angle: (%f)", angle);
+
+  // Debug final coordinates
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Target world: (%f, %f)", target_x, target_y);
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final world: (%f, %f)", world_x, world_y);
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final angle: (%f)", angle);
   
-  // Create a response message for the user
-  std::string target_id = llm_solver_response["target_id"];
-  std::string reasoning = llm_solver_response["message"];
-  
-  // Create the response JSON for the final step
-  json response_json;
-  response_json["success"] = llm_solver_response["success"];
-  response_json["real_world_coordinates"] = {{"x", world_x}, {"y", world_y}};
-  response_json["pixel_coordinates"] = {{"x", pixel_x}, {"y", pixel_y}};
-  response_json["target_id"] = target_id;
-  response_json["message"] = reasoning;
-
-
-  // FIX: Convert JSON to string for logging
-  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Response JSON: %s", response_json.dump().c_str());
-
   /*
    * FINAL STEP: RETURN RESULTS
    */
 
   // Publish get_coordinates result
-  publishResult(response_json["message"]);
+  publishResult(reasoning);
   
   params_out.pose.position.x = world_x;
   params_out.pose.position.y = world_y;
   params_out.pose.position.z = 0;
   params_out.pose.orientation.r = 0;
   params_out.pose.orientation.p = 0;
-  params_out.pose.orientation.y = 0;
+  params_out.pose.orientation.y = angle;
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Inspection completed successfully");
   
   return true;

@@ -13,8 +13,26 @@ namespace ai_core {
  * @brief Structure to define messages for AI communication
  */
 struct Message {
-    std::string role;    // Role of the message (e.g., "system", "user", "assistant")
-    std::string content; // Content of the message
+    std::string role;         // Role of the message (e.g., "system", "user", "assistant")
+    std::string content;      // Content of the message as text
+    nlohmann::json content_json; // Content of the message as JSON (for multimodal messages)
+    bool is_json_content;     // Flag to indicate if content is JSON
+
+    /**
+     * @brief Constructor for text-based message
+     * @param r Role of the message
+     * @param c Content of the message as text
+     */
+    Message(std::string r, std::string c) 
+        : role(r), content(c), is_json_content(false) {}
+    
+    /**
+     * @brief Constructor for JSON-based message (for multimodal content)
+     * @param r Role of the message
+     * @param c Content of the message as JSON
+     */
+    Message(std::string r, nlohmann::json c) 
+        : role(r), content_json(c), is_json_content(true) {}
 };
 
 /**
@@ -61,7 +79,7 @@ std::string callOpenAIAPI(
 std::string AIImagePrompt(
     const std::vector<Message>& messages,
     const cv::Mat& image,
-    float temperature = 0.7f,
+    float temperature = 0.3f,
     int max_tokens = 1024,
     float frequency_penalty = 0.0f,
     float presence_penalty = 0.0f);

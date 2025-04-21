@@ -133,7 +133,7 @@ bool onRun()
   std::string ai_response = ai_core::AIImagePrompt(
     messages,
     captured_image_,  // Use the captured image
-    0.7f,    // temperature
+    0.3f,    // temperature
     1024,    // max_tokens
     0.0f,    // frequency_penalty
     0.0f     // presence_penalty

@@ -1,6 +1,6 @@
 {
   "graph_name": "example_inspect",
-  "graph_description": "Inspect a room",
+  "graph_description": "Inspect in front",
   "graph_entry": [
     {
       "name": "Inspect",
