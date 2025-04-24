@@ -6,6 +6,11 @@
 #include <filesystem>
 #include <string>
 #include <map>
+#include <queue>
+#include <unordered_set>
+#include <unordered_map>
+#include <functional>
+#include <memory>
 
 using json = nlohmann::json;
 
@@ -15,6 +20,41 @@ struct RobotTransform {
     double y;
     
     RobotTransform(double x_ = 0.0, double y_ = 0.0) : x(x_), y(y_) {}
+};
+
+// A Node class for A* Pathfinding Algorithm
+struct AStarNode {
+    int x;
+    int y;
+    double g_cost; // Cost from start to current node
+    double h_cost; // Heuristic cost (estimated cost from current to goal)
+    double f_cost; // Total cost (g_cost + h_cost)
+    std::shared_ptr<AStarNode> parent;
+
+    AStarNode(int x, int y, double g_cost, double h_cost, std::shared_ptr<AStarNode> parent = nullptr)
+        : x(x), y(y), g_cost(g_cost), h_cost(h_cost), f_cost(g_cost + h_cost), parent(parent) {}
+
+    // Compare nodes based on f_cost for priority queue
+    bool operator>(const AStarNode& other) const {
+        if (f_cost == other.f_cost) {
+            return h_cost > other.h_cost; // If f_costs are equal, prefer lower h_cost
+        }
+        return f_cost > other.f_cost;
+    }
+};
+
+// Hash function for Point to use in unordered_set/map
+struct PointHash {
+    std::size_t operator()(const cv::Point& point) const {
+        return std::hash<int>()(point.x) ^ std::hash<int>()(point.y);
+    }
+};
+
+// Equals function for Point to use in unordered_set/map
+struct PointEquals {
+    bool operator()(const cv::Point& a, const cv::Point& b) const {
+        return a.x == b.x && a.y == b.y;
+    }
 };
 
 class MapBuilder {
@@ -61,6 +101,25 @@ public:
      * @return Pixel coordinates as cv::Point
      */
     static cv::Point worldToMapCoordinates(double x, double y, const json& params, int map_height);
+
+    /**
+     * A* pathfinding algorithm to find a path from robot to target
+     * 
+     * @param map The original map image
+     * @param params Map parameters
+     * @param items_data JSON data with object information
+     * @param robot_pos Robot position in world coordinates
+     * @param map_output_path Path to save the visualization map
+     * @param target_id ID of the target object
+     * @return The goal coordinate as cv::Point
+     */
+    static cv::Point coordinates_astar(
+        const cv::Mat& map, 
+        const json& params, 
+        const json& items_data, 
+        const RobotTransform& robot_pos, 
+        const std::string& map_output_path, 
+        const std::string& target_id);
 
 private:
     // Helper function to scale the map

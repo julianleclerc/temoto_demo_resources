@@ -6,6 +6,8 @@
 #include <cmath>
 #include <random>
 #include <opencv2/imgproc.hpp>
+#include <queue>
+#include <unordered_set>
 
 // Define color constants for visualization
 const cv::Scalar COLOR_OBSTACLE(0, 0, 0);       // Black for obstacles
@@ -624,4 +626,213 @@ cv::Mat MapBuilder::displayTargetCoordinate(
     }
     
     return result;
+}
+
+
+cv::Point MapBuilder::coordinates_astar(
+    const cv::Mat& map, 
+    const json& params, 
+    const json& items_data, 
+    const RobotTransform& robot_pos, 
+    const std::string& map_output_path, 
+    const std::string& target_id) {
+    
+    std::cout << "Starting A* pathfinding algorithm with improved object padding..." << std::endl;
+    
+    // Threshold map to black and white
+    cv::Mat binary_map;
+    cv::threshold(map, binary_map, 200, 255, cv::THRESH_BINARY);
+    
+    // Convert to color map for visualization
+    cv::Mat color_map;
+    cv::cvtColor(binary_map, color_map, cv::COLOR_GRAY2BGR);
+
+    // Get parameters with proper type conversion
+    float scale_factor = params["scale_factor"].get<float>();
+    float grid_scale = params["grid_scale"].get<float>();
+    float resolution = params["resolution"].get<float>();
+    double origin_x = params["origin"][0].get<double>();
+    double origin_y = params["origin"][1].get<double>();
+
+    // Convert robot position to pixel coordinates
+    int robot_x = static_cast<int>((robot_pos.x - origin_x) / resolution);
+    int robot_y = map.rows - static_cast<int>((robot_pos.y - origin_y) / resolution);
+
+    // Process all objects except the target
+    for (auto& [id, item] : items_data.items()) {
+        if (id == target_id) continue;
+        
+        float x = item["coordinates"]["x"].get<float>();
+        float y = item["coordinates"]["y"].get<float>();
+        float width = item["dimensions"]["width"].get<float>();
+        float height = item["dimensions"]["height"].get<float>();
+        
+        // Convert to pixel coordinates
+        int px = static_cast<int>((x - origin_x) / resolution);
+        int py = map.rows - static_cast<int>((y - origin_y) / resolution) - 1;
+        int pw = std::max(1, static_cast<int>(width / resolution));
+        int ph = std::max(1, static_cast<int>(height / resolution));
+        
+        cv::rectangle(binary_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0), cv::FILLED);
+        cv::rectangle(color_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0, 0, 0), cv::FILLED);
+    }
+
+    // Mark target object (red)
+    if (items_data.contains(target_id)) {
+        auto& target = items_data[target_id];
+        float x = target["coordinates"]["x"].get<float>();
+        float y = target["coordinates"]["y"].get<float>();
+        float width = target["dimensions"]["width"].get<float>();
+        float height = target["dimensions"]["height"].get<float>();
+        
+        // Convert to pixel coordinates
+        int px = static_cast<int>((x - origin_x) / resolution);
+        int py = map.rows - static_cast<int>((y - origin_y) / resolution) - 1;
+        int pw = std::max(1, static_cast<int>(width / resolution));
+        int ph = std::max(1, static_cast<int>(height / resolution));
+        
+        // Create target rectangle
+        cv::Rect target_rect(px - pw/2, py - ph/2, pw, ph);
+        
+        // Draw rectangle (red for target)
+        cv::rectangle(color_map, target_rect, cv::Scalar(0, 0, 255), cv::FILLED);
+        
+        // Save init
+        try {
+            cv::imwrite(map_output_path + "/astar_init.png", color_map);
+            std::cout << "Saved colorized cost map to: " << map_output_path + "/astar_init.png" << std::endl;
+        } catch (const cv::Exception& e) {
+            std::cerr << "Error saving colorized cost map: " << e.what() << std::endl;
+        }
+
+        // A* algorithm implementation
+        struct Node {
+            cv::Point point;
+            float g_cost;
+            float h_cost;
+            float f_cost() const { return g_cost + h_cost; }
+            Node* parent;
+            bool operator<(const Node& other) const {
+                return f_cost() > other.f_cost();  // For min-heap
+            }
+        };
+
+        std::priority_queue<Node> open_set;
+        std::unordered_map<int, std::unordered_map<int, Node>> all_nodes;
+
+        Node start_node;
+        start_node.point = cv::Point(robot_x, robot_y);
+        start_node.g_cost = 0;
+        start_node.h_cost = std::sqrt(std::pow(px - robot_x, 2) + std::pow(py - robot_y, 2));
+        start_node.parent = nullptr;
+        open_set.push(start_node);
+        all_nodes[robot_x][robot_y] = start_node;
+
+        const int dx[] = {-1, 0, 1, -1, 1, -1, 0, 1};
+        const int dy[] = {-1, -1, -1, 0, 0, 1, 1, 1};
+
+        bool found = false;
+        Node final_node;
+
+        // Create a slightly expanded rectangle to detect when we're near the target
+        cv::Rect expanded_rect = target_rect;
+        expanded_rect.x -= 1;
+        expanded_rect.y -= 1;
+        expanded_rect.width += 2;
+        expanded_rect.height += 2;
+
+        while (!open_set.empty()) {
+            Node current = open_set.top();
+            open_set.pop();
+
+            // Check if the current point is adjacent to or inside the target rectangle
+            if (current.point.inside(expanded_rect)) {
+                // If we're already inside, use this point
+                if (current.point.inside(target_rect)) {
+                    final_node = current;
+                    found = true;
+                    break;
+                }
+                
+                // Otherwise, check if this point is adjacent to the target
+                for (int i = 0; i < 8; i++) {
+                    int nx = current.point.x + dx[i];
+                    int ny = current.point.y + dy[i];
+                    
+                    cv::Point test_point(nx, ny);
+                    if (test_point.inside(target_rect)) {
+                        // Found a point adjacent to the target
+                        final_node = current;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (found) break;
+            }
+
+            for (int i = 0; i < 8; i++) {
+                int nx = current.point.x + dx[i];
+                int ny = current.point.y + dy[i];
+
+                if (nx < 0 || ny < 0 || nx >= binary_map.cols || ny >= binary_map.rows)
+                    continue;
+
+                if (binary_map.at<uchar>(ny, nx) != 255)
+                    continue;
+
+                float new_g = current.g_cost + (i < 4 ? 1.0f : 1.414f);
+                float new_h = std::sqrt(std::pow(px - nx, 2) + std::pow(py - ny, 2));
+
+                if (all_nodes.count(nx) && all_nodes[nx].count(ny)) {
+                    if (all_nodes[nx][ny].g_cost <= new_g)
+                        continue;
+                }
+
+                Node neighbor;
+                neighbor.point = cv::Point(nx, ny);
+                neighbor.g_cost = new_g;
+                neighbor.h_cost = new_h;
+                neighbor.parent = &all_nodes[current.point.x][current.point.y];
+
+                open_set.push(neighbor);
+                all_nodes[nx][ny] = neighbor;
+            }
+        }
+
+        if (found) {
+            std::vector<cv::Point> path;
+            Node* current = &final_node;
+            while (current != nullptr) {
+                path.push_back(current->point);
+                current = current->parent;
+            }
+
+            for (size_t i = 0; i < path.size() - 1; i++) {
+                cv::line(color_map, path[i], path[i + 1], cv::Scalar(0, 255, 0), 2);
+            }
+
+            try {
+                cv::imwrite(map_output_path + "/astar_final.png", color_map);
+                std::cout << "Saved colorized cost map to: " << map_output_path + "/astar_final.png" << std::endl;
+            } catch (const cv::Exception& e) {
+                std::cerr << "Error saving final path map: " << e.what() << std::endl;
+            }
+
+            // Return the point closest to the target but not inside it
+            for (size_t i = 0; i < path.size(); i++) {
+                if (!path[i].inside(target_rect)) {
+                    // Found a point that's outside the target box
+                    return path[i];
+                }
+            }
+            
+            // Fallback if all points are somehow inside the target
+            if (path.size() >= 1) {
+                return path[0];
+            }
+        }
+    }
+
+    return cv::Point(robot_x, robot_y);
 }

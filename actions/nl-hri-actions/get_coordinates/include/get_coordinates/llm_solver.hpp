@@ -16,6 +16,7 @@ namespace LLMSolver {
  */
 nlohmann::json getCoordinateIDSearch(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data,
     const std::string& target_name);
 
 /**
@@ -27,6 +28,7 @@ nlohmann::json getCoordinateIDSearch(
  */
 nlohmann::json getCoordinateOneShot(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data,
     const std::string& target_name);
 
 /**
@@ -38,6 +40,7 @@ nlohmann::json getCoordinateOneShot(
  */
 nlohmann::json getCoordinatePolar(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data, 
     const std::string& target_name);
 
 /**
@@ -49,6 +52,7 @@ nlohmann::json getCoordinatePolar(
  */
 nlohmann::json getCoordinateFallback(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data,
     const std::string& target_name);
 
 /**

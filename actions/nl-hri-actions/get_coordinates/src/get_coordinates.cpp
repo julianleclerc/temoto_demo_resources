@@ -217,7 +217,7 @@ bool onRun()
 /*
    * STEP THREE: PROMPT LLM
   */
-  std::string COORDINATES_METHOD = "polarSearch";
+  std::string COORDINATES_METHOD = "oneCoordSearch";
   int pixel_x = 0;
   int pixel_y = 0;
   double world_x = 0.0;
@@ -229,43 +229,63 @@ bool onRun()
   double scaled_resolution = resolution_ / scale_factor;
 
   
-  /*  Method 1: One shot get coordinates */
   if (COORDINATES_METHOD == "oneCoordSearch") {
     // Get coordinates
-    llm_solver_response = LLMSolver::getCoordinateOneShot(object_map, params_in.target);
+    llm_solver_response = LLMSolver::getCoordinateOneShot(object_map, items_data, params_in.target);
     
     // Check for success
     std::string success = llm_solver_response["success"];
     if (success == "false") {
-      std::string message = llm_solver_response["message"];
-
-      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Failure to get coordinates: %s", message.c_str());
-      nlohmann::json errorObj;
-      errorObj["type"] = "error";
-      errorObj["message"] = "Get Coordinates was not successful: " + message;
-      writeLog(errorObj.dump());
-      
-      throw std::runtime_error("Get Coordinates was not successful: " + message);
+        std::string message = llm_solver_response["message"];
+        
+        RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Failure to get coordinates: %s", message.c_str());
+        nlohmann::json errorObj;
+        errorObj["type"] = "error";
+        errorObj["message"] = "Get Coordinates was not successful: " + message;
+        writeLog(errorObj.dump());
+        
+        throw std::runtime_error("Get Coordinates was not successful: " + message);
     }  
 
-    // Extract pixel coordinates from the LLM response
-    pixel_x = llm_solver_response["coordinates"]["x"];
-    pixel_y = llm_solver_response["coordinates"]["y"];
+    // Get target object ID and find its position
+    target_id = llm_solver_response["target_id"];
+
+    // Check if target exists
+    if (items_data.contains(target_id) == false) {
+        RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Target object with ID %s not found in items_data", target_id.c_str());
+        throw std::runtime_error("Target object not found");
+    }
+
+    // Find Coordinate through A*
+    cv::Point goal_point = MapBuilder::coordinates_astar(map, params, items_data, robot_pos, fs::path(DATA_DIR).string(), target_id);
     
-    // Convert to world coordinates
-    world_x = pixel_x * resolution_ + origin_[0];
-    world_y = (map.rows - pixel_y) * resolution_ + origin_[1];
+    // Important: do NOT scale these coordinates, they are already in the original map's coordinate system
+    pixel_x = static_cast<int>(goal_point.x * scale_factor);
+    pixel_y = static_cast<int>(goal_point.y * scale_factor);
+    
+    json visualization_json = {
+        {"target_id", target_id},
+        {"coordinates", {{"x", pixel_x}, {"y", pixel_y}}},
+        {"success", "true"}
+    };
     
     // Display Coordinates on map as a simple red dot
     std::string visualization_output_path = (fs::path(DATA_DIR) / "target_visualization.png").string();
     cv::Mat visualization = MapBuilder::displayTargetCoordinate(
         object_map, 
-        llm_solver_response, 
+        visualization_json, 
         params, 
         visualization_output_path);
-  } else if(COORDINATES_METHOD == "polarSearch") {
+
+    // Debug final coordinates
+    RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final original map pixel: (%d, %d)", pixel_x, pixel_y);
+
+    
+  };
+  
+  if(COORDINATES_METHOD == "polarSearch") {
     // Get polar coordinates
-    llm_solver_response = LLMSolver::getCoordinatePolar(object_map, params_in.target);
+    llm_solver_response = LLMSolver::getCoordinatePolar(object_map, items_data, params_in.target);
     // Check for success
     std::string success = llm_solver_response["success"];
     if (success == "false") {
@@ -281,8 +301,8 @@ bool onRun()
     }
 
     // Get polar coordinates from LLM response
-    double angle_degrees = llm_solver_response["polar_coordinates"]["angle"];
-    double distance_percentage = llm_solver_response["polar_coordinates"]["distance"];
+    double angle_degrees = llm_solver_response["robot_to_target_angle"].get<double>() - 180;
+    double distance_percentage = llm_solver_response["distance"];
 
     // Log raw angle value for debugging
     RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Raw angle from LLM: %f degrees", angle_degrees);
@@ -441,7 +461,7 @@ bool onRun()
   double target_x = items_data[target_id]["coordinates"]["x"];
   double angle_rad = std::atan2(target_y - world_y, target_x - world_x);
   while (angle_rad < 0) angle_rad += 2 * M_PI;
-  angle = angle_rad;
+  angle = angle_rad + M_PI;
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final angle: (%f)", angle);
 
   // Debug final coordinates

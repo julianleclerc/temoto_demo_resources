@@ -63,10 +63,13 @@ bool onRun()
   navigation_goal.pose.pose.position.z = params_in.pose.position.z;
   
   // Set the orientation
+
+  double angle = params_in.pose.orientation.y;
+
   navigation_goal.pose.pose.orientation.x = 0.0;
   navigation_goal.pose.pose.orientation.y = 0.0;
-  navigation_goal.pose.pose.orientation.z = 0.0;
-  navigation_goal.pose.pose.orientation.w = 1.0;  // no rotation
+  navigation_goal.pose.pose.orientation.z = sin(angle/2.0);
+  navigation_goal.pose.pose.orientation.w = cos(angle/2.0);  
 
   // Log the goal
   RCLCPP_INFO(rclcpp::get_logger("navigate_to_pose"), 

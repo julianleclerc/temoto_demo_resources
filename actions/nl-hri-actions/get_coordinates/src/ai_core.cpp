@@ -1,4 +1,4 @@
-#include "inspect/ai_core.hpp"
+#include "get_coordinates/ai_core.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -33,6 +33,56 @@ std::string getApiKey() {
     
     std::cout << "AI Core: API key retrieved successfully" << std::endl;
     return std::string(apiKey);
+}
+
+std::string extractJsonFromText(const std::string& text) {
+    std::cout << "AI Core: Extracting JSON from text..." << std::endl;
+    
+    // Find the first opening curly brace
+    size_t start_pos = text.find('{');
+    if (start_pos == std::string::npos) {
+        std::cerr << "AI Core: No JSON object found in text (no opening brace)" << std::endl;
+        return "";
+    }
+    
+    // Track brace nesting to find the matching closing brace
+    int brace_count = 1;
+    size_t pos = start_pos + 1;
+    size_t end_pos = std::string::npos;
+    
+    // Parse through the string to find the matching closing brace
+    while (pos < text.length() && brace_count > 0) {
+        if (text[pos] == '{') {
+            brace_count++;
+        } else if (text[pos] == '}') {
+            brace_count--;
+            if (brace_count == 0) {
+                end_pos = pos;
+                break;
+            }
+        }
+        pos++;
+    }
+    
+    if (end_pos == std::string::npos) {
+        std::cerr << "AI Core: Could not find matching closing brace for JSON object" << std::endl;
+        return "";
+    }
+    
+    // Extract the JSON string
+    std::string json_str = text.substr(start_pos, end_pos - start_pos + 1);
+    
+    // Verify it's valid JSON by attempting to parse it
+    try {
+        nlohmann::json::parse(json_str);
+        std::cout << "AI Core: Successfully extracted valid JSON (length: " 
+                 << json_str.size() << " bytes)" << std::endl;
+        return json_str;
+    } catch (const nlohmann::json::exception& e) {
+        std::cerr << "AI Core: Extracted text is not valid JSON: " << e.what() << std::endl;
+        std::cerr << "AI Core: Extracted text: " << json_str << std::endl;
+        return "";
+    }
 }
 
 std::string encodeImageToBase64(const cv::Mat& image) {
@@ -81,7 +131,8 @@ Message createImageMessage(const std::string& text, const std::string& base64Ima
     std::cout << "AI Core: Creating image message with text: " << text << std::endl;
     std::cout << "AI Core: Base64 image size: " << base64Image.size() << " bytes" << std::endl;
     
-    // Create a JSON array for content that includes both text and image
+    // Construct the message as a direct content object that includes both text and image
+    // This is the format expected by the OpenAI Chat API for GPT-4o
     nlohmann::json content = nlohmann::json::array();
     
     // Add the text part
@@ -90,19 +141,21 @@ Message createImageMessage(const std::string& text, const std::string& base64Ima
         {"text", text}
     });
     
-    // Add the image part with high detail
+    // Add the image part
     content.push_back({
         {"type", "image_url"},
         {"image_url", {
-            {"url", "data:image/jpeg;base64," + base64Image},
-            {"detail", "high"}
+            {"url", "data:image/jpeg;base64," + base64Image}
         }}
     });
     
-    std::cout << "AI Core: Created JSON content array for message" << std::endl;
+    std::string content_str = content.dump();
+    std::cout << "AI Core: Created message content JSON (size: " << content_str.size() << " bytes)" << std::endl;
     
-    // Return a Message with JSON content
-    return Message("user", content);
+    return Message{
+        "user",
+        content_str
+    };
 }
 
 std::string callOpenAIAPI(
@@ -156,29 +209,42 @@ std::string callOpenAIAPI(
             request_json["model"] = "gpt-4o";
             request_json["temperature"] = temperature;
             request_json["max_tokens"] = max_tokens;
-            request_json["top_p"] = 0.5;
+            request_json["top_p"] = 0.3;  
             request_json["frequency_penalty"] = frequency_penalty;
             request_json["presence_penalty"] = presence_penalty;
             
             // Add messages
             nlohmann::json message_array = nlohmann::json::array();
             for (const auto& message : messages) {
-                if (message.is_json_content) {
-                    // Use structured JSON content
-                    message_array.push_back({
-                        {"role", message.role},
-                        {"content", message.content_json}
-                    });
-                    std::cout << "AI Core: Added message with role: " << message.role 
-                            << ", using structured JSON content" << std::endl;
-                } else {
-                    // Use plain text content
+                // Handle different message content formats
+                try {
+                    // Check if the content is already JSON
+                    if (message.content.find("[{\"type\":") == 0) {
+                        // Content is already JSON, parse it
+                        nlohmann::json content_json = nlohmann::json::parse(message.content);
+                        message_array.push_back({
+                            {"role", message.role},
+                            {"content", content_json}
+                        });
+                        std::cout << "AI Core: Added message with role: " << message.role 
+                                << ", content as JSON array" << std::endl;
+                    } else {
+                        // Content is plain text
+                        message_array.push_back({
+                            {"role", message.role},
+                            {"content", message.content}
+                        });
+                        std::cout << "AI Core: Added message with role: " << message.role 
+                                << ", content as text, length: " << message.content.size() << " bytes" << std::endl;
+                    }
+                } catch (const std::exception& e) {
+                    // If parsing fails, treat as plain text
                     message_array.push_back({
                         {"role", message.role},
                         {"content", message.content}
                     });
                     std::cout << "AI Core: Added message with role: " << message.role 
-                            << ", content as text, length: " << message.content.size() << " bytes" << std::endl;
+                            << ", content as text (parse failed), length: " << message.content.size() << " bytes" << std::endl;
                 }
             }
             request_json["messages"] = message_array;
@@ -230,6 +296,17 @@ std::string callOpenAIAPI(
                     std::string content = response_json["choices"][0]["message"]["content"].get<std::string>();
                     std::cout << "AI Core: Successfully extracted content from response (length: " 
                               << content.size() << " bytes)" << std::endl;
+                    
+                    // Try to extract JSON if the content might contain JSON
+                    if (content.find('{') != std::string::npos) {
+                        std::string json_content = extractJsonFromText(content);
+                        if (!json_content.empty()) {
+                            std::cout << "AI Core: Found and extracted valid JSON from response" << std::endl;
+                            return json_content; // Return the extracted JSON directly
+                        }
+                    }
+                    
+                    // If no valid JSON was extracted or no JSON markers were found, return the original content
                     return content;
                 } else {
                     std::cerr << "AI Core: Invalid response format from API" << std::endl;
@@ -308,9 +385,39 @@ std::string AIImagePrompt(
             resized_image = image.clone();
         }
         
+        // Use higher JPEG compression to further reduce size
+        std::vector<int> compression_params;
+        compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+        compression_params.push_back(80); // 80% quality
+        
         // Convert image to base64
         std::cout << "AI Core: Converting image to base64..." << std::endl;
-        std::string base64Image = encodeImageToBase64(resized_image);
+        std::string base64Image;
+        
+        // Test compression with different quality settings if needed
+        std::vector<uchar> buf;
+        cv::imencode(".jpg", resized_image, buf, compression_params);
+        
+        if (buf.size() > 50000) { // If still too large, compress more
+            std::cout << "AI Core: Image still large (" << buf.size() << " bytes), increasing compression..." << std::endl;
+            compression_params[1] = 65; // 65% quality
+            cv::imencode(".jpg", resized_image, buf, compression_params);
+        }
+        
+        // Convert to base64
+        using namespace boost::archive::iterators;
+        using base64_text = base64_from_binary<transform_width<const char *, 6, 8>>;
+        
+        std::string base64_image(base64_text((char *)buf.data()), 
+                               base64_text((char *)buf.data() + buf.size()));
+        
+        // Add padding if needed
+        size_t padding = (3 - buf.size() % 3) % 3;
+        for (size_t i = 0; i < padding; i++) {
+            base64_image.push_back('=');
+        }
+        
+        base64Image = base64_image;
         
         std::cout << "AI Core: Base64 encoding successful, compressed size: " << base64Image.size() << " bytes" << std::endl;
         
@@ -331,7 +438,7 @@ std::string AIImagePrompt(
         for (const auto& msg : messages) {
             if (msg.role == "system") {
                 api_messages.push_back(msg);
-                std::cout << "AI Core: Added system message" << std::endl;
+                std::cout << "AI Core: Added system message: " << msg.content << std::endl;
             }
         }
         
@@ -349,7 +456,7 @@ std::string AIImagePrompt(
         
         // Construct a multipart message with text and image
         api_messages.push_back(createImageMessage(promptText, base64Image));
-        std::cout << "AI Core: Created user message with image content" << std::endl;
+        std::cout << "AI Core: Created user message with image" << std::endl;
         
         // Use our helper function to make the API call
         std::cout << "AI Core: Calling OpenAI API with " << api_messages.size() << " messages" << std::endl;

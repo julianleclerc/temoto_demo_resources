@@ -95,36 +95,64 @@ bool onRun()
     return false;
   }
 
-  std::string instructions = 
-  "You are an advanced computer vision system designed for image inspection.\n"
-  "You will receive an object or area to inspect along with a picture.\n"
-  "Your task is to analyze the image and provide inspection results.\n"
-  "\n"
-  "IMPORTANT: Your response MUST be a valid JSON string with EXACTLY this format:\n"
-  "{\n"
-  "  \"inspection_message\": \"Your detailed inspection findings here. Be specific about what you observe and any potential issues.\",\n"
-  "  \"requires_attention\": false\n"
-  "}\n"
-  "\n"
-  "- The \"inspection_message\" field should contain your detailed analysis of what you see in the image related to the inspection request.\n"
-  "- The \"requires_attention\" field must be a boolean (true or false, no quotes):\n"
-  "  - Set it to true if you detect any issues that require human intervention (safety concerns, missing components, damage, etc.)\n"
-  "  - Set it to false if everything appears normal and no intervention is needed.\n"
-  "\n"
-  "Do NOT include any text outside the JSON structure. Your entire response must be parseable as valid JSON.\n";
+  std::string instructions = R"(
+    You are an advanced computer vision system designed for robot inspection tasks.
+    
+    INSPECTION CONTEXT:
+    You will be given:
+    1. An image from the robot's camera
+    2. An inspection objective that may be either:
+       - A general inspection of an object/area
+       - A check for the presence of something specific
+    
+    IMPORTANT: Your response MUST be a valid JSON string with EXACTLY this format:
+    {
+      "inspection_message": "Your detailed inspection findings here. Be specific about what you observe and any potential issues.",
+      "requires_attention": false,
+      "confidence_level": 0.95,
+      "inspection_type": "general|presence"
+    }
+    
+    FIELD DESCRIPTIONS:
+    - "inspection_message": Detailed analysis of what you see related to the inspection request.
+       Make this conversational and informative as it will be relayed directly to the user. Highlight any elements that may be of concern if needed.
+    
+    - "requires_attention": Boolean (true/false, no quotes):
+      for general / security inspections:
+       - Set to true if you detect any issues that require human intervention (like hazardous elements)
+       - Set to false if everything appears normal and no intervention is needed
+      for presence inpsections:
+       - Set to true if you identify the presnece of requested object(s)
+       - Set to false if you don't indentify the presence of requested object(s)
+    
+    - "confidence_level": Number between 0 and 1 indicating your confidence in the assessment
+        
+    - "inspection_type": String indicating which type of inspection was performed:
+       - "general" - Overall assessment of an object or area, looking for suspicious or concerning elements
+       - "presence" - Checking if something specific is there
+    
+    ADDITIONAL GUIDELINES:
+    - Focus only on the specific inspection request - don't report on unrelated elements
+    - If you cannot determine something with confidence, state this explicitly in your inspection_message
+    - For presence checks, clearly state whether the object was found or not
+    - For security checks, explain what makes something suspicious or not
+    - Use natural language in your inspection_message as it will be communicated directly to users
+    
+    Do NOT include any text outside the JSON structure. Your entire response must be parseable as valid JSON.
+  )";
 
+  
   // Create messages for the AI
   std::vector<ai_core::Message> messages;
-  // Log errors
-
+  
   // System message to define the AI's role
   messages.push_back({
-      "system", 
-      instructions
+    "system", 
+    instructions
   });
-
+        
   // User message to define the inspection target
-  std::string user_message = "Can you determine anything suspicious for: " + params_in.inspect + "\n";
+  std::string user_message = "User input inpsection for: " + params_in.inspect + "\n";
   messages.push_back({
     "user", 
     user_message
@@ -174,9 +202,9 @@ bool onRun()
 
   // Check for error indicator -> raise error if yes 
   if (response_json["requires_attention"].get<bool>()) {
-    publishInspectionResult(response_json["inspection_message"]);
+    //publishInspectionResult(response_json["inspection_message"]);
     
-    std::string error_message = "A concern has been raised in the inspection: " + 
+    std::string error_message = "A concern has been raised in the inspection that requires user intervention (either an element of concern as been raised or an object has been identified): " + 
                                 response_json["inspection_message"].get<std::string>() + "\n";
     
     temoto_log["type"] = "error";

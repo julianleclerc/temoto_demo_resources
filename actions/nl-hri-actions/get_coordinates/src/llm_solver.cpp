@@ -11,216 +11,237 @@ using json = nlohmann::json;
 
 namespace LLMSolver {
 
-std::string createIDSearchInstructions() {
-    return R"(
-You are an assistant responsible for providing the **target id** the robot need to navigate to on a map.
-You will receive:
-1. **A map image**:
- - **Black areas**: Non-traversable regions (e.g., walls).
- - **White areas**: Traversable regions where the robot can roam but might not always be reachable.
- - **Robot's Current Position**: Indicated by a red circle and an orientation line (0 degrees at 3 o'clock, counter-clockwise rotation).
- - **Objects**: Represented as colored rectangles with readable ID labels.
-2. **A user request**:
- - Specifies the target object to navigate to and may include additional descriptive attributes.
-
-### Response Format:
-#### **Success Response**:
-If valid coordinates are found:
-{
- "success": "true",
- "target_id": "<target_id>",
- "error": "none",
- "message": "Starting Navigation to <object and description>"
-}
-#### **Error Response**:
-If an error occurs:
-{
- "success": "false",
- "target_id": "none",
- "error": <error_type>,
- "message": "<error_message>"
-}
-- **Error Types**:
- - "noObjects": No objects match the description.
- - "ambiguous": Multiple objects match, but no clear decision can be made.
- - "noPath": The robot cannot reach a valid position near the target.
- - "skip": User explicitly requested to skip the operation.
-
-The output must only include the JSON response. No additional reasoning, explanation, or context should be part of the response.
-)";
-}
-
 std::string createOneShotInstructions() {
     return R"(
-You are an assistant responsible for providing navigation coordinates to help a robot reach a target object. You will:
-1. Analyze a map image showing objects and robot position
-2. Identify the specific target object based on user description
-3. Return coordinates where the robot should move to reach this target
 
-## Map Interpretation:
-- **White areas**: Traversable spaces where the robot can move
-- **Black areas**: Obstacles that cannot be passed
-- **Shaded/gray areas**: Non-traversable regions the robot must avoid
-- **Blue circle**: Robot's current position
-- **Colored rectangles**: Objects with ID labels (e.g., plant_001, chair_002)
-- **Red grid lines**: Reference grid (coordinates can be on these lines)
+    You are an assistant responsible for providing the **target id** the robot need to navigate to on a map.
 
-## Coordinate Selection Requirements:
-1. Coordinates MUST be within white traversable areas only
-2. Coordinates MUST be within the map boundaries
-3. Coordinates should be close enough to the target object for meaningful interaction (typically 0.5-1 meter away)
-4. The point should be in an open area, not pressed against walls or obstacles
-5. Choose a point that gives the robot a clear view of the target object
+    You will receive:
+    1. **A map image**:
+       - **Black areas**: Non-traversable regions (e.g., walls).
+       - **White areas**: Traversable regions where the robot can roam but might not always be reachable.
+       - **Robot’s Current Position**: Indicated by a red circle and an orientation line (0 degrees at 3 o'clock, counter-clockwise rotation).
+       - **Objects**: Represented as colored rectangles with readable ID labels.
+    2. **An object list**:
+       - Each entry includes an object’s ID, description, attributes (if any), and coordinates.
+    3. **A user request**:
+       - Specifies the target object to navigate to and may include additional descriptive attributes.
+    4. **Conversation history**:
+       - If an error occurred previously, this history provides context to assist in decision-making.
+    
+    ---
+    
+    ### Key Guidelines:
+     **Decision-Making**:
+       - Minimize errors by focusing on the map and object list provided.
+       - If multiple objects match the description but cannot be resolved due to ambiguity, return an error only when no clear choice is possible.
+       - Use previous user conversations to clarify intent and improve response accuracy.
+    
+    
+    ### Workflow:
+    
+    #### **1. Object Identification**
+       - Search the object list for items matching the user’s description.
+       - Match based on:
+         - Exact ID or name match.
+         - Attributes provided (e.g., “next to the fridge”).
+         - Spatial clues (e.g., proximity, relative position from the robot, what the robot is looking at).
+       - If no objects match, set `"success": "false"` with `"error": "noObjects"`.
+    
+    #### **2. Handling Ambiguities**
+       - If multiple objects match:
+         - Prioritize the object **closest** to the robot.
+         - Use the robot’s orientation to align with objects it is already facing or near.
+         - If still unresolved, set `"success": "false"` with `"error": "ambiguous"`.
+    
+    #### **3. Error Handling**
+       - Only return an error when:
+         - No objects match (`"noObjects"`).
+         - Ambiguity prevents making a clear decision (`"ambiguous"`).
+         - The target is unreachable due to obstacles (`"noPath"`).
+       - **Do not return unnecessary errors** when valid coordinates can be proposed based on the map and object list.
+    
+    ---
+    
+    ### Response Format:
+    
+    #### **Success Response**:
+    If valid coordinates are found:
+    {
+      "success": "true",
+      "target_id": "<target_id>",
+      "error": "none",
+      "message": "Starting Navigation to <object and discription>"
+    }
+    
+    #### **Error Response**:
+    If an error occurs:
+    {
+      "success": "false",
+      "target_id": "null",
+      "error": <error_type>,
+      "message": "<error_message>"
+    }
+    
+    - **Error Types**:
+      - "noObjects": No objects match the description.
+      - "ambiguous": Multiple objects match, but no clear decision can be made.
+      - "noPath": The robot cannot reach a valid position near the target.
+      - "skip": User explicitly requested to skip the operation.
+    
+    ---
+    
+    ### Example Response:
+    
+    #### **User Request**: "Navigate to the plant next to the fridge."
+    
+    **Robot’s Position**: `(x: 100, y: 150, orientation: 0 degrees)`  
+    **Object List**:
+    - `plant_001`: `(green, near fridge_001 on map)`
+    - `plant_002`: `(green, on corner of the map)`
+    
+    
+    **Logic**:
+    1. Identify that plant_001 and plant_002 are both plants
+    2. Check the map and find plant_001 matches the user's request (next to fridge).
+    
+    
+    **Response**:
+    {
+      "success": "true",
+      "target_id": "plant_004",
+      "error": "none",
+      "message": "Found the plant next to the fridge. Robot will begin navigation"
+    }
+    
+    ---
+    The output must only include the JSON response. No additional reasoning, explanation, or context should be part of the response. For example:
+    {
+      "success": "true",
+      "target_id": "plant_002",
+      "error": "none",
+      "message": "Starting Navigation to the green plant on the corner of the room"
+    }
 
-## Response Format:
-{
- "success": "true",
- "coordinates": {"x": <target x-pixel-coordinate>, "y": <target y-pixel-coordinate>},
- "target_id": "<target_id>",
- "error": "none",
- "message": "Heading to <target> because <reasoning behind decision>"
-}
-
-## Error Conditions:
-If you can't find a valid target or navigation point:
-{
- "success": "false",
- "coordinates": {"x": null, "y": null},
- "target_id": "<error_type>",
- "error": "<error_type>",
- "message": "<descriptive error message>"
-}
-
-Error types:
-- "noObjects": The requested object doesn't exist on the map
-- "ambiguous": Multiple matching objects exist and can't be distinguished
-- "unreachable": Object exists but no valid navigation point can be found
-
-## Finding the Right Target:
-1. First identify ALL objects matching the type requested (e.g., all plants)
-2. If the request has qualifiers like "next to X", find the object with that relation
-3. For "next to" relations, check if objects are within 2 meters of each other
-4. Measure distances between objects based on their coordinates as labeled on the map
-
-## Selecting Navigation Coordinates:
-1. Find a position that is:
-   - On white space (traversable area)
-   - ~0.7-1 meter from the target (20-40 pixels depending on map scale)
-   - Placed in a way that the robot would face the center of the target
-   - Not blocked by obstacles (black areas)
-2. If multiple positions meet these criteria, choose the one closest to the robot
-
-IMPORTANT: Double-check your coordinates are valid (within map bounds and on white traversable space)
-
-    )";
+        )";
 }
 
 std::string createPolarInstructions() {
     return R"(
-You are an assistant responsible for identifying a target and returning the polar coordinates to which a robot must navigate to in relation to the target. You will:
-1. Analyze a map image showing objects and robot position
-2. Identify the specific target object based on user description
-3. Return appropriate angle (from the target's center outward) at which the robot should approach
-4. Return appropriate distance to which the robot should approach the target
+You are an assistant responsible for identifying a target object and determining the optimal approach for a robot. Your task is to:
+1. Analyze the map image showing objects and the robot's current position
+2. Identify the specific target object based on the user's description
+3. Calculate the angle from robot approach to target and determine the appropriate distance
 
-## Map Interpretation:
-- **White areas**: Traversable spaces where the robot can move
-- **Black areas**: Obstacles that cannot be passed (both solid black and gray areas should be treated as non-traversable)
+## CRITICAL: RESPONSE FORMAT REQUIREMENTS
+YOU MUST FOLLOW THESE FORMATTING RULES EXACTLY:
+1. Your response MUST be a valid JSON object enclosed in curly braces {}
+2. Do NOT include any explanatory text, markdown, or code blocks outside the JSON
+3. Do NOT include ```json or ``` anywhere in your response
+4. Start your response with { and end with } without any additional characters
+5. Ensure all JSON keys and string values are enclosed in double quotes
+
+## Map Visual Understanding:
+- **White areas**: Open spaces where the robot can move freely
+- **Black/Gray areas**: Walls and obstacles the robot cannot pass through
+- **Colored rectangles**: Various objects with ID labels
 - **Blue circle**: Robot's current position
-- **Colored rectangles**: Objects with ID labels (e.g., plant_001, chair_002)
-- **Red grid lines**: Reference grid (coordinates can be on these lines)
+- **Red Grid**: Is a grid overlay to help in determiing the angle at which the angle at which the robot should approach the target
 
-## Finding the Right Target:
-1. CRITICAL: Be extremely precise when interpreting spatial relationships like "next to", "near", "in front of", etc.
-   - "Next to" means objects that are DIRECTLY adjacent with minimal distance between them (< 1 meter)
-   - "Near" means in the general vicinity but not necessarily adjacent (1-3 meters)
-   - Objects on opposite sides of a room are NOT "next to" each other, even if they're in the same general area
-2. THOROUGH ANALYSIS: Make a concerted effort to identify the correct object before declaring ambiguity:
-   - Analyze ALL spatial relationships mentioned in the request (e.g., "plant next to fridge")
-   - Consider secondary spatial relationships (e.g., "plant next to fridge near the door")
-   - Look at the ENTIRE context of the map (room layout, object groupings, unique positions)
-   - Use common sense reasoning about typical object placements and relationships
-3. When evaluating relationships between objects (like "plant next to fridge"):
-   - Calculate the EXACT distance between object boundaries
-   - Rank ALL matching objects by their distance to the reference object
-   - If one object is SIGNIFICANTLY closer than others (even by small margins), select it
-   - Consider additional context clues like visibility from the robot's position
-4. Always specify the target_id precisely as shown on the map label
-5. HANDLING AMBIGUITY (Use sparingly):
-   - Only declare ambiguity when MULTIPLE objects match ALL criteria with virtually IDENTICAL relevance
-   - If one object has even a SLIGHT advantage in matching the description, choose it
-   - Before declaring ambiguity, try considering additional factors like:
-     * Object size and prominence
-     * Centrality in the room
-     * Accessibility from the robot's position
-     * Relationship to other landmarks in the room
-   - Only return an "ambiguous" error when, after thorough analysis, it's impossible to reasonably select one target
+## Finding the Target Object (Using Visual Assessment):
+1. VISUALLY SCAN the map for objects matching the description
+2. Look for VISUAL RELATIONSHIPS between objects:
+   - "Near the wall" - object visibly close to any black border
+   - "In the corner" - object visually located in any corner of the room
+   - "Next to the table" - object that appears closest to any table
+   - "Between X and Y" - object visually positioned between two other objects
+3. Use VISUAL CONTEXT to identify the target, not just label names
+4. If multiple objects match, choose the one that BEST FITS the visual description
+5. Ensure to examine the relationship of objects both vertically and horizontally (the map is 2d space)
 
-## Finding the Right Angle:
-1. Angle must be in degrees from 0 to 359 (or equivalently -180 to 180)
-2. The angle is measured from the center of the target outward
-3. 0 degrees points to the right (east) of the target
-4. 90 degrees points upward (north) from the target
-5. 180 degrees points to the left (west) of the target
-6. 270 degrees points downward (south) from the target
-7. CRITICAL: The angle must result in a position that:
-   - Is in a COMPLETELY OPEN area with sufficient clearance (at least 1 meter from any other object)
-   - NEVER places the robot between the target and a wall/obstacle
-   - Provides clear line-of-sight to the target without obstruction
-   - Allows for easy robot access without tight maneuvering
-   - Avoids positions where the robot might block pathways or access to other objects
-8. ALWAYS check in at least 8 directions around the target (0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°) to find the optimal approach
-9. Prioritize angles that place the robot in open spaces rather than confined areas, even if slightly farther from the target
+## Determining the Robot-to-Target Angle:
+1. Find the target obejct position 
+2. Examine the area around
+3. Determine the angle of approach from the ROBOT TO THE TARGET in that is the least obscured by obstacles (such as walls or other objects):
+   - 0 degrees points to the right (east)
+   - 90 degrees points up (north)
+   - 180 degrees points to the left (west)
+   - 270 degrees points down (south)
 
 ## Finding the Right Distance:
-1. Distance is a percentage from 0 to 100 
+1. Distance is a percentage from 0 to 100
 2. 0% means very close to the target's edge (for interaction)
 3. 50% means a moderate distance from the target
 4. 100% means a far distance from the target
 5. Choose a distance that:
-   - Keeps the robot entirely in white space
-   - Provides at least 0.5 meters of clearance from all obstacles
-   - Ensures no part of the robot would overlap with any object
-   - Is appropriate for the target type and intended interaction
-6. NEVER choose a distance that would place any part of the robot in non-traversable areas
+   - Places the robot in a COMPLETELY WHITE SPACE area
+   - Ensures no walls or obstacles are within 10-15 pixels
+   - Provides PLENTY OF SPACE for the robot to maneuver
+   - Is NOT wedged between the target and a wall or other object
 
-## Additional Verification Checks:
-1. After identifying a target and determining polar coordinates, VERIFY your choice by:
-   - Confirming the target truly matches the relationship description (e.g., "next to fridge")
-   - Checking if the resulting position places the robot in a fully open area
-   - Ensuring the robot would not be wedged between objects or against walls
-   - Verifying there's enough room for the robot to rotate if needed
-2. If the initially chosen angle would place the robot in a confined space, ADJUST your choice to prioritize robot accessibility
+## VISUAL ASSESSMENT CHECKLIST:
+- ✓ The chosen distance places the robot approach in a clearly open area
+- ✓ No walls or obstacles near the robot's approach position
+- ✓ A circle with 10-pixel radius would fit entirely in white space
+- ✓ Clear line of sight between robot and target
+- ✓ Position allows robot to face the target directly
+
+## WHAT TO AVOID (Visual Red Flags):
+- ✕ Positions next to walls or in corners
+- ✕ Positions in narrow passages or doorways
+- ✕ Placing robot between the target and a wall
+- ✕ Cluttered areas with multiple objects nearby
+
+## Example 1:
+{
+"success": "true",
+"target_id": "plant_001",
+"distance": 50,
+"robot_to_target_angle": 135,
+"error": "none",
+"message": "Navigating to plant_001. Selected distance provides clear approach with plenty of open space for maneuvering."
+}
+
+## Example 2:
+{
+"success": "false",
+"target_id": "none",
+"distance": null,
+"robot_to_target_angle": null,
+"error": "notFound",
+"message": "No object matching description found on the map."
+}
 
 ## Response Format:
 {
- "success": "true",
- "target_id": "<target_id>",
- "polar_coordinates": {"angle": <angle>, "distance": <distance>},
- "error": "none",
- "message": "Heading to <target> because <detailed reasoning>"
+"success": "true",
+"target_id": "<target_id>",
+"distance": <distance_percentage>,
+"robot_to_target_angle": <angle_in_degrees>,
+"error": "none",
+"message": "Navigating to <target>. <explanation of selection>"
 }
 
-## Error Conditions:
-If you can't find a valid target or navigation point:
+## Error Format:
 {
- "success": "false",
- "target_id": "none",
- "polar_coordinates": {"angle": "none", "distance": "none"},
- "error": "<error_type>",
- "message": "<descriptive error message>",
- "candidates": ["<target_id_1>", "<target_id_2>", "..."]
+"success": "false",
+"target_id": "none",
+"distance": null,
+"robot_to_target_angle": null,
+"error": "<error_type>",
+"message": "<descriptive error message>",
+"candidates": ["<target_id_1>", "<target_id_2>", "..."]
 }
 
 Error types:
-- "noObjects": The requested object doesn't exist on the map
-- "ambiguous": Multiple matching objects exist and can't be distinguished (MUST include "candidates" field with array of all matching object IDs)
-- "unreachable": Object exists but no valid navigation point can be found
+- "notFound": The requested object doesn't appear on the map
+- "ambiguous": Multiple objects match the description (include all matches in "candidates")
+- "noApproach": No good approach position can be found visually
 
-DOUBLE-CHECK your target identification before responding. Make sure the target_id matches exactly what's on the map.
-You MUST correctly interpret spatial relationships between objects for proper target identification.
-    )";
+REMEMBER: Your entire response must be valid JSON. Start with { and end with }. No text outside the JSON structure.
+)";
 }
+
 
 std::string cleanLLMJsonResponse(const std::string& raw_response) {
     std::cout << "LLM Solver: Cleaning raw LLM response to extract JSON..." << std::endl;
@@ -254,6 +275,7 @@ std::string cleanLLMJsonResponse(const std::string& raw_response) {
 
 nlohmann::json getCoordinateIDSearch(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data,
     const std::string& target_name) {
     
     std::cout << "LLM Solver: Starting ID search for target: " << target_name << std::endl;
@@ -287,7 +309,7 @@ nlohmann::json getCoordinateIDSearch(
         std::string ai_response = ai_core::AIImagePrompt(
             messages,
             map_image,  
-            0.2f,       // temperature
+            0.4f,       // temperature
             1024,       // max_tokens
             0.0f,       // frequency_penalty
             0.0f        // presence_penalty
@@ -311,7 +333,7 @@ nlohmann::json getCoordinateIDSearch(
         // Parse the cleaned response
         try {
             json response_json = json::parse(cleaned_response);
-            std::cout << "LLM Solver: Successfully parsed JSON response for ID search" << std::endl;
+            std::cout << "LLM Solver: Successfully parsed JSON response for ID search" << std::endl;            
             return response_json;
         } catch (const json::exception& e) {
             std::cerr << "LLM Solver: JSON parsing error: " << e.what() << std::endl;
@@ -341,6 +363,7 @@ nlohmann::json getCoordinateIDSearch(
 
 nlohmann::json getCoordinateOneShot(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data,
     const std::string& target_name) {
     
     std::cout << "LLM Solver: Starting one-shot coordinate search for target: " << target_name << std::endl;
@@ -366,14 +389,19 @@ nlohmann::json getCoordinateOneShot(
         user_msg.role = "user";
         user_msg.content = user_message;
         messages.push_back(user_msg);
-        
+
+        // Add items
+        ai_core::Message items_msg;
+        items_msg.role = "user";
+        items_msg.content = "Available items:\n" + items_data.dump(2);
+        messages.push_back(items_msg);
+
         std::cout << "LLM Solver: Calling OpenAI API with map image for one-shot search..." << std::endl;
         std::cout << "LLM Solver: Map image dimensions: " << map_image.cols << "x" << map_image.rows << std::endl;
         
         // Call AI with image prompt using the ai_core implementation
-        std::string ai_response = ai_core::AIImagePrompt(
+        std::string ai_response = ai_core::callOpenAIAPI(
             messages,
-            map_image,  // Use the image directly
             0.3f,       // temperature
             1024,       // max_tokens
             0.0f,       // frequency_penalty
@@ -388,7 +416,6 @@ nlohmann::json getCoordinateOneShot(
             // Return error response for processing failure
             json error_json = {
                 {"success", "false"},
-                {"coordinates", {{"x", "none"}, {"y", "none"}}},
                 {"target_id", "none"},
                 {"error", "systemError"},
                 {"message", "Failed to extract valid JSON from LLM response"}
@@ -407,7 +434,6 @@ nlohmann::json getCoordinateOneShot(
             // Return error response for JSON parsing failure
             json error_json = {
                 {"success", "false"},
-                {"coordinates", {{"x", "none"}, {"y", "none"}}},
                 {"target_id", "none"},
                 {"error", "systemError"},
                 {"message", "Failed to parse LLM response: " + std::string(e.what())}
@@ -420,7 +446,6 @@ nlohmann::json getCoordinateOneShot(
         // Return error response for any critical failure
         json error_json = {
             {"success", "false"},
-            {"coordinates", {{"x", "none"}, {"y", "none"}}},
             {"target_id", "none"},
             {"error", "systemError"},
             {"message", "Critical error in one-shot coordinate search: " + std::string(e.what())}
@@ -431,6 +456,7 @@ nlohmann::json getCoordinateOneShot(
 
 nlohmann::json getCoordinatePolar(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data,
     const std::string& target_name) {
     
     std::cout << "LLM Solver: Starting polar coordinate search for target: " << target_name << std::endl;
@@ -457,6 +483,13 @@ nlohmann::json getCoordinatePolar(
         user_msg.content = user_message;
         messages.push_back(user_msg);
         
+        // Add items
+        ai_core::Message items_msg;
+        items_msg.role = "user";
+        items_msg.content = "Available items:\n" + items_data.dump(2);
+        messages.push_back(items_msg);
+
+
         std::cout << "LLM Solver: Calling OpenAI API with map image for one-shot search..." << std::endl;
         std::cout << "LLM Solver: Map image dimensions: " << map_image.cols << "x" << map_image.rows << std::endl;
         
@@ -464,7 +497,7 @@ nlohmann::json getCoordinatePolar(
         std::string ai_response = ai_core::AIImagePrompt(
             messages,
             map_image,  // Use the image directly
-            0.2f,       // temperature
+            0.6f,       // temperature
             1024,       // max_tokens
             0.0f,       // frequency_penalty
             0.0f        // presence_penalty
@@ -522,13 +555,14 @@ nlohmann::json getCoordinatePolar(
 
 nlohmann::json getCoordinateFallback(
     const cv::Mat& map_image,
+    const nlohmann::json& items_data,
     const std::string& target_name) {
     
     std::cout << "LLM Solver: Using coordinate fallback method for target: " << target_name << std::endl;
     
     try {
         // For fallback, we'll use the ID search method as it's more basic
-        return getCoordinateIDSearch(map_image, target_name);
+        return getCoordinateIDSearch(map_image, items_data, target_name);
     } catch (const std::exception& e) {
         std::cerr << "LLM Solver: Critical error in getCoordinateFallback: " << e.what() << std::endl;
         
