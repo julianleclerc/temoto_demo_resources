@@ -1,0 +1,47 @@
+{
+  "area_002": {
+    "description": "Area B",
+    "coordinates": {
+      "x": 0.5,
+      "y": 3.0
+    },
+    "dimensions": {
+      "height": 0.5,
+      "width": 0.5
+    }
+  },
+  "area_001": {
+    "description": "Area A",
+    "coordinates": {
+      "x": -2.8,
+      "y": -2.5
+    },
+    "dimensions": {
+      "height": 0.5,
+      "width": 0.5
+    }
+  },
+  "area_003": {
+    "description": "Area C",
+    "coordinates": {
+      "x": 2.5,
+      "y": -2.2
+    },
+    "dimensions": {
+      "height": 0.5,
+      "width": 0.5
+    }
+  },
+  "item_001" : {
+        "description": "Suspicious bag",
+        "coordinates": {
+          "x": 3,
+          "y": -3
+      },
+        "dimensions": {
+          "height": 0.5,
+          "width": 0.5
+        }
+  }
+}
+  

@@ -461,7 +461,7 @@ bool onRun()
   double target_x = items_data[target_id]["coordinates"]["x"];
   double angle_rad = std::atan2(target_y - world_y, target_x - world_x);
   while (angle_rad < 0) angle_rad += 2 * M_PI;
-  angle = angle_rad;
+  angle = angle_rad + M_PI;
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final angle: (%f)", angle);
 
   // Debug final coordinates
