@@ -640,6 +640,10 @@ cv::Point MapBuilder::coordinates_astar(
     
     std::cout << "Starting A* pathfinding algorithm with circular radius padding..." << std::endl;
     
+    // Define wall padding constant in meters
+    const double WALL_PADDING_METERS = 0.1; // Can be adjusted as needed
+    std::cout << "Using wall padding: " << WALL_PADDING_METERS << " meters" << std::endl;
+    
     // Threshold map to black and white
     cv::Mat binary_map;
     cv::threshold(map, binary_map, 200, 255, cv::THRESH_BINARY);
@@ -654,6 +658,24 @@ cv::Point MapBuilder::coordinates_astar(
     float resolution = params["resolution"].get<float>();
     double origin_x = params["origin"][0].get<double>();
     double origin_y = params["origin"][1].get<double>();
+    
+    // Calculate wall padding in pixels
+    int wall_padding_px = static_cast<int>(WALL_PADDING_METERS / resolution);
+    std::cout << "Wall padding in pixels: " << wall_padding_px << " px" << std::endl;
+    
+    // Apply padding to walls/obstacles (dilate black areas)
+    cv::Mat padded_binary_map = binary_map.clone();
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, 
+                                              cv::Size(2 * wall_padding_px + 1, 2 * wall_padding_px + 1));
+    cv::erode(padded_binary_map, padded_binary_map, kernel);
+    
+    // Save padded map for debugging
+    try {
+        cv::imwrite(map_output_path + "/astar_padded_walls.png", padded_binary_map);
+        std::cout << "Saved padded wall map to: " << map_output_path + "/astar_padded_walls.png" << std::endl;
+    } catch (const cv::Exception& e) {
+        std::cerr << "Error saving padded wall map: " << e.what() << std::endl;
+    }
 
     // Convert robot position to pixel coordinates
     int robot_x = static_cast<int>((robot_pos.x - origin_x) / resolution);
@@ -674,7 +696,11 @@ cv::Point MapBuilder::coordinates_astar(
         int pw = std::max(1, static_cast<int>(width / resolution));
         int ph = std::max(1, static_cast<int>(height / resolution));
         
-        cv::rectangle(binary_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0), cv::FILLED);
+        // Add padding to objects too
+        pw += 2 * wall_padding_px;
+        ph += 2 * wall_padding_px;
+        
+        cv::rectangle(padded_binary_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0), cv::FILLED);
         cv::rectangle(color_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0, 0, 0), cv::FILLED);
     }
 
@@ -712,9 +738,9 @@ cv::Point MapBuilder::coordinates_astar(
         // Save initialization visualization
         try {
             cv::imwrite(map_output_path + "/astar_init.png", color_map);
-            std::cout << "Saved colorized cost map to: " << map_output_path + "/astar_init.png" << std::endl;
+            std::cout << "Saved initialization map to: " << map_output_path + "/astar_init.png" << std::endl;
         } catch (const cv::Exception& e) {
-            std::cerr << "Error saving colorized cost map: " << e.what() << std::endl;
+            std::cerr << "Error saving initialization map: " << e.what() << std::endl;
         }
 
         // A* algorithm implementation
@@ -769,11 +795,11 @@ cv::Point MapBuilder::coordinates_astar(
                 int nx = current.point.x + dx[i];
                 int ny = current.point.y + dy[i];
 
-                if (nx < 0 || ny < 0 || nx >= binary_map.cols || ny >= binary_map.rows)
+                if (nx < 0 || ny < 0 || nx >= padded_binary_map.cols || ny >= padded_binary_map.rows)
                     continue;
 
-                // Check if this is a valid (white) pixel
-                if (binary_map.at<uchar>(ny, nx) != 255)
+                // Check if this is a valid (white) pixel in the padded map
+                if (padded_binary_map.at<uchar>(ny, nx) != 255)
                     continue;
 
                 // Calculate distance from this point to target center
@@ -833,11 +859,11 @@ cv::Point MapBuilder::coordinates_astar(
             return path[0];
         } 
         else {
-            std::cout << "Could not find path to target boundary, returning robot position" << std::endl;
+            std::cout << "Could not find path to target boundary..." << std::endl;
         }
     }
     else {
-        std::cout << "Target ID not found in items data, returning robot position" << std::endl;
+        std::cout << "Target ID not found in items data ... " << std::endl;
     }
 
     return cv::Point(robot_x, robot_y);

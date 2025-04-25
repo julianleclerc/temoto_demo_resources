@@ -209,7 +209,7 @@ std::string callOpenAIAPI(
             request_json["model"] = "gpt-4o";
             request_json["temperature"] = temperature;
             request_json["max_tokens"] = max_tokens;
-            request_json["top_p"] = 0.9;  
+            request_json["top_p"] = 0.7;  
             request_json["frequency_penalty"] = frequency_penalty;
             request_json["presence_penalty"] = presence_penalty;
             

@@ -35,6 +35,7 @@ std::string createOneShotInstructions() {
        - Minimize errors by focusing on the map and object list provided.
        - If multiple objects match the description, ALWAYS return ambiguous error unless the user has provided specific distinguishing attributes.
        - Use previous user conversations to clarify intent and improve response accuracy.
+       - Use semantic matching for object descriptions - don't require exact matches.
     
     
     ### Workflow:
@@ -42,9 +43,13 @@ std::string createOneShotInstructions() {
     #### **1. Object Identification**
        - Search the object list for items matching the user's description.
        - Match based on:
-         - The object description
+         - The object description using semantic matching (not just exact matching)
          - You must use attributes provided (e.g., "next to the fridge").
          - Spatial clues (e.g., proximity, relative position from the robot, what the robot is looking at).
+       - Apply flexible matching:
+         - "loading area" should match items with "loading" in the description
+         - "component storage" should match items with "storing" or "component" in the description
+         - Consider synonyms (e.g., "bay" and "area" can be related)
        - If no objects match, set "success": "false" with "error": "noObjects". 
     
     #### **2. Handling Ambiguities**
@@ -118,25 +123,25 @@ std::string createOneShotInstructions() {
     
     ---
     
-    ### Example Response for Success:
+    ### Example Response for Semantic Matching:
     
-    #### **User Request**: "Navigate to the plant next to the fridge."
+    #### **User Request**: "Navigate to the loading area."
     
     **Robot's Position**: (x: 100, y: 150, orientation: 0 degrees)  
     **Object List**:
-    - plant_001: (green, near fridge_001 on map)
-    - plant_002: (green, on corner of the map)
+    - area_004: (Loading bay)
+    - area_001: (Component storage area)
     
     **Logic**:
-    1. Identify that plant_001 and plant_002 are both plants
-    2. Check the map and find plant_001 matches the user's request (next to fridge).
+    1. Identify that area_004 with description "Loading bay" semantically matches "loading area"
+    2. Return success with the appropriate target ID
     
     **Response**:
     {
       "success": "true",
-      "target_id": "plant_004",
+      "target_id": "area_004",
       "error": "none",
-      "message": "Found the plant next to the fridge. Robot will begin navigation"
+      "message": "Starting Navigation to the loading bay (area_004) "
     }
     
     ---
@@ -333,7 +338,7 @@ nlohmann::json getCoordinateIDSearch(
         std::string ai_response = ai_core::AIImagePrompt(
             messages,
             map_image,  
-            0.2f,       // temperature
+            0.4f,       // temperature
             1024,       // max_tokens
             0.0f,       // frequency_penalty
             0.0f        // presence_penalty
