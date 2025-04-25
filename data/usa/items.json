@@ -1,0 +1,46 @@
+{
+  "area_001": {
+    "description": "Component A storing area",
+    "coordinates": {
+      "x": 4.5,
+      "y": 8.5
+    },
+    "dimensions": {
+      "height": 0.2,
+      "width": 0.2
+    }
+  },
+  "area_003": {
+    "description": "Component B storing area",
+    "coordinates": {
+      "x": 2,
+      "y": -4.2
+    },
+    "dimensions": {
+      "height": 0.2,
+      "width": 0.2
+    }
+  },
+  "area_004": {
+    "description": "Loading bay",
+    "coordinates": {
+      "x": 10,
+      "y": 6
+    },
+    "dimensions": {
+      "height": 0.2,
+      "width": 0.2
+    }
+  },
+  "dock_001": {
+    "description": "Robot charging dock",
+    "coordinates": {
+      "x": 1.0,
+      "y": 0.0
+    },
+    "dimensions": {
+      "height": 0.2,
+      "width": 0.2
+    }
+  }
+}
