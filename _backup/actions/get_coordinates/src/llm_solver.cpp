@@ -13,16 +13,17 @@ namespace LLMSolver {
 
 std::string createOneShotInstructions() {
     return R"(
+
     You are an assistant responsible for providing the **target id** the robot need to navigate to on a map.
 
     You will receive:
     1. **A map image**:
        - **Black areas**: Non-traversable regions (e.g., walls).
        - **White areas**: Traversable regions where the robot can roam but might not always be reachable.
-       - **Robot's Current Position**: Indicated by a red circle and an orientation line (0 degrees at 3 o'clock, counter-clockwise rotation).
+       - **Robot’s Current Position**: Indicated by a red circle and an orientation line (0 degrees at 3 o'clock, counter-clockwise rotation).
        - **Objects**: Represented as colored rectangles with readable ID labels.
     2. **An object list**:
-       - Each entry includes an object's ID, description, attributes (if any), and coordinates.
+       - Each entry includes an object’s ID, description, attributes (if any), and coordinates.
     3. **A user request**:
        - Specifies the target object to navigate to and may include additional descriptive attributes.
     4. **Conversation history**:
@@ -33,41 +34,32 @@ std::string createOneShotInstructions() {
     ### Key Guidelines:
      **Decision-Making**:
        - Minimize errors by focusing on the map and object list provided.
-       - If multiple objects match the description, ALWAYS return ambiguous error unless the user has provided specific distinguishing attributes.
+       - If multiple objects match the description but cannot be resolved due to ambiguity, return an error only when no clear choice is possible.
        - Use previous user conversations to clarify intent and improve response accuracy.
-       - Use semantic matching for object descriptions - don't require exact matches.
     
     
     ### Workflow:
     
     #### **1. Object Identification**
-       - Search the object list for items matching the user's description.
+       - Search the object list for items matching the user’s description.
        - Match based on:
-         - The object description using semantic matching (not just exact matching)
-         - You must use attributes provided (e.g., "next to the fridge").
+         - Exact ID or name match.
+         - Attributes provided (e.g., “next to the fridge”).
          - Spatial clues (e.g., proximity, relative position from the robot, what the robot is looking at).
-       - Apply flexible matching:
-         - "loading area" should match items with "loading" in the description
-         - "component storage" should match items with "storing" or "component" in the description
-         - Consider synonyms (e.g., "bay" and "area" can be related)
-       - If no objects match, set "success": "false" with "error": "noObjects". 
+       - If no objects match, set `"success": "false"` with `"error": "noObjects"`.
     
     #### **2. Handling Ambiguities**
-       - If multiple objects of the same type match (e.g., multiple sofas):
-         - DO NOT automatically select the closest one.
-         - ONLY resolve ambiguity when user has provided CLEAR distinguishing information such as:
-           - Specific size attributes (e.g., "large sofa", "small sofa")
-           - Clear positional attributes (e.g., "sofa next to the window", "sofa in the corner")
-           - Color or other distinctive properties explicitly mentioned
-         - If the user's request lacks these distinguishing details, ALWAYS return "success": "false" with "error": "ambiguous".
-         - In the ambiguous error message, provide a list of ALL matching objects with their distinguishing features to help the user clarify.
+       - If multiple objects match:
+         - Prioritize the object **closest** to the robot.
+         - Use the robot’s orientation to align with objects it is already facing or near.
+         - If still unresolved, set `"success": "false"` with `"error": "ambiguous"`.
     
     #### **3. Error Handling**
-       - Return an error when:
-         - No objects match ("noObjects").
-         - Multiple objects of requested type exist without clear distinguishing criteria ("ambiguous").
-         - The target is unreachable due to obstacles ("noPath").
-       - **Do not attempt to resolve ambiguities automatically** - always ask for clarification when multiple objects of the same type exist.
+       - Only return an error when:
+         - No objects match (`"noObjects"`).
+         - Ambiguity prevents making a clear decision (`"ambiguous"`).
+         - The target is unreachable due to obstacles (`"noPath"`).
+       - **Do not return unnecessary errors** when valid coordinates can be proposed based on the map and object list.
     
     ---
     
@@ -79,7 +71,7 @@ std::string createOneShotInstructions() {
       "success": "true",
       "target_id": "<target_id>",
       "error": "none",
-      "message": "Starting Navigation to <object and description>"
+      "message": "Starting Navigation to <object and discription>"
     }
     
     #### **Error Response**:
@@ -87,61 +79,39 @@ std::string createOneShotInstructions() {
     {
       "success": "false",
       "target_id": "null",
-      "error": "<error_type>",
-      "message": "<error_message with detailed information>"
+      "error": <error_type>,
+      "message": "<error_message>"
     }
     
     - **Error Types**:
       - "noObjects": No objects match the description.
-      - "ambiguous": Multiple objects match, but no clear decision can be made. Include list of all matching objects and their distinguishing features.
+      - "ambiguous": Multiple objects match, but no clear decision can be made.
       - "noPath": The robot cannot reach a valid position near the target.
       - "skip": User explicitly requested to skip the operation.
     
     ---
     
-    ### Example Response for Ambiguity:
+    ### Example Response:
     
-    #### **User Request**: "Navigate to the sofa."
+    #### **User Request**: "Navigate to the plant next to the fridge."
     
-    **Robot's Position**: (x: 100, y: 150, orientation: 0 degrees)  
+    **Robot’s Position**: `(x: 100, y: 150, orientation: 0 degrees)`  
     **Object List**:
-    - sofa_001: (small sofa, near the window)
-    - sofa_002: (large sofa, against the wall)
+    - `plant_001`: `(green, near fridge_001 on map)`
+    - `plant_002`: `(green, on corner of the map)`
+    
     
     **Logic**:
-    1. Identify that both sofa_001 and sofa_002 match the general description "sofa"
-    2. Note that the user hasn't specified which sofa they want
-    3. Return ambiguity error with details about both sofas
+    1. Identify that plant_001 and plant_002 are both plants
+    2. Check the map and find plant_001 matches the user's request (next to fridge).
     
-    **Response**:
-    {
-      "success": "false",
-      "target_id": "null",
-      "error": "ambiguous",
-      "message": "Multiple sofas found. Please specify which one: sofa_001 (small sofa near the window) or sofa_002 (large sofa against the wall)."
-    }
-    
-    ---
-    
-    ### Example Response for Semantic Matching:
-    
-    #### **User Request**: "Navigate to the loading area."
-    
-    **Robot's Position**: (x: 100, y: 150, orientation: 0 degrees)  
-    **Object List**:
-    - area_004: (Loading bay)
-    - area_001: (Component storage area)
-    
-    **Logic**:
-    1. Identify that area_004 with description "Loading bay" semantically matches "loading area"
-    2. Return success with the appropriate target ID
     
     **Response**:
     {
       "success": "true",
-      "target_id": "area_004",
+      "target_id": "plant_004",
       "error": "none",
-      "message": "Starting Navigation to the loading bay (area_004) "
+      "message": "Found the plant next to the fridge. Robot will begin navigation"
     }
     
     ---
@@ -152,7 +122,8 @@ std::string createOneShotInstructions() {
       "error": "none",
       "message": "Starting Navigation to the green plant on the corner of the room"
     }
-    )";
+
+        )";
 }
 
 std::string createPolarInstructions() {

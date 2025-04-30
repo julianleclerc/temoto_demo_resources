@@ -49,7 +49,7 @@ bool onRun()
   // Define I/O
   node_ = std::make_shared<rclcpp::Node>("inspection");
   image_subscription_ = node_->create_subscription<sensor_msgs::msg::Image>(
-      "/cam_feed", 10, std::bind(&Inspect::image_callback, this, std::placeholders::_1));
+      "/spot_image_server/rgb/hand_rgb/image", 10, std::bind(&Inspect::image_callback, this, std::placeholders::_1));
 
   inspection_publisher_ = node_->create_publisher<std_msgs::msg::String>(
     "chat_interface_feedback", 10);

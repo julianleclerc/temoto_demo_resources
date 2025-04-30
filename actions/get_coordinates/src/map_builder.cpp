@@ -1,4 +1,3 @@
-// Modified map_builder.cpp to support new items.json format
 #include "get_coordinates/map_builder.hpp"
 
 #include <iostream>
@@ -23,7 +22,7 @@ cv::Mat MapBuilder::BuildMap(
     const std::string& path) 
 {
     // Create debug directory if it doesn't exist
-    std::string debug_dir = "data/debug_GetCoordinates";
+    std::string debug_dir = path;
     try {
         if (!std::filesystem::exists(debug_dir)) {
             std::filesystem::create_directories(debug_dir);
@@ -42,8 +41,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the original map
     try {
-        cv::imwrite(debug_dir + "/01_base_map.pgm", base_map);
-        std::cout << "Saved base map to: " << debug_dir + "/01_base_map.pgm" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "01_base_map.pgm").string(), base_map);
+        std::cout << "Saved base map to: " << (std::filesystem::path(debug_dir) / "01_base_map.pgm").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving base map: " << e.what() << std::endl;
     }
@@ -54,8 +53,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the scaled map
     try {
-        cv::imwrite(debug_dir + "/02_scaled_map.pgm", scaled_map);
-        std::cout << "Saved scaled map to: " << debug_dir + "/02_scaled_map.pgm" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "02_scaled_map.pgm").string(), scaled_map);
+        std::cout << "Saved scaled map to: " << (std::filesystem::path(debug_dir) / "02_scaled_map.pgm").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving scaled map: " << e.what() << std::endl;
     }
@@ -65,8 +64,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the cost map
     try {
-        cv::imwrite(debug_dir + "/03_cost_map.pgm", cost_map);
-        std::cout << "Saved cost map to: " << debug_dir + "/03_cost_map.pgm" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "03_cost_map.pgm").string(), cost_map);
+        std::cout << "Saved cost map to: " << (std::filesystem::path(debug_dir) / "03_cost_map.pgm").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving cost map: " << e.what() << std::endl;
     }
@@ -77,8 +76,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the colorized cost map
     try {
-        cv::imwrite(debug_dir + "/04_cost_map_color.png", cost_map_color);
-        std::cout << "Saved colorized cost map to: " << debug_dir + "/04_cost_map_color.png" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "04_cost_map_color.png").string(), cost_map_color);
+        std::cout << "Saved colorized cost map to: " << (std::filesystem::path(debug_dir) / "04_cost_map_color.png").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving colorized cost map: " << e.what() << std::endl;
     }
@@ -88,8 +87,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the non-traversable map
     try {
-        cv::imwrite(debug_dir + "/05_non_traversable_map.png", non_traversable_map);
-        std::cout << "Saved non-traversable map to: " << debug_dir + "/05_non_traversable_map.png" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "05_non_traversable_map.png").string(), non_traversable_map);
+        std::cout << "Saved non-traversable map to: " << (std::filesystem::path(debug_dir) / "05_non_traversable_map.png").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving non-traversable map: " << e.what() << std::endl;
     }
@@ -99,8 +98,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the grid map
     try {
-        cv::imwrite(debug_dir + "/06_grid_map.png", grid_map);
-        std::cout << "Saved grid map to: " << debug_dir + "/06_grid_map.png" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "06_grid_map.png").string(), grid_map);
+        std::cout << "Saved grid map to: " << (std::filesystem::path(debug_dir) / "06_grid_map.png").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving grid map: " << e.what() << std::endl;
     }
@@ -110,8 +109,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the object map
     try {
-        cv::imwrite(debug_dir + "/07_object_map.png", object_map);
-        std::cout << "Saved object map to: " << debug_dir + "/07_object_map.png" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "07_object_map.png").string(), object_map);
+        std::cout << "Saved object map to: " << (std::filesystem::path(debug_dir) / "07_object_map.png").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving object map: " << e.what() << std::endl;
     }
@@ -121,8 +120,8 @@ cv::Mat MapBuilder::BuildMap(
     
     // Save the robot map
     try {
-        cv::imwrite(debug_dir + "/08_robot_map.png", robot_map);
-        std::cout << "Saved robot map to: " << debug_dir + "/08_robot_map.png" << std::endl;
+        cv::imwrite((std::filesystem::path(debug_dir) / "08_robot_map.png").string(), robot_map);
+        std::cout << "Saved robot map to: " << (std::filesystem::path(debug_dir) / "08_robot_map.png").string() << std::endl;
     } catch (const cv::Exception& e) {
         std::cerr << "Error saving robot map: " << e.what() << std::endl;
     }
@@ -130,8 +129,8 @@ cv::Mat MapBuilder::BuildMap(
     // Save the final map if path is provided
     if (!path.empty()) {
         try {
-            cv::imwrite(path, robot_map);
-            std::cout << "Saved final robot map to: " << path << std::endl;
+            cv::imwrite((std::filesystem::path(debug_dir) / "final_robot_map.png").string(), robot_map);
+            std::cout << "Saved final robot map to: " << (std::filesystem::path(debug_dir) / "final_robot_map.png").string() << std::endl;
         } catch (const cv::Exception& e) {
             std::cerr << "Error saving final robot map: " << e.what() << std::endl;
         }
@@ -139,8 +138,6 @@ cv::Mat MapBuilder::BuildMap(
     
     return robot_map;
 }
-
-// IMPLEMENTATION OF EACH STEP
 
 double MapBuilder::scaleMap(const cv::Mat& map_img, cv::Mat& scaled_map, const json& params)
 {
@@ -628,7 +625,6 @@ cv::Mat MapBuilder::displayTargetCoordinate(
     return result;
 }
 
-
 cv::Point MapBuilder::coordinates_astar(
     const cv::Mat& map, 
     const json& params, 
@@ -639,6 +635,10 @@ cv::Point MapBuilder::coordinates_astar(
     double radius_padding) {
     
     std::cout << "Starting A* pathfinding algorithm with circular radius padding..." << std::endl;
+    
+    // Define wall padding constant in meters
+    const double WALL_PADDING_METERS = 0.1; // Can be adjusted as needed
+    std::cout << "Using wall padding: " << WALL_PADDING_METERS << " meters" << std::endl;
     
     // Threshold map to black and white
     cv::Mat binary_map;
@@ -654,6 +654,24 @@ cv::Point MapBuilder::coordinates_astar(
     float resolution = params["resolution"].get<float>();
     double origin_x = params["origin"][0].get<double>();
     double origin_y = params["origin"][1].get<double>();
+    
+    // Calculate wall padding in pixels
+    int wall_padding_px = static_cast<int>(WALL_PADDING_METERS / resolution);
+    std::cout << "Wall padding in pixels: " << wall_padding_px << " px" << std::endl;
+    
+    // Apply padding to walls/obstacles (dilate black areas)
+    cv::Mat padded_binary_map = binary_map.clone();
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, 
+                                              cv::Size(2 * wall_padding_px + 1, 2 * wall_padding_px + 1));
+    cv::erode(padded_binary_map, padded_binary_map, kernel);
+    
+    // Save padded map for debugging - FIXED PATH HANDLING
+    try {
+        cv::imwrite((std::filesystem::path(map_output_path) / "astar_padded_walls.png").string(), padded_binary_map);
+        std::cout << "Saved padded wall map to: " << (std::filesystem::path(map_output_path) / "astar_padded_walls.png").string() << std::endl;
+    } catch (const cv::Exception& e) {
+        std::cerr << "Error saving padded wall map: " << e.what() << std::endl;
+    }
 
     // Convert robot position to pixel coordinates
     int robot_x = static_cast<int>((robot_pos.x - origin_x) / resolution);
@@ -674,7 +692,11 @@ cv::Point MapBuilder::coordinates_astar(
         int pw = std::max(1, static_cast<int>(width / resolution));
         int ph = std::max(1, static_cast<int>(height / resolution));
         
-        cv::rectangle(binary_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0), cv::FILLED);
+        // Add padding to objects too
+        pw += 2 * wall_padding_px;
+        ph += 2 * wall_padding_px;
+        
+        cv::rectangle(padded_binary_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0), cv::FILLED);
         cv::rectangle(color_map, cv::Rect(px - pw/2, py - ph/2, pw, ph), cv::Scalar(0, 0, 0), cv::FILLED);
     }
 
@@ -709,12 +731,12 @@ cv::Point MapBuilder::coordinates_astar(
         // Draw circle (red for target)
         cv::circle(color_map, cv::Point(target_px, target_py), target_radius_px, cv::Scalar(0, 0, 255), 2);
         
-        // Save initialization visualization
+        // Save initialization visualization - FIXED PATH HANDLING
         try {
-            cv::imwrite(map_output_path + "/astar_init.png", color_map);
-            std::cout << "Saved colorized cost map to: " << map_output_path + "/astar_init.png" << std::endl;
+            cv::imwrite((std::filesystem::path(map_output_path) / "astar_init.png").string(), color_map);
+            std::cout << "Saved initialization map to: " << (std::filesystem::path(map_output_path) / "astar_init.png").string() << std::endl;
         } catch (const cv::Exception& e) {
-            std::cerr << "Error saving colorized cost map: " << e.what() << std::endl;
+            std::cerr << "Error saving initialization map: " << e.what() << std::endl;
         }
 
         // A* algorithm implementation
@@ -769,11 +791,11 @@ cv::Point MapBuilder::coordinates_astar(
                 int nx = current.point.x + dx[i];
                 int ny = current.point.y + dy[i];
 
-                if (nx < 0 || ny < 0 || nx >= binary_map.cols || ny >= binary_map.rows)
+                if (nx < 0 || ny < 0 || nx >= padded_binary_map.cols || ny >= padded_binary_map.rows)
                     continue;
 
-                // Check if this is a valid (white) pixel
-                if (binary_map.at<uchar>(ny, nx) != 255)
+                // Check if this is a valid (white) pixel in the padded map
+                if (padded_binary_map.at<uchar>(ny, nx) != 255)
                     continue;
 
                 // Calculate distance from this point to target center
@@ -822,9 +844,10 @@ cv::Point MapBuilder::coordinates_astar(
             // Mark the target point with a different color
             cv::circle(color_map, path[0], 5, cv::Scalar(255, 0, 255), -1);
 
+            // Save final visualization - FIXED PATH HANDLING
             try {
-                cv::imwrite(map_output_path + "/astar_final.png", color_map);
-                std::cout << "Saved path visualization to: " << map_output_path + "/astar_final.png" << std::endl;
+                cv::imwrite((std::filesystem::path(map_output_path) / "astar_final.png").string(), color_map);
+                std::cout << "Saved path visualization to: " << (std::filesystem::path(map_output_path) / "astar_final.png").string() << std::endl;
             } catch (const cv::Exception& e) {
                 std::cerr << "Error saving final path map: " << e.what() << std::endl;
             }
@@ -833,11 +856,11 @@ cv::Point MapBuilder::coordinates_astar(
             return path[0];
         } 
         else {
-            std::cout << "Could not find path to target boundary, returning robot position" << std::endl;
+            std::cout << "Could not find path to target boundary..." << std::endl;
         }
     }
     else {
-        std::cout << "Target ID not found in items data, returning robot position" << std::endl;
+        std::cout << "Target ID not found in items data ... " << std::endl;
     }
 
     return cv::Point(robot_x, robot_y);

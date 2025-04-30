@@ -21,8 +21,6 @@
 #include "get_coordinates/map_builder.hpp"
 #include "get_coordinates/llm_solver.hpp"
 
-
-
 namespace fs = std::filesystem;
 using json = nlohmann::json;
 
@@ -100,16 +98,35 @@ bool onRun()
   }
   
   // Set data paths
-  const std::string DATA_DIR = (workspace_path / "data").string();
+  const std::string DATA_DIR = (workspace_path / "src" /"data").string();
+  const std::string DEBUG_DIR = (workspace_path / "debug").string();
+  const std::string DEBUG_SUBDIR = (fs::path(DEBUG_DIR) / "GetCoordinates").string();
   const std::string MAP_PATH = (fs::path(DATA_DIR) / "map.pgm").string();
   const std::string MAP_YAML_PATH = (fs::path(DATA_DIR) / "map.yaml").string();
   const std::string ITEMS_JSON_PATH = (fs::path(DATA_DIR) / "items.json").string();
-  
+
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Data directory: %s", DATA_DIR.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Debug directory: %s", DEBUG_DIR.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "GetCoordinates debug subdirectory: %s", DEBUG_SUBDIR.c_str());
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map path: %s", MAP_PATH.c_str());
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map YAML path: %s", MAP_YAML_PATH.c_str());
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Items JSON path: %s", ITEMS_JSON_PATH.c_str());
-  
+
+  // Create debug directories
+  try {
+    if (!fs::exists(DEBUG_DIR)) {
+      fs::create_directories(DEBUG_DIR);
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Created debug directory: %s", DEBUG_DIR.c_str());
+    }
+    
+    if (!fs::exists(DEBUG_SUBDIR)) {
+      fs::create_directories(DEBUG_SUBDIR);
+      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Created GetCoordinates debug subdirectory: %s", DEBUG_SUBDIR.c_str());
+    }
+  } catch (const fs::filesystem_error& e) {
+    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Error creating debug directories: %s", e.what());
+  }
+
   // Check if the files exist
   if (!fs::exists(MAP_PATH)) {
     RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Map file not found at: %s", MAP_PATH.c_str());
@@ -143,19 +160,6 @@ bool onRun()
 
   // Data storage
   json items_data;
-
-  // Output directory for saving images
-  std::string output_dir = (fs::path(DATA_DIR) / "debug_GetCoordinates").string();
-  
-  // Try to create the debug directory
-  try {
-    if (!fs::exists(output_dir)) {
-      fs::create_directories(output_dir);
-      RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Created debug directory: %s", output_dir.c_str());
-    }
-  } catch (const fs::filesystem_error& e) {
-    RCLCPP_ERROR(rclcpp::get_logger(getNodeName()), "Error creating debug directory: %s", e.what());
-  }
     
   // Load map configuration (will throw on failure)
   loadMapConfig(MAP_YAML_PATH);
@@ -210,8 +214,8 @@ bool onRun()
   }
   
   // Try to build map
-  std::string map_output_path = (fs::path(DATA_DIR) / "final_robot_map.png").string();
-  cv::Mat object_map = MapBuilder::BuildMap(map, params, items_data, robot_pos, map_output_path);
+  std::string map_output_path = (fs::path(DEBUG_SUBDIR) / "final_robot_map.png").string();
+  cv::Mat object_map = MapBuilder::BuildMap(map, params, items_data, robot_pos, DEBUG_SUBDIR);
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Map building completed successfully");
 
 /*
@@ -258,7 +262,7 @@ bool onRun()
 
     // Find Coordinate through A*
     double radius_padding = 0.3;  // in meters for extra distance from object
-    cv::Point goal_point = MapBuilder::coordinates_astar(map, params, items_data, robot_pos, fs::path(DATA_DIR).string(), target_id, radius_padding);    
+    cv::Point goal_point = MapBuilder::coordinates_astar(map, params, items_data, robot_pos, DEBUG_SUBDIR, target_id, radius_padding);
 
     pixel_x = static_cast<int>(goal_point.x * scale_factor);
     pixel_y = static_cast<int>(goal_point.y * scale_factor);
@@ -270,7 +274,7 @@ bool onRun()
     };
     
     // Display Coordinates on map as a simple red dot
-    std::string visualization_output_path = (fs::path(DATA_DIR) / "target_visualization.png").string();
+    std::string visualization_output_path = (fs::path(DEBUG_SUBDIR) / "target_visualization.png").string();
     cv::Mat visualization = MapBuilder::displayTargetCoordinate(
         object_map, 
         visualization_json, 
@@ -427,7 +431,7 @@ bool onRun()
     };
 
     // Display Coordinates on map as a simple red dot
-    std::string visualization_output_path = (fs::path(DATA_DIR) / "target_visualization.png").string();
+    std::string visualization_output_path = (fs::path(DEBUG_SUBDIR) / "target_visualization.png").string();
     cv::Mat visualization = MapBuilder::displayTargetCoordinate(
         object_map, 
         cartesian_llm_response, 
@@ -461,7 +465,7 @@ bool onRun()
   double target_x = items_data[target_id]["coordinates"]["x"];
   double angle_rad = std::atan2(target_y - world_y, target_x - world_x);
   while (angle_rad < 0) angle_rad += 2 * M_PI;
-  angle = angle_rad + M_PI;
+  angle = angle_rad;
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "Final angle: (%f)", angle);
 
   // Debug final coordinates
@@ -608,6 +612,7 @@ void publishResult(const std::string& message) {
   
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "=== COORDINATE RESULT PUBLISHED ===");
 } 
+
 std::string encodeImageToBase64(const cv::Mat& image) {
   RCLCPP_INFO(rclcpp::get_logger(getNodeName()), "=== ENCODING IMAGE TO BASE64 ===");
   
@@ -654,12 +659,9 @@ std::string cleanLLMJsonResponse(const std::string& raw_response) {
               cleaned_json.length() > 100 ? (cleaned_json.substr(0, 97) + "...").c_str() : cleaned_json.c_str());
   
   return cleaned_json;
-
 }
 
 };
-
-
 
 // REQUIRED, do not remove
 boost::shared_ptr<ActionBase> factory()
